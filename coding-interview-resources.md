@@ -6,7 +6,7 @@ Contains links to videos that cover each data structure & algorithm that is impo
 2. Linked Lists (1.5 hrs): [Youtube Video](https://www.youtube.com/watch?v=Hj_rA0dhr2I&list=PLtNNv62UFY5R8xKkwo9-0WLAnvf1ODzAx&index=6&ab_channel=freeCodeCamp.org)
 3. Graph Algorithms (2 hrs): [Youtube Video](https://www.youtube.com/watch?v=tWVWeAqZ0WU&list=PLtNNv62UFY5R8xKkwo9-0WLAnvf1ODzAx&index=3&ab_channel=freeCodeCamp.org)
 4. Binary Tree Algorithms (2 hrs): [Youtube Video](https://www.youtube.com/watch?v=fAAZixBzIAI&list=PLtNNv62UFY5R8xKkwo9-0WLAnvf1ODzAx&index=11&t=10s&ab_channel=freeCodeCamp.org)
-5. Greedy Algorithms (1.5 hrs): [Youtube Video](https://www.youtube.com/watch?v=bC7o8P_Ste4&ab_channel=freeCodeCamp.org)
+5. Greedy Algorithms (2 hrs): [Youtube Video](https://www.youtube.com/watch?v=bC7o8P_Ste4&ab_channel=freeCodeCamp.org)
 7. Dynamic Programming (5 hrs): [Youtube Video](https://www.youtube.com/watch?v=oBt53YbR9Kk&list=PLtNNv62UFY5R8xKkwo9-0WLAnvf1ODzAx&index=7&ab_channel=freeCodeCamp.org)
 8. Backtracking problems (1/2 hr): [Youtube Video](https://www.youtube.com/watch?v=A80YzvNwqXA&list=PLtNNv62UFY5R8xKkwo9-0WLAnvf1ODzAx&index=4&ab_channel=freeCodeCamp.org)
 9. 10 Common Interview Problems solved (2 hrs): [Youtube Video](https://www.youtube.com/watch?v=Peq4GCPNC5c&list=PLtNNv62UFY5R8xKkwo9-0WLAnvf1ODzAx&index=11&ab_channel=freeCodeCamp.org)
