@@ -1,4 +1,4 @@
-# All the resources needed to crack interviews
+# All the resources needed to crack coding interviews
 
 Contains links to videos that cover each data structure & algorithm that is important for interviews and solves example problems.
 
