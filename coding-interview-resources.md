@@ -3,11 +3,11 @@
 Contains links to videos that cover each data structure & algorithm that is important for interviews and solves example problems.
 
 1. Data Structures - Computer Science Course for Beginners (3 hrs): [Youtube Video](https://www.youtube.com/watch?v=zg9ih6SVACc&ab_channel=freeCodeCamp.org)
-2. Recursion (2 hrs): [Youtube Video](https://www.youtube.com/watch?v=IJDJ0kBx2LM&list=PLtNNv62UFY5R8xKkwo9-0WLAnvf1ODzAx&index=10&ab_channel=freeCodeCamp.org)
-3. Linked Lists (1.5 hrs): [Youtube Video](https://www.youtube.com/watch?v=Hj_rA0dhr2I&list=PLtNNv62UFY5R8xKkwo9-0WLAnvf1ODzAx&index=6&ab_channel=freeCodeCamp.org)
-4. Graph Algorithms (2 hrs): [Youtube Video](https://www.youtube.com/watch?v=tWVWeAqZ0WU&list=PLtNNv62UFY5R8xKkwo9-0WLAnvf1ODzAx&index=3&ab_channel=freeCodeCamp.org)
-5. Binary Tree Algorithms (2 hrs): [Youtube Video](https://www.youtube.com/watch?v=fAAZixBzIAI&list=PLtNNv62UFY5R8xKkwo9-0WLAnvf1ODzAx&index=11&t=10s&ab_channel=freeCodeCamp.org)
-6. Heap Data Structure (15 min): [Youtube Video](https://www.youtube.com/watch?v=dM_JHpfFITs&ab_channel=freeCodeCamp.org)
+2. Heap Data Structure (15 min): [Youtube Video](https://www.youtube.com/watch?v=dM_JHpfFITs&ab_channel=freeCodeCamp.org)
+3. Recursion (2 hrs): [Youtube Video](https://www.youtube.com/watch?v=IJDJ0kBx2LM&list=PLtNNv62UFY5R8xKkwo9-0WLAnvf1ODzAx&index=10&ab_channel=freeCodeCamp.org)
+4. Linked Lists (1.5 hrs): [Youtube Video](https://www.youtube.com/watch?v=Hj_rA0dhr2I&list=PLtNNv62UFY5R8xKkwo9-0WLAnvf1ODzAx&index=6&ab_channel=freeCodeCamp.org)
+5. Graph Algorithms (2 hrs): [Youtube Video](https://www.youtube.com/watch?v=tWVWeAqZ0WU&list=PLtNNv62UFY5R8xKkwo9-0WLAnvf1ODzAx&index=3&ab_channel=freeCodeCamp.org)
+6. Binary Tree Algorithms (2 hrs): [Youtube Video](https://www.youtube.com/watch?v=fAAZixBzIAI&list=PLtNNv62UFY5R8xKkwo9-0WLAnvf1ODzAx&index=11&t=10s&ab_channel=freeCodeCamp.org)
 7. Greedy Algorithms (2 hrs): [Youtube Video](https://www.youtube.com/watch?v=bC7o8P_Ste4&ab_channel=freeCodeCamp.org)
 8. Dynamic Programming (5 hrs): [Youtube Video](https://www.youtube.com/watch?v=oBt53YbR9Kk&list=PLtNNv62UFY5R8xKkwo9-0WLAnvf1ODzAx&index=7&ab_channel=freeCodeCamp.org)
 9. Backtracking problems (1/2 hr): [Youtube Video](https://www.youtube.com/watch?v=A80YzvNwqXA&list=PLtNNv62UFY5R8xKkwo9-0WLAnvf1ODzAx&index=4&ab_channel=freeCodeCamp.org)
