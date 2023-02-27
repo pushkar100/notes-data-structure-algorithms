@@ -11,4 +11,5 @@ Contains links to videos that cover each data structure & algorithm that is impo
 8. Backtracking problems (1/2 hr): [Youtube Video](https://www.youtube.com/watch?v=A80YzvNwqXA&list=PLtNNv62UFY5R8xKkwo9-0WLAnvf1ODzAx&index=4&ab_channel=freeCodeCamp.org)
 9. 10 Common Interview Problems solved (2 hrs): [Youtube Video](https://www.youtube.com/watch?v=Peq4GCPNC5c&list=PLtNNv62UFY5R8xKkwo9-0WLAnvf1ODzAx&index=11&ab_channel=freeCodeCamp.org)
 10. Master Your Coding Interview (4 hrs): [Youtube Video](https://www.youtube.com/watch?v=iAHQopLuZ4Q&list=PLtNNv62UFY5R8xKkwo9-0WLAnvf1ODzAx&index=2&ab_channel=freeCodeCamp.org)
-11. Common Algorithm Interview Patterns (Playlist) (30mins x 20 videos): [Youtube Playlist](https://www.youtube.com/playlist?list=PLxQ8cCJ6LyOYCas1Ln-L8kCBquxw20ljC)
+11. Understanding Sorting Algorithms (1 hr): [Youtube Video](https://www.youtube.com/watch?v=l7-f9gS8VOs&ab_channel=freeCodeCamp.org)
+12. Common Algorithm Interview Patterns (Playlist) (30mins x 20 videos): [Youtube Playlist](https://www.youtube.com/playlist?list=PLxQ8cCJ6LyOYCas1Ln-L8kCBquxw20ljC)
