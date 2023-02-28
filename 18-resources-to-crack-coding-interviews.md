@@ -3,7 +3,7 @@
 Contains links to videos that cover each data structure & algorithm that is important for interviews and solves example problems.
 
 1. Data Structures - Computer Science Course for Beginners (3 hrs): [Youtube Video](https://www.youtube.com/watch?v=zg9ih6SVACc&ab_channel=freeCodeCamp.org)
-2. Heaps, heapsort, and priority queues - Inside code (19 min): [Youtube Video]([https://www.youtube.com/watch?v=dM_JHpfFITs&ab_channel=freeCodeCamp.org](https://www.youtube.com/watch?v=pLIajuc31qk&t=805s&ab_channel=Insidecode))
+2. Heaps, heapsort, and priority queues - Inside code (19 min): [Youtube Video](https://www.youtube.com/watch?v=pLIajuc31qk&t=805s&ab_channel=Insidecode)
 3. Trie Data Structure (12 min): [Youtube Video](https://www.youtube.com/watch?v=7XmS8McW_1U&ab_channel=freeCodeCamp.org)
 4. Binary Search Trees in JavaScript For Beginners (1 hr): [Youtube Video](https://www.youtube.com/watch?v=GyGCw142xb8&ab_channel=NoobCoder)
 5. Recursion (2 hrs): [Youtube Video](https://www.youtube.com/watch?v=IJDJ0kBx2LM&list=PLtNNv62UFY5R8xKkwo9-0WLAnvf1ODzAx&index=10&ab_channel=freeCodeCamp.org)
