@@ -19,6 +19,6 @@ Contains links to videos that cover each data structure & algorithm that is impo
 15. Common Algorithm Interview Patterns (Playlist) (30mins x 20 videos): [Youtube Playlist](https://www.youtube.com/playlist?list=PLxQ8cCJ6LyOYCas1Ln-L8kCBquxw20ljC)
 16. Coding Interview Patterns (30mins x 6 videos): [Youtube Playlist](https://www.youtube.com/playlist?list=PLB7ZlVMcmjIDUDmOnoIRATIblml0hBt57)
 17. Topological Sort Algorithm | Graph Theory (15 min): [Youtube Video](https://www.youtube.com/watch?v=eL-KzMXSXXI&t=43s&ab_channel=WilliamFiset)
-18. Practice: 50 popular coding interview problems (15min x 50 videos): [Udemy Course](https://www.udemy.com/course/50-problems/)
+18. Practice: 50 popular coding interview problems (15 min x 50 videos): [Udemy Course](https://www.udemy.com/course/50-problems/)
 
 **Tip**: How to ace the whiteboard coding interview (50 min): [Youtube Video](https://www.youtube.com/watch?v=51gc7-eskU8&list=PLtNNv62UFY5R8xKkwo9-0WLAnvf1ODzAx&index=7&ab_channel=freeCodeCamp.org)
