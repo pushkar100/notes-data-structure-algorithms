@@ -17,3 +17,4 @@ Contains links to videos that cover each data structure & algorithm that is impo
 13. Common Algorithm Interview Patterns (Playlist) (30mins x 20 videos): [Youtube Playlist](https://www.youtube.com/playlist?list=PLxQ8cCJ6LyOYCas1Ln-L8kCBquxw20ljC)
 14. Trie Data Structure (12 min): [Youtube Video](https://www.youtube.com/watch?v=7XmS8McW_1U&ab_channel=freeCodeCamp.org)
 15. How to ace the whiteboard coding interview (50 min): [Youtube Video](https://www.youtube.com/watch?v=51gc7-eskU8&list=PLtNNv62UFY5R8xKkwo9-0WLAnvf1ODzAx&index=7&ab_channel=freeCodeCamp.org)
+16. Coding Interview Patterns (30mins x 6 videos): [Youtube Playlist](https://www.youtube.com/playlist?list=PLB7ZlVMcmjIDUDmOnoIRATIblml0hBt57)
