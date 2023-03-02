@@ -17,7 +17,7 @@ Contains links to videos that cover each data structure & algorithm that is impo
 13. 10 Common Interview Problems solved (2 hrs): [Youtube Video](https://www.youtube.com/watch?v=Peq4GCPNC5c&list=PLtNNv62UFY5R8xKkwo9-0WLAnvf1ODzAx&index=11&ab_channel=freeCodeCamp.org)
 14. Master Your Coding Interview (4 hrs): [Youtube Video](https://www.youtube.com/watch?v=iAHQopLuZ4Q&list=PLtNNv62UFY5R8xKkwo9-0WLAnvf1ODzAx&index=2&ab_channel=freeCodeCamp.org)
 15. Understanding Sorting Algorithms (1 hr): [Youtube Video](https://www.youtube.com/watch?v=l7-f9gS8VOs&ab_channel=freeCodeCamp.org)
-16. Common Algorithm Interview Patterns (Playlist) (30mins x 20 videos): [Youtube Playlist](https://www.youtube.com/playlist?list=PLxQ8cCJ6LyOYCas1Ln-L8kCBquxw20ljC)
+16. Common Algorithm Interview Patterns (30mins x 20 videos): [Youtube Playlist](https://www.youtube.com/playlist?list=PLxQ8cCJ6LyOYCas1Ln-L8kCBquxw20ljC)
 17. Coding Interview Patterns (30 mins x 6 videos): [Youtube Playlist](https://www.youtube.com/playlist?list=PLB7ZlVMcmjIDUDmOnoIRATIblml0hBt57)
 18. Topological Sort Algorithm | Graph Theory (15 min): [Youtube Video](https://www.youtube.com/watch?v=eL-KzMXSXXI&t=43s&ab_channel=WilliamFiset)
 
