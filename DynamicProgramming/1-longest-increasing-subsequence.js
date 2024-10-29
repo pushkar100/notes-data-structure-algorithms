@@ -44,12 +44,13 @@ indices : [0, 1,  2,  3,  4,  5,  6]
 dp      : [1, 1,  1,  1,  1,  1,  1] // i = 0, j = 0, do nothing
           [1, 1,  1,  1,  1,  1,  1] // i = 1, j = 0, values[i] > values[j] (i.e 9 > 1)
           Hence, dp[i] = Max(dp[i], dp[j] + 1)
+          i.e dp[1] = Max(dp[1], dp[0] + 1)
 
-          [1, 2,  1,  1,  1,  1,  1] // i = 2, j = 0, values[2] > values[0] (i.e 19 > 1) (Hence, dp[2] = Max(dp[2], dp[0] + 1))
-          [1, 2,  2,  1,  1,  1,  1] // i = 2, j = 1, values[2] > values[1] (i.e 19 > 9) (Hence, dp[2] = Max(dp[2], dp[1] + 1))
+          [1, 2,  1,  1,  1,  1,  1] // i = 2, j = 0, values[2] > values[0] (i.e 19 > 1), (Hence, dp[2] = Max(dp[2], dp[0] + 1))
+          [1, 2,  2,  1,  1,  1,  1] // i = 2, j = 1, values[2] > values[1] (i.e 19 > 9), (Hence, dp[2] = Max(dp[2], dp[1] + 1))
 
-          [1, 2,  3,  1,  1,  1,  1] // i = 3, j = 0, values[3] > values[0] (i.e 17 > 1) (Hence, dp[3] = Max(dp[3], dp[0] + 1))
-          [1, 2,  3,  2,  1,  1,  1] // i = 3, j = 1, values[3] > values[1] (i.e 17 > 9) (Hence, dp[3] = Max(dp[3], dp[1] + 1))
+          [1, 2,  3,  1,  1,  1,  1] // i = 3, j = 0, values[3] > values[0] (i.e 17 > 1), (Hence, dp[3] = Max(dp[3], dp[0] + 1))
+          [1, 2,  3,  2,  1,  1,  1] // i = 3, j = 1, values[3] > values[1] (i.e 17 > 9), (Hence, dp[3] = Max(dp[3], dp[1] + 1))
           [1, 2,  3,  2,  1,  1,  1] // i = 3, j = 2, values[3] < values[1] (i.e 17 < 19), do nothing
 
           [1, 2,  3,  2,  1,  1,  1] // i = 4, j = 0, values[4] > values[0] (i.e 32 > 1), (Hence, dp[4] = Max(dp[4], dp[0] + 1))
