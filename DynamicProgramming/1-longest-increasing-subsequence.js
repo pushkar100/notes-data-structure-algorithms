@@ -94,4 +94,4 @@ function lengthOfLIS(values) {
   return Math.max(...dp)
 }
 
-console.log(lengthOfLIS([1, 9, 19, 17, 32, 15, 99]))
+console.log(lengthOfLIS([1, 9, 19, 17, 32, 15, 99])) // 5
