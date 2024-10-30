@@ -1,6 +1,6 @@
 /*
 
-**Problem**
+**Problem** (Medium)
 Find the length of the Longest Decreasing Subsequence (LDS) of an array of numbers.
 
 (A subsequence of an array is an ordered subset of the array's elements having the same 
