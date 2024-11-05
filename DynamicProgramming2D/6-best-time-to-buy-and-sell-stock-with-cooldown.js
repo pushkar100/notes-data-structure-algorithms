@@ -1,4 +1,5 @@
 /*
+// https://www.youtube.com/watch?v=qMky6D6YtXU&t=55s
 
 **Problem** (Medium)
 You are given an array prices where prices[i] is the price of a given stock on the ith day.
