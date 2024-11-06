@@ -82,6 +82,16 @@ function maxProductSubArray(nums) {
       rightProduct = 1
     }
 
+    // **(Imp)** Question: : How do we get a middle sub-array when we are actually
+    // calculating the prefix (always containing the start element) and the
+    // suffix products (always containing the end element)?
+   
+    // Answer: The above two conditions for 0 are the ones that enable
+    // use to find a prefix from the middle instead of always containing
+    // the first element (the reset to 1 means we are starting the sub-array 
+    // afresh from the ith element)
+    // Similarly for the suffix product
+
     // Prefix array product
     leftProduct = leftProduct * nums[i]
 
