@@ -90,9 +90,9 @@ function houseRobberSpaceOptimized(nums) {
   if (nums.length === 1) {
     return nums[0]
   }
-
-  let last = Math.max(nums[nums.length - 1], 0)
-  let lastButOne = Math.max(nums[nums.length - 2], last)
+ 
+  let last = Math.max(nums[nums.length - 1], 0) // either take it or do not
+  let lastButOne = Math.max(nums[nums.length - 2], last) // either take it or take the last
 
   for (let i = nums.length - 3; i >= 0; i--) {
     // costMatrix[i] = Math.max(nums[i] + costMatrix[i + 2], costMatrix[i + 1])
