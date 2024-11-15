@@ -64,11 +64,11 @@ function houseRobber(nums) {
     return nums[0]
   }
 
-  costMatrix[costMatrix.length - 1] = Math.max(nums[nums.length - 1], 0)
+  costMatrix[costMatrix.length - 1] = Math.max(nums[nums.length - 1], 0) // either take the last or do not
   costMatrix[costMatrix.length - 2] = Math.max(
     nums[nums.length - 2],
     costMatrix[costMatrix.length - 1]
-  )
+  ) // either take the last but one or (take the last or dont take it)
 
   for (let i = costMatrix.length - 3; i >= 0; i--) {
     costMatrix[i] = Math.max(nums[i] + costMatrix[i + 2], costMatrix[i + 1])
@@ -92,7 +92,7 @@ function houseRobberSpaceOptimized(nums) {
   }
  
   let last = Math.max(nums[nums.length - 1], 0) // either take it or do not
-  let lastButOne = Math.max(nums[nums.length - 2], last) // either take it or take the last
+  let lastButOne = Math.max(nums[nums.length - 2], last) // either take it or (take the last or dont take it)
 
   for (let i = nums.length - 3; i >= 0; i--) {
     // costMatrix[i] = Math.max(nums[i] + costMatrix[i + 2], costMatrix[i + 1])
