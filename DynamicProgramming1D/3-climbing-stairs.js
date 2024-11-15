@@ -22,7 +22,7 @@ Explanation: There are three ways to climb to the top.
 
 **Approach**
 At every step, we have 2 choices i.e either take one more step or two more steps
-So, our DP formula is climb(n) = climb(n + 1) + climb(n + 2)
+So, our DP formula is climb(n) = climb(n - 1) + climb(n - 2)
 The base case is when n = last, only one way i.e stay there (so climb(1) = 1)
 Another base case is when n = last but one, only one way i.e climb one stair else out of bounds 
 if we try to climb two (so climb(2) = 1).
