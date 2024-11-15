@@ -77,8 +77,9 @@ Therefore, we have a recursive relationship and base cases so we can do a bottom
 NumWays DP = length of string + 1 where the 0th index indicates empty string and all other indices 
 map to the digit location in string (1 indexed)
 
-NumWays DP[emptyString] => NumWays DP[0] = 1 (1 way to decode empty string - do nothing)
-NumWays DP[first digit] => NumWays DP[1] = 1 (1 way to decode single digit - decode that digit)
+BASE CASES:
+1. NumWays DP[emptyString] => NumWays DP[0] = 1 (1 way to decode empty string - do nothing)
+2. NumWays DP[first digit] => NumWays DP[1] = 1 (1 way to decode single digit - decode that digit)
 
 Every other case can be filled by looking and constraints as per the 4 cases and filling in the values
 
