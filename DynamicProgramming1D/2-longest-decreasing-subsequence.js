@@ -94,7 +94,7 @@ function lengthOfLDS(values) {
   for (let i = 0; i < values.length; i++) {
     for (let j = 0; j < i; j++) {
       if (values[i] < values[j]) {
-        // Strictly increasing
+        // Strictly decreasing
         dp[i] = Math.max(dp[i], dp[j] + 1)
       }
     }
