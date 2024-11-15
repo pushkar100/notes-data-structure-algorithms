@@ -74,7 +74,8 @@ function wordBreak(s, wordDict) {
         canWordBreakDP[i] = canWordBreakDP[i + wordLength]
       }
 
-      // Optional: Short circuiting once DP[i] has been found to be true
+      // **IMPORTANT**: Short circuiting once DP[i] has been found to be true
+      // Need to make sure once we know its true from an index, no other updates should change it!
       if (canWordBreakDP[i]) {
         break
       }
