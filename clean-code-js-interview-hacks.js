@@ -138,3 +138,9 @@ Math.min(...nums) // 1
 // Use `.reduce()`
 const points = [3, 1, 2, 5, 4, 10, 6] // sum = 31
 points.reduce((acc, value) => acc + value, 0) // 31
+
+// 18. Get the code of a character (ASCII code): Use `.charCodeAt(position)`
+'a'.charCodeAt(0) // 97
+
+// 19. Get the character from its ASCII code: Use `String.fromCharCode(ascii number)`
+String.fromCharCode(102) // 'f'
