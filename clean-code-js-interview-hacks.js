@@ -44,6 +44,8 @@ frequencies.size // size of the map
 for (const [key, value] of frequencies) {
   console.log(key, value)
 }
+Array.from(frequencies.values()) // Gets all the map values as an array
+Array.from(frequencies.keys()) // Gets all the map keys as an array
 
 // 8. Use a Set data structure for maintaining unique/distinct values:
 // i.e removing duplicates
@@ -60,6 +62,7 @@ uniqueElements.add('trains') // NOTE: NO EFFECT SINCE "trains" already exists (n
 for (const uniqueItem of uniqueElements) {
   console.log(uniqueItem)
 }
+Array.from(uniqueItem.values()) // Gets all the set values as an array
 
 // 9. Generate a range of numbers from 0 to n - 1 for looping through:
 // Use `.keys()` method on arrays to get an iterable containing the indices
