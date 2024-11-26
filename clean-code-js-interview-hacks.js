@@ -147,3 +147,9 @@ points.reduce((acc, value) => acc + value, 0) // 31
 
 // 19. Get the character from its ASCII code: Use `String.fromCharCode(ascii number)`
 String.fromCharCode(102) // 'f'
+
+// 20. Create a copy of arrays with primitive values: Use `.map` and `.slice`
+const myNums = [1, 2, 3] 
+const myMatrix = [ [1, 2, 3], [4, 5, 6], [7, 8, 9] ]
+const myNumsCopy = [...myNums] // 1D array
+const myMatrixCopy = myMatrix.map(row => [...row]) // 2D array
