@@ -2,10 +2,6 @@
 
 ## 133 Clone Graph 
 
-I will break down "Clone Graph" with the depth expected of a Senior (L5) or Staff (L6) engineer. At this level, the focus shifts from "just getting code to pass" to understanding the underlying data structures, handling edge cases gracefully, and writing clean, maintainable code.
-
----
-
 ### 1. Problem Explanation
 
 **The Core Task**
