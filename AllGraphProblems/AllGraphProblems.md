@@ -14601,3 +14601,2345 @@ Top-tier companies (Google, Meta, Bloomberg) rarely ask the exact LeetCode quest
 * When expanding node `(r, c)`, check neighbors.
 * ALSO check if `grid[r][c]` is a portal. If so, add neighbor `(target_r, target_c)` with cost 0 or 1 depending on rules.
 * This tests your ability to model the problem as a generic Graph rather than just a Grid.
+
+
+# 130. Surrounded Regions
+
+Here is how a Senior Staff Software Engineer (L6) at Google would break down, solve, and optimize "Surrounded Regions".
+
+### 1. Problem Explanation
+
+**The Core Concept**
+We are given a 2D grid (a board) containing two types of characters:
+
+* `'X'`: A wall or land.
+* `'O'`: A region or water.
+
+**The Objective**
+We need to "capture" all regions of `'O'` that are **fully surrounded** by `'X'`.
+
+* **Captured:** Flipping all `'O'`s in that region to `'X'`.
+* **Safe:** If a region of `'O'` connects to the **border** (edge) of the board, it cannot be fully surrounded. These `'O'`s remain `'O'`.
+
+**Visualizing the Rule**
+
+Imagine the `'O'`s are water and the `'X'`s are land. The edges of the board are an infinite ocean.
+
+* If a pool of water inside the board connects to the infinite ocean (the edge), it stays water (`'O'`).
+* If a pool of water is completely landlocked (surrounded by `'X'`), it dries up and becomes land (`'X'`).
+
+**Example 1: The "island" of O**
+
+```text
+Input Board:
+X  X  X  X
+X  O  O  X
+X  X  O  X
+X  X  X  X
+
+Visual Logic:
+1. Look at the 'O's in the middle (at [1,1], [1,2], [2,2]).
+2. Can they reach the edge? 
+   - [1,1] goes Left -> 'X' (Blocked)
+   - [1,1] goes Up   -> 'X' (Blocked)
+   - ... and so on.
+3. NONE of them connect to the boundary.
+4. They are captured!
+
+Output Board:
+X  X  X  X
+X  X  X  X  <-- All 'O's turned to 'X'
+X  X  X  X
+X  X  X  X
+
+```
+
+**Example 2: The "Escape Route"**
+
+```text
+Input Board:
+X  X  X  X
+X  O  O  X
+X  X  O  X
+X  O  X  X  <-- Note this 'O' at the bottom edge [3,1]
+
+Visual Logic:
+1. Look at the 'O' at [3,1]. It is ON the boundary. It is safe.
+2. Look at the 'O' at [2,2]. It connects to [1,2], which connects to [1,1].
+3. DO ANY connect to the boundary?
+   - Wait, look closely.
+   - The middle clump ([1,1], [1,2], [2,2]) is surrounded by X.
+   - The bottom 'O' [3,1] is on the edge.
+
+   Let's check connections:
+   [1,1] - [1,2]
+             |
+           [2,2]
+   
+   [3,1] is isolated from the group above by 'X's.
+
+   Result: 
+   - The top group is CAPTURED (becomes X).
+   - The bottom 'O' is SAFE (stays O).
+
+Output Board:
+X  X  X  X
+X  X  X  X
+X  X  X  X
+X  O  X  X
+
+```
+
+---
+
+### 2. Solution Explanation
+
+**The "Inside-Out" Trap (Junior Engineer Approach)**
+A common mistake is to iterate through every cell. When you find an `'O'`, you launch a search (BFS/DFS) to see if you hit a wall or an edge.
+
+* *Why this is bad:* You might check the same "safe" region over and over again. It's complicated to "remember" which `'O'`s were part of a bad region vs a good region without complex state management.
+
+**The "Boundary Infection" Strategy (L5/L6 Approach)**
+Instead of looking for what to *capture*, we look for what to *save*.
+We know for a fact: **Any `'O'` touching the border is safe.**
+Furthermore: **Any `'O'` connected to a safe `'O'` is also safe.**
+
+**The Algorithm:**
+
+1. **Scan the Borders:** Iterate only through the top row, bottom row, left column, and right column.
+2. **Infect/Mark Safe:** If we find an `'O'` on the border, we run a traversal (DFS or BFS). We change that `'O'` (and all its connected neighbors) to a temporary safe marker, let's call it `'T'` (for Temporary or Safe).
+3. **The Final Sweep:** Once we are done with the borders, we iterate through the entire board one last time.
+* If we see an `'O'`, it means it was **never** reached by our "Safety Infection". It is trapped. Turn it to `'X'`.
+* If we see a `'T'`, it means it was saved. Turn it back to `'O'`.
+
+
+
+**Step-by-Step Visualization**
+
+**Initial State:**
+
+```text
+X  O  X  X
+X  O  O  X
+X  X  O  X
+X  O  X  X
+
+```
+
+**Phase 1: Border Scan & Infect**
+We scan the edges. We find an `'O'` at `[0, 1]` (Top row).
+We trigger DFS from `[0, 1]`.
+
+```text
+DFS at [0,1]:
+1. Change [0,1] 'O' -> 'T'.
+2. Check neighbors. [1,1] is 'O'. Move there.
+
+Board:
+X  T  X  X
+X  O  O  X
+X  X  O  X
+X  O  X  X
+
+DFS at [1,1]:
+1. Change [1,1] 'O' -> 'T'.
+2. Check neighbors. [1,2] is 'O'. Move there.
+
+Board:
+X  T  X  X
+X  T  O  X
+X  X  O  X
+X  O  X  X
+
+DFS continues...
+It eventually marks [1,2] and [2,2] as 'T'. 
+It STOPS there because [2,2] is surrounded by X (except for where we came from).
+
+Board after top cluster processed:
+X  T  X  X
+X  T  T  X
+X  X  T  X
+X  O  X  X
+
+```
+
+**Phase 1 Continued...**
+We continue scanning the border. We find another `'O'` at `[3, 1]` (Bottom row).
+We trigger DFS from `[3, 1]`.
+
+```text
+DFS at [3,1]:
+1. Change [3,1] 'O' -> 'T'.
+2. Neighbors are all 'X'. Stop.
+
+Current Board State (All borders checked):
+X  T  X  X
+X  T  T  X
+X  X  T  X
+X  T  X  X
+
+```
+
+**Phase 2: The Final Sweep**
+Now we loop through every single cell `(r, c)`.
+
+* `board[0,0]` is 'X'. Skip.
+* `board[0,1]` is 'T'. **Restore to 'O'.**
+* ...
+* (Imagine we had a hidden 'O' in the middle that wasn't reached. It would still be 'O'. We would flip it to 'X').
+
+**Final Result:**
+
+```text
+X  O  X  X
+X  O  O  X
+X  X  O  X
+X  O  X  X
+
+```
+
+(In this specific example, nothing was captured, but the logic holds).
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+**Time Complexity: O(R * C)**
+
+* `R` = Number of Rows
+* `C` = Number of Columns
+
+```text
+Visual Logic for Time:
+
+   Phase 1 (Borders):
+   We iterate the perimeter: 2*R + 2*C.
+   Complexity: O(R + C)
+
+   Phase 2 (DFS/BFS Traversal):
+   In the worst case (the whole board is 'O'), we visit every cell
+   exactly once to mark it 'T'.
+   Complexity: O(R * C)
+
+   Phase 3 (Final Sweep):
+   We iterate every cell to flip 'T' -> 'O' or 'O' -> 'X'.
+   Complexity: O(R * C)
+
+   Total Time = O(R + C) + O(R * C) + O(R * C)
+              = O(R * C)
+   
+   Ideally, we touch each cell a constant number of times (max 2 or 3).
+
+```
+
+**Space Complexity: O(R * C)**
+
+```text
+Visual Logic for Space:
+
+   We are not using a separate "visited" array (we are modifying the board in-place).
+   However, we use "System Stack" for Recursion (DFS) or a Queue for BFS.
+
+   Worst Case Scenario (Snake Pattern):
+   
+   O  O  O  O
+   X  X  X  O
+   O  O  O  O
+   O  X  X  X
+   O  O  O  O
+   
+   If the entire board is a long winding path of 'O's, our recursion
+   goes deep.
+   
+   Recursion Depth = Total number of 'O's.
+   Max Depth = R * C
+   
+   Space = O(R * C)
+
+```
+
+---
+
+### 4. Solution Code
+
+We will implement the **Boundary DFS** approach. It is intuitive and clean.
+
+**Comments on implementation:**
+
+* **Safety Check:** Always check bounds `(r < 0, r >= rows)` first.
+* **Optimization:** We modify the board *in-place* to save space (no `visited` set needed).
+
+#### Python Solution
+
+```python
+class Solution:
+    def solve(self, board: List[List[str]]) -> None:
+        """
+        Do not return anything, modify board in-place.
+        """
+        if not board or not board[0]:
+            return
+        
+        rows = len(board)
+        cols = len(board[0])
+        
+        # ---------------------------------------------------------
+        # Helper Function: DFS
+        # This function starts at a safe 'O' and infects all
+        # connected 'O's, turning them into 'T' (Temporary Safe).
+        # ---------------------------------------------------------
+        def dfs_mark_safe(r, c):
+            # Base Case 1: Out of bounds
+            if r < 0 or r >= rows or c < 0 or c >= cols:
+                return
+            
+            # Base Case 2: Not an 'O'
+            # If it's 'X', it's a wall.
+            # If it's 'T', we have already processed it.
+            if board[r][c] != 'O':
+                return
+            
+            # Mark current cell as Safe ('T')
+            board[r][c] = 'T'
+            
+            # Visit all 4 neighbors
+            dfs_mark_safe(r + 1, c) # Down
+            dfs_mark_safe(r - 1, c) # Up
+            dfs_mark_safe(r, c + 1) # Right
+            dfs_mark_safe(r, c - 1) # Left
+
+        # ---------------------------------------------------------
+        # Step 1: Boundary Scan
+        # We only care about starting DFS from the edges.
+        # ---------------------------------------------------------
+        
+        # Check Left and Right columns for every row
+        for r in range(rows):
+            # Left edge: board[r][0]
+            if board[r][0] == 'O':
+                dfs_mark_safe(r, 0)
+            # Right edge: board[r][cols-1]
+            if board[r][cols - 1] == 'O':
+                dfs_mark_safe(r, cols - 1)
+                
+        # Check Top and Bottom rows for every column
+        for c in range(cols):
+            # Top edge: board[0][c]
+            if board[0][c] == 'O':
+                dfs_mark_safe(0, c)
+            # Bottom edge: board[rows-1][c]
+            if board[rows - 1][c] == 'O':
+                dfs_mark_safe(rows - 1, c)
+        
+        # ---------------------------------------------------------
+        # Step 2: Final Sweep
+        # Convert remaining 'O' -> 'X' (Captured)
+        # Convert 'T' -> 'O' (Restored Safe)
+        # ---------------------------------------------------------
+        for r in range(rows):
+            for c in range(cols):
+                if board[r][c] == 'O':
+                    board[r][c] = 'X'  # Trap the unsurrounded ones
+                elif board[r][c] == 'T':
+                    board[r][c] = 'O'  # Restore the safe ones
+
+```
+
+#### Javascript Solution
+
+```javascript
+/**
+ * @param {character[][]} board
+ * @return {void} Do not return anything, modify board in-place.
+ */
+var solve = function(board) {
+    if (!board || board.length === 0) return;
+    
+    const rows = board.length;
+    const cols = board[0].length;
+    
+    // ---------------------------------------------------------
+    // Helper Function: DFS
+    // Marks connected 'O's as 'T'
+    // ---------------------------------------------------------
+    const dfsMarkSafe = (r, c) => {
+        // Base Case: Check bounds and if it is 'O'
+        if (r < 0 || r >= rows || c < 0 || c >= cols || board[r][c] !== 'O') {
+            return;
+        }
+        
+        // Mark as Safe
+        board[r][c] = 'T';
+        
+        // Recurse neighbors
+        dfsMarkSafe(r + 1, c);
+        dfsMarkSafe(r - 1, c);
+        dfsMarkSafe(r, c + 1);
+        dfsMarkSafe(r, c - 1);
+    };
+    
+    // ---------------------------------------------------------
+    // Step 1: Boundary Scan
+    // ---------------------------------------------------------
+    
+    // Scan Left and Right borders
+    for (let r = 0; r < rows; r++) {
+        if (board[r][0] === 'O') dfsMarkSafe(r, 0);
+        if (board[r][cols - 1] === 'O') dfsMarkSafe(r, cols - 1);
+    }
+    
+    // Scan Top and Bottom borders
+    for (let c = 0; c < cols; c++) {
+        if (board[0][c] === 'O') dfsMarkSafe(0, c);
+        if (board[rows - 1][c] === 'O') dfsMarkSafe(rows - 1, c);
+    }
+    
+    // ---------------------------------------------------------
+    // Step 2: Final Sweep
+    // ---------------------------------------------------------
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            if (board[r][c] === 'O') {
+                board[r][c] = 'X'; // Captured
+            } else if (board[r][c] === 'T') {
+                board[r][c] = 'O'; // Safe
+            }
+        }
+    }
+};
+
+```
+
+---
+
+### Note 1: Terminology & Techniques
+
+**1. Flood Fill:**
+The algorithm used here (DFS/BFS spreading from a point) is classically known as "Flood Fill". It is the exact algorithm used by the "Paint Bucket" tool in Microsoft Paint. In this problem, we perform a "Conditional Flood Fill" starting only from the edges.
+
+**2. Boundary Traversal:**
+This is a specific optimization technique for grid problems where the status of an interior cell is determined by its connectivity to the edge. Instead of solving for the center, you solve for the edge and work your way in.
+
+---
+
+### Note 2: Real World & Indirect Interview Variations
+
+Top-tier companies rarely ask "Surrounded Regions" exactly as it appears on LeetCode. They wrap it in a practical scenario.
+
+**1. Google: The "Go" Game (Board Logic)**
+
+* **Question:** "Implement a function to determine captured stones in the game of Go."
+* **Context:** In Go, a stone is captured if it has no "liberties" (empty spaces) adjacent to it.
+* **The Twist:** It's the exact same logic. The "empty space" is the Boundary/Safe zone. If a group of stones cannot reach an empty space, they are captured.
+* **Solution:** Treat "Empty Space" as the Border. Run BFS from all empty spaces. Any stone not reached is captured.
+
+**2. Meta (Facebook): Removing Disconnected UI Components**
+
+* **Question:** "Given a binary image of a UI mockup, remove all 'noise' artifacts. Noise is defined as black pixels that are not connected to the main border of the image."
+* **Context:** Cleaning up scanned documents or processed images.
+* **Solution:** This is 100% "Surrounded Regions". The "Main Border" is the safe zone. Any black pixel clump not touching the edge is noise (surrounded by white) and should be removed.
+
+**3. Bloomberg: Geographic "Enclaves"**
+
+* **Question:** "You have a map of water (0) and land (1). Find the number of land cells that can never walk off the map boundary."
+* **Solution:**
+1. Start BFS from all land cells on the boundary. Mark them as "Walkable".
+2. Count the remaining land cells that are not marked "Walkable".
+3. This is the inverse of Surrounded Regions (counting the captured items rather than flipping them).
+
+
+# 785. Is Graph Bipartite?
+
+Here is a deep dive into solving **LeetCode 785: Is Graph Bipartite?** from the perspective of a Senior/Staff Engineer (L5/L6).
+
+At this level, we don't just "solve" the problem; we look for the underlying pattern (Graph Coloring) and ensure our solution is robust against edge cases like disconnected components.
+
+---
+
+### 1. Problem Explanation
+
+**The Core Concept: What is "Bipartite"?**
+
+Imagine a group of people where some are enemies. A graph is "Bipartite" if you can split everyone into two separate rooms (Group A and Group B) such that **no two enemies are in the same room**.
+
+In graph theory terms:
+
+* **Vertices (Nodes):** The people.
+* **Edges (Lines):** The "enemy" relationship.
+* **Bipartite:** You can divide the nodes into two independent sets, let's call them **Set A** and **Set B**, such that every single edge connects a node in Set A to one in Set B. No edge can connect two nodes within the same set.
+
+**Visualizing the Happy Path (Bipartite)**
+Consider a square graph: `0 -- 1 -- 3 -- 2 -- 0`
+
+```text
+Set A (Red)       Set B (Blue)
+   (0) -------------- (1)
+    |                  |
+    |                  |
+   (2) -------------- (3)
+
+```
+
+* If we color Node 0 **Red**, its neighbors (1 and 2) MUST be **Blue**.
+* If Node 1 is Blue, its neighbor (3) MUST be **Red**.
+* If Node 2 is Blue, its neighbor (3) MUST be **Red**.
+* **Result:** Node 3 is Red. Its neighbors are 1 (Blue) and 2 (Blue). No conflicts!
+
+**Visualizing the Failure Path (Not Bipartite)**
+Consider a triangle graph: `0 -- 1 -- 2 -- 0`
+
+```text
+   (0) -- [Color: Red]
+  /   \
+ (1)---(2)
+
+```
+
+1. Start at **(0)**. Color it **Red**.
+2. Move to neighbor **(1)**. It must be **Blue**.
+3. Move to neighbor **(2)**. Since it connects to (0) [Red], it must be **Blue**.
+4. **Conflict!** Now look at the edge `(1) -- (2)`.
+* (1) is Blue.
+* (2) is Blue.
+* They are connected. This violates the rule.
+* **Result:** Not Bipartite.
+
+
+
+> **Key Intuition:** A graph is bipartite if and only if it contains **no odd-length cycles**. A triangle is a cycle of length 3 (odd), so it fails. A square is a cycle of length 4 (even), so it passes.
+
+---
+
+### 2. Solution Explanation: The "2-Coloring" Algorithm
+
+To solve this algorithmically, we simulate the process of putting nodes into two rooms. We use a **Coloring approach**.
+
+We will try to color the graph using two colors (represented as integers):
+
+* `0`: Uncolored
+* `1`: Red (Set A)
+* `-1`: Blue (Set B)
+
+**The Algorithm (BFS or DFS):**
+
+1. **Iterate through every node:** (Crucial for disconnected graphs)
+* If a node is already colored, skip it.
+* If not, start a traversal (BFS or DFS) from this node.
+
+
+2. **Color the Start Node:** Assign it Color 1 (Red).
+3. **Traverse Neighbors:**
+* For every neighbor, check its status.
+* **Case 1 (Uncolored):** Color it the **opposite** of the current node (-1 * current_color) and push it to the queue/stack.
+* **Case 2 (Colored):** Check if it has the **same** color as the current node.
+* If YES: We found a conflict (Edge between two Red nodes). **Return False immediately.**
+* If NO: It's valid (Red connects to Blue). Continue.
+
+
+
+
+4. **Completion:** If we color all nodes without a conflict, return **True**.
+
+**Step-by-Step Visualization**
+
+Input Graph: `[[1,3], [0,2], [1,3], [0,2]]` (This represents a square cycle `0-1-2-3-0`)
+
+```text
+Step 1: Start at Node 0.
+Queue: [0]
+Colors: [0: Red, 1: null, 2: null, 3: null]
+
+Step 2: Pop 0 (Red). Neighbors are 1 and 3.
+   -> Color 1 Blue. Add to Queue.
+   -> Color 3 Blue. Add to Queue.
+Queue: [1, 3]
+Colors: [0: Red, 1: Blue, 2: null, 3: Blue]
+
+Step 3: Pop 1 (Blue). Neighbors are 0 and 2.
+   -> Check 0: It is Red. (Blue vs Red = OK).
+   -> Check 2: Uncolored. Color it Red (Opposite of Blue). Add to Queue.
+Queue: [3, 2]
+Colors: [0: Red, 1: Blue, 2: Red, 3: Blue]
+
+Step 4: Pop 3 (Blue). Neighbors are 0 and 2.
+   -> Check 0: It is Red. (Blue vs Red = OK).
+   -> Check 2: It is Red. (Blue vs Red = OK).
+Queue: [2]
+
+Step 5: Pop 2 (Red). Neighbors are 1 and 3.
+   -> Check 1: It is Blue. (Red vs Blue = OK).
+   -> Check 3: It is Blue. (Red vs Blue = OK).
+Queue: []
+
+Result: Queue empty. No conflicts. Return TRUE.
+
+```
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+**Time Complexity: O(V + E)**
+
+* **V** = Number of Vertices (Nodes)
+* **E** = Number of Edges
+* We use an adjacency list or the input array to visit neighbors.
+* In the worst case (BFS/DFS), we visit every **Node** exactly once to color it.
+* We traverse every **Edge** exactly once (or twice depending on implementation logic) to check for conflicts.
+
+```text
+TC Logic Visualization:
+[ Node 1 ] --> [Edge A] --> [ Node 2 ]
+   |             ^             |
+   v             |             v
+(Visit 1x)    (Check 1x)    (Visit 1x)
+
+Total Operations ~ (Visits to all Nodes) + (Checks on all Edges)
+                 ~ O(V) + O(E)
+
+```
+
+**Space Complexity: O(V)**
+
+* We need a `color` array of size **V** to store the state of each node.
+* We need a Stack (for DFS) or Queue (for BFS). In the worst case, the stack/queue might store up to **O(V)** nodes.
+
+```text
+SC Logic Visualization:
+1. Color Array: [ c1, c2, c3 ... cV ]  --> Size V
+2. Queue/Stack: [ n1, n5, ... ]        --> Max Size V (e.g. Star Graph)
+
+Total Memory ~ O(V)
+
+```
+
+---
+
+### 4. Solution Code
+
+We will provide a BFS solution as it is often more intuitive for "level-by-level" expansion, and a DFS solution as it is concise. Both are valid in an L5/L6 interview.
+
+#### Python Solution (Iterative BFS & Recursive DFS)
+
+```python
+from collections import deque
+
+class Solution:
+    def isBipartite(self, graph: list[list[int]]) -> bool:
+        """
+        Determines if a graph is bipartite using 2-Coloring.
+        Uses 0 for uncolored, 1 for Red, -1 for Blue.
+        """
+        n = len(graph)
+        colors = [0] * n  # 0: Uncolored, 1: Red, -1: Blue
+        
+        # We must iterate 0 to n because the graph might be disconnected.
+        # If the graph has two separate islands, both must be bipartite.
+        for i in range(n):
+            
+            # Skip if we already colored this node in a previous component traversal
+            if colors[i] != 0:
+                continue
+            
+            # Start BFS from this node
+            queue = deque([i])
+            colors[i] = 1  # Always start a new component with Red (1)
+            
+            while queue:
+                current_node = queue.popleft()
+                
+                for neighbor in graph[current_node]:
+                    
+                    if colors[neighbor] == 0:
+                        # Case: Neighbor is uncolored.
+                        # Color it the opposite of current_node (-1 * current)
+                        colors[neighbor] = -colors[current_node]
+                        queue.append(neighbor)
+                        
+                    elif colors[neighbor] == colors[current_node]:
+                        # Case: Neighbor is colored, and it's the SAME color.
+                        # CONFLICT DETECTED!
+                        return False
+                        
+        # If we get through all nodes without conflict
+        return True
+
+    # -- Alternative: Recursive DFS Approach (Good for concise code) --
+    def isBipartiteDFS(self, graph: list[list[int]]) -> bool:
+        n = len(graph)
+        colors = [0] * n
+        
+        def dfs(node, color):
+            colors[node] = color
+            for neighbor in graph[node]:
+                if colors[neighbor] == 0:
+                    # Try to color neighbor with opposite color. 
+                    # If that path fails, bubble up False.
+                    if not dfs(neighbor, -color):
+                        return False
+                elif colors[neighbor] == color:
+                    # Conflict found
+                    return False
+            return True
+
+        for i in range(n):
+            if colors[i] == 0:
+                if not dfs(i, 1):
+                    return False
+        return True
+
+```
+
+#### JavaScript Solution (Iterative BFS)
+
+```javascript
+/**
+ * @param {number[][]} graph
+ * @return {boolean}
+ */
+var isBipartite = function(graph) {
+    const n = graph.length;
+    // 0: Uncolored, 1: Red, -1: Blue
+    const colors = new Array(n).fill(0);
+
+    // Loop through all nodes to handle disconnected graph components
+    for (let i = 0; i < n; i++) {
+        // If node is already colored, it belongs to a component we checked
+        if (colors[i] !== 0) continue;
+
+        // Initialize Queue for BFS
+        const queue = [i];
+        colors[i] = 1; // Start component with Red
+
+        while (queue.length > 0) {
+            const current = queue.shift();
+
+            for (let neighbor of graph[current]) {
+                
+                // If uncolored, color it opposite and process
+                if (colors[neighbor] === 0) {
+                    colors[neighbor] = -colors[current];
+                    queue.push(neighbor);
+                } 
+                // If colored and SAME as current, we have a conflict
+                else if (colors[neighbor] === colors[current]) {
+                    return false;
+                }
+            }
+        }
+    }
+
+    return true;
+};
+
+```
+
+---
+
+### New Terms & Techniques
+
+**1. 2-Coloring:**
+This is the standard algorithm used to check for Bipartiteness. It simply means trying to assign one of two labels (colors) to every vertex such that no two adjacent vertices have the same label.
+
+**2. Disconnected Components Handling:**
+Notice the loop `for i in range(n)` outside the BFS/DFS. This is critical. A graph might look like two separate islands.
+
+* Island 1: A square (Bipartite).
+* Island 2: A triangle (Not Bipartite).
+If we only ran BFS starting at Node 0 (in Island 1), we would return `True` and miss the triangle in Island 2. A Senior Engineer **must** spot this "disconnected graph" trap immediately.
+
+---
+
+### Real-World Interview Variations (Google, Meta, Bloomberg)
+
+The "Is Graph Bipartite" question is rarely asked as "Is this graph bipartite?". It is almost always wrapped in a word problem about **conflicts** or **splitting groups**.
+
+#### Variation 1: The "Haters" Problem (Common at Google/Meta)
+
+**Problem:** "We have N people. We have a list of 'dislikes', where `dislikes[i] = [a, b]` means person `a` and person `b` hate each other. Can we split these people into two teams such that no two people on the same team hate each other?"
+**Mapping:**
+
+* People = Nodes
+* Dislike pair = Edge
+* Two Teams = The two Colors (Sets)
+* **Solution:** Build the adjacency list from the `dislikes` array and run the exact `isBipartite` code above.
+
+#### Variation 2: Meeting Scheduler / Resource Allocation (Bloomberg)
+
+**Problem:** "You have a set of tasks. Some tasks conflict and cannot be run on the same server at the same time. You only have 2 servers. Can you schedule all tasks?"
+**Mapping:**
+
+* Tasks = Nodes
+* Conflict = Edge
+* Server 1 vs Server 2 = Color 1 vs Color -1
+* **Solution:** If the graph of conflicts is Bipartite, the answer is Yes.
+
+#### Variation 3: The "Odd Cycle" Check
+
+**Problem:** "Does a given network topology contain any odd-length cycles?"
+**Mapping:**
+
+* This is a trick question.
+* **Solution:** A graph has an odd cycle IF AND ONLY IF it is **NOT** Bipartite. Run the Bipartite check. If it returns `False`, the graph has an odd cycle.
+
+**Senior Engineer Tip:**
+When asked these variants, explicitly state: *"This problem can be modeled as a Graph Bipartition problem. If we treat the entities as nodes and the conflicts as edges, we are essentially asking if the graph is 2-colorable."* This shows you can map abstract requirements to concrete data structures.
+
+# 886. Possible Bipartition
+
+Here is a breakdown of "Possible Bipartition" from the perspective of a Senior/Staff Engineer (L5/L6). At this level, we look past the specific logic puzzle and view this as a **Graph Modeling** problem. We care about correctness across all edge cases (like disconnected graphs) and code maintainability.
+
+### 1. Problem Explanation
+
+**The Core Question:**
+We have `N` people, numbered `1` to `N`. We are given a list of "dislikes". If person A dislikes person B, they cannot be in the same group. Can we split everyone into exactly two groups (Group 1 and Group 2) such that no one is stuck with someone they dislike?
+
+**The Engineering Perspective (Graph Theory):**
+This is a classic "Graph Coloring" problem.
+
+* **Nodes (Vertices):** The people.
+* **Edges:** The "dislikes" relationships.
+* **Goal:** Assign a color (or group ID) to every node such that no two connected nodes share the same color. This is called testing if a graph is **Bipartite**.
+
+**Visualizing the Happy Path:**
+Imagine 4 people.
+Dislikes: `[1, 2], [1, 3], [2, 4]`
+
+```text
+       [1] --- dislikes --- [2]
+        |                    |
+     dislikes             dislikes
+        |                    |
+       [3]                  [4]
+
+```
+
+**Can we group them?**
+Let's try to assign groups (Group A and Group B).
+
+1. Start with **Person 1**. Put them in **Group A**.
+2. Since **1** dislikes **2** and **3**, **Person 2** and **Person 3** MUST be in **Group B**.
+3. Now look at **Person 2** (who is in Group B). They dislike **4**. So **Person 4** MUST be in **Group A**.
+
+```text
+       [1] (Group A)       [2] (Group B)
+           |                   |
+           |                   |
+       [3] (Group B)       [4] (Group A)
+
+```
+
+**Result:**
+
+* Group A: {1, 4} (1 and 4 don't dislike each other? Correct, no edge between them).
+* Group B: {2, 3} (2 and 3 don't dislike each other? Correct).
+* **Answer:** True.
+
+**Visualizing the Conflict (The "Impossible" Cycle):**
+Imagine 3 people who all dislike each other (A Triangle of Hate).
+Dislikes: `[1, 2], [2, 3], [3, 1]`
+
+```text
+       [1] --- dislikes --- [2]
+         \                  /
+          \                /
+           \              /
+            -- dislikes --
+                 [3]
+
+```
+
+1. Put **1** in **Group A**.
+2. **2** must be **Group B**.
+3. **2** dislikes **3**, so **3** must be **Group A**.
+4. But wait! **3** dislikes **1**.
+* **3** is in Group A.
+* **1** is in Group A.
+* **CONFLICT!** They hate each other but are in the same group.
+
+
+
+**Answer:** False.
+
+---
+
+### 2. Solution Explanation: The 2-Coloring Algorithm (BFS)
+
+To solve this systematically, we use **Breadth-First Search (BFS)**. We will traverse the graph and attempt to color nodes Red (1) and Blue (-1).
+
+**The Algorithm:**
+
+1. **Build the Graph:** Convert the raw list of pairs `[[1,2], [2,3]...]` into an "Adjacency List". This is a lookup table where `graph[1]` gives you a list of everyone Person 1 dislikes.
+2. **Handle Disconnected Components:** The graph might not be one giant piece. We might have People 1-4 fighting, and People 5-6 fighting, but the two groups don't know each other. We must loop through `1 to N` to ensure we check every person.
+3. **The Coloring Loop (BFS):**
+* If a person is uncolored, assign them **Color Red**.
+* Add them to a Queue.
+* While the Queue is not empty:
+* Take the current person.
+* Look at everyone they dislike (their neighbors).
+* **Rule:** If the current person is **Red**, neighbors must be **Blue**. If **Blue**, neighbors must be **Red**.
+* **Check:**
+* If a neighbor is **Uncolored**: Color them the opposite color and add to Queue.
+* If a neighbor is **Already Colored**: Check if their color is the SAME as the current person. If yes, we found a conflict. **Return False**.
+
+
+
+
+
+
+
+**Why BFS?**
+BFS processes the graph layer by layer. It's excellent for finding immediate conflicts in local neighborhoods. (DFS is also valid, but BFS is often preferred in iterative implementations to avoid recursion limit issues on massive graphs).
+
+**Visualization of the Algorithm in Action:**
+
+*Input:* N = 5, Dislikes = `[[1,2], [2,3], [3,4], [4,5], [5,1]]` (This is a Pentagon of hate).
+
+**Step 1:** Start at 1. Color = Red (1). Queue = [1].
+
+```text
+   (Red)
+    [1] --- [2]
+     |       |
+    [5]     [3]
+     \       /
+      \     /
+        [4]
+
+```
+
+**Step 2:** Pop 1. Neighbors are 2 and 5.
+
+* Color 2 -> Blue (-1). Add 2 to Queue.
+* Color 5 -> Blue (-1). Add 5 to Queue.
+
+```text
+   (Red)
+    [1] --- [2] (Blue)
+     |       |
+    [5]     [3]
+  (Blue)     \
+      \      /
+        [4]
+
+```
+
+**Step 3:** Pop 2 (Blue). Neighbor is 3.
+
+* Color 3 -> Red (1). Add 3 to Queue.
+
+```text
+   (Red)
+    [1] --- [2] (Blue)
+     |       |
+    [5]     [3] (Red)
+  (Blue)     \
+      \      /
+        [4]
+
+```
+
+**Step 4:** Pop 5 (Blue). Neighbor is 4.
+
+* Color 4 -> Red (1). Add 4 to Queue.
+
+```text
+   (Red)
+    [1] --- [2] (Blue)
+     |       |
+    [5]     [3] (Red)
+  (Blue)     \
+      \      /
+        [4] (Red)
+
+```
+
+**Step 5:** Pop 3 (Red). Neighbor is 4.
+
+* Check 4.
+* Current (3) is **Red**.
+* Neighbor (4) SHOULD be **Blue**.
+* **BUT** Neighbor (4) is already **Red** (from step 4).
+* **CONFLICT FOUND!** Red connected to Red.
+
+**Return:** False.
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+**Time Complexity: O(N + E)**
+Where N is the number of people (nodes) and E is the number of dislike pairs (edges).
+
+**Derivation:**
+
+```text
+  Phase 1: Graph Construction
+  +--------------------------------+
+  | Read every pair in "dislikes"  | ---> Iterates E times.
+  | Add to Adjacency List          | ---> O(1) per insertion.
+  +--------------------------------+ ---> Cost: O(E)
+
+  Phase 2: Coloring (BFS)
+  +--------------------------------+
+  | Loop 1 to N (Outer Loop)       | ---> We ensure we visit every node once.
+  |                                |
+  |   Inside BFS:                  |
+  |   - Enqueue each node once     | ---> Total N nodes processed.
+  |   - Check every edge once      | ---> Total E edges processed (each edge checked from both sides).
+  +--------------------------------+ ---> Cost: O(N + E)
+
+  Total Time = O(E) + O(N + E)
+             = O(N + E)
+
+```
+
+**Space Complexity: O(N + E)**
+
+**Derivation:**
+
+```text
+  1. Adjacency List (The Graph)
+  +--------------------------------+
+  | Array of size N                | ---> O(N) slots.
+  | Lists inside containing edges  | ---> Total 2 * E entries (undirected).
+  +--------------------------------+ ---> Cost: O(N + E)
+
+  2. Color Array
+  +--------------------------------+
+  | Stores color for each person   | ---> Size N.
+  +--------------------------------+ ---> Cost: O(N)
+
+  3. Queue (for BFS)
+  +--------------------------------+
+  | Worst case, stores nodes       | ---> Max Size O(N).
+  +--------------------------------+ ---> Cost: O(N)
+
+  Total Space = O(N + E) + O(N) + O(N)
+              = O(N + E)
+
+```
+
+---
+
+### 4. Solution Code
+
+I have provided two approaches in the code below.
+
+1. **BFS (Queue-based):** The standard iterative approach. Best for avoiding recursion limits.
+2. **Union-Find (Disjoint Set):** An advanced, very "Google-style" optimization. It's often faster in practice for connectivity checks, though it has similar theoretical complexity. I included it to show L6 breadth, but BFS is the primary recommendation.
+
+#### Python Implementation
+
+```python
+from collections import deque
+
+class Solution:
+    def possibleBipartition(self, n: int, dislikes: list[list[int]]) -> bool:
+        """
+        Solves the Possible Bipartition problem using BFS 2-Coloring.
+        
+        Args:
+        n: Total number of people (1 to n).
+        dislikes: List of pairs [a, b] where a and b dislike each other.
+        
+        Returns:
+        True if split is possible, False otherwise.
+        """
+        
+        # 1. Build Adjacency List
+        #    We map Person ID -> List of people they dislike
+        #    Time: O(E)
+        graph = [[] for _ in range(n + 1)]
+        for a, b in dislikes:
+            graph[a].append(b)
+            graph[b].append(a)
+            
+        # 2. Color Array
+        #    0 = Uncolored
+        #    1 = Group A (Red)
+        #   -1 = Group B (Blue)
+        colors = [0] * (n + 1)
+        
+        # 3. Iterate 1 to N to handle disconnected components
+        for person_id in range(1, n + 1):
+            
+            # If person is already colored, they belong to a component
+            # we already checked. Skip them.
+            if colors[person_id] != 0:
+                continue
+                
+            # Start BFS for this new component
+            queue = deque([person_id])
+            colors[person_id] = 1 # Start with Red
+            
+            while queue:
+                curr = queue.popleft()
+                
+                # Check all people the current person dislikes
+                for neighbor in graph[curr]:
+                    
+                    # Case 1: Neighbor is uncolored
+                    if colors[neighbor] == 0:
+                        # Color them the OPPOSITE of current
+                        # If curr is 1, neighbor becomes -1. 
+                        # If curr is -1, neighbor becomes 1.
+                        colors[neighbor] = -colors[curr]
+                        queue.append(neighbor)
+                    
+                    # Case 2: Neighbor is ALREADY colored
+                    else:
+                        # If they have the SAME color, it's a conflict.
+                        # We cannot separate them.
+                        if colors[neighbor] == colors[curr]:
+                            return False
+                            
+        # If we get through all nodes without conflict
+        return True
+
+# --- ALTERNATIVE: UNION FIND APPROACH ---
+# This is often used in systems problems to track group membership efficiently.
+class SolutionUnionFind:
+    def possibleBipartition(self, n: int, dislikes: list[list[int]]) -> bool:
+        parent = list(range(n + 1))
+        
+        def find(x):
+            if parent[x] != x:
+                parent[x] = find(parent[x]) # Path compression
+            return parent[x]
+        
+        def union(x, y):
+            rootX = find(x)
+            rootY = find(y)
+            if rootX != rootY:
+                parent[rootX] = rootY
+
+        graph = [[] for _ in range(n + 1)]
+        for a, b in dislikes:
+            graph[a].append(b)
+            graph[b].append(a)
+
+        for i in range(1, n + 1):
+            if not graph[i]: continue
+            
+            # Look at the first person 'i' dislikes
+            root_enemy = graph[i][0]
+            
+            # Check all other enemies of 'i'
+            for enemy in graph[i]:
+                # If 'i' is in the same group as any enemy, Impossible.
+                if find(i) == find(enemy):
+                    return False
+                # Combine all enemies of 'i' into one group.
+                # Logic: If I dislike A and I dislike B, then A and B 
+                # effectively belong to the same team (the team that is NOT mine).
+                union(root_enemy, enemy)
+                
+        return True
+
+```
+
+#### JavaScript Implementation
+
+```javascript
+/**
+ * @param {number} n
+ * @param {number[][]} dislikes
+ * @return {boolean}
+ */
+var possibleBipartition = function(n, dislikes) {
+    // 1. Build Adjacency List
+    // Note: n + 1 to handle 1-based indexing comfortably
+    const graph = Array.from({ length: n + 1 }, () => []);
+    for (const [a, b] of dislikes) {
+        graph[a].push(b);
+        graph[b].push(a);
+    }
+
+    // 2. Color Array
+    // 0: Uncolored, 1: Red, -1: Blue
+    const colors = new Array(n + 1).fill(0);
+
+    // 3. Iterate 1 to N (Handle disconnected parts)
+    for (let i = 1; i <= n; i++) {
+        if (colors[i] !== 0) continue; // Already processed
+
+        // Start BFS
+        const queue = [i];
+        colors[i] = 1; // Start with Red
+
+        while (queue.length > 0) {
+            const curr = queue.shift();
+
+            for (const neighbor of graph[curr]) {
+                // Case 1: Uncolored
+                if (colors[neighbor] === 0) {
+                    colors[neighbor] = -colors[curr]; // Flip color
+                    queue.push(neighbor);
+                } 
+                // Case 2: Already colored - Check for conflict
+                else if (colors[neighbor] === colors[curr]) {
+                    return false;
+                }
+            }
+        }
+    }
+
+    return true;
+};
+
+// --- ALTERNATIVE: UNION FIND APPROACH (JS) ---
+// Useful for interviews where strict 'Class' structure isn't required 
+// but speed and grouping logic are tested.
+var possibleBipartitionUnionFind = function(n, dislikes) {
+    const parent = Array.from({length: n + 1}, (_, i) => i);
+    
+    const find = (x) => {
+        if (parent[x] !== x) parent[x] = find(parent[x]);
+        return parent[x];
+    }
+    
+    const union = (x, y) => {
+        parent[find(x)] = find(y);
+    }
+    
+    const graph = Array.from({ length: n + 1 }, () => []);
+    for (const [a, b] of dislikes) {
+        graph[a].push(b);
+        graph[b].push(a);
+    }
+    
+    for (let i = 1; i <= n; i++) {
+        if (graph[i].length === 0) continue;
+        
+        const firstEnemy = graph[i][0];
+        const rootX = find(i);
+        
+        for (const enemy of graph[i]) {
+            // If I am in the same set as my enemy -> Fail
+            if (find(enemy) === rootX) return false;
+            
+            // Group all my enemies together
+            union(firstEnemy, enemy);
+        }
+    }
+    return true;
+};
+
+```
+
+---
+
+### Terminology Check
+
+**Bipartite Graph:** A graph where vertices can be divided into two disjoint and independent sets,  and , such that every edge connects a vertex in  to one in . In simple terms: "A graph that is 2-colorable." This is the formal math name for the "Two Groups" problem.
+
+**Adjacency List:** A way of representing a graph where an array stores a list of neighbors for each node. It is memory efficient O(V + E) compared to an Adjacency Matrix O(V * V).
+
+---
+
+### Real World & Interview Context (Google, Meta, Bloomberg)
+
+In a Senior Interview (L5+), you won't just get asked to "solve this puzzle." The interviewer will cloak this problem in a real-world system design scenario.
+
+**1. The "Server Anti-Affinity" Problem (Google/AWS)**
+
+* **Question:** "We have a list of microservices. Some services conflict with others and cannot be placed on the same physical server machine. We have exactly 2 physical racks (Rack A and Rack B). Can we deploy all services?"
+* **Mapping:**
+* People = Microservices
+* Dislikes = "Anti-affinity rules" (Services that crash if together)
+* Groups = Rack A vs Rack B
+
+
+* **L6 Add-on:** What if we have 3 Racks? (This changes the problem from P-Time to NP-Complete "3-Coloring". You are expected to recognize that the 2-rack solution is fast, but the 3-rack solution is exponentially harder).
+
+**2. The "Conference Scheduler" (Bloomberg/Meta)**
+
+* **Question:** "You are scheduling meetings. You have a list of overlapping time slots where meetings conflict. Can we schedule all these meetings using only 2 conference rooms?"
+* **Mapping:**
+* Nodes = Meetings
+* Edges = Time Overlap (Conflict)
+* Groups = Room 1 vs Room 2
+
+
+
+**3. The "Team Partitioning" (Meta)**
+
+* **Question:** "We are doing an A/B test. We have users with social connections. If two users are friends, they must be in different experiment groups (Control vs Test) to prevent contamination of the experiment. Is this possible?"
+* **Mapping:**
+* Nodes = Users
+* Edges = Friendship
+* Groups = Control Group vs Test Group
+
+# Minimum Operations to Remove Adjacent Ones in a Matrix
+
+To answer this as a Senior/Staff Engineer (L5/L6) at Google, I won't just throw code at you. I will break down the *reduction*—how we transform a vague "grid problem" into a well-known "graph theory" problem. This is the key skill we look for: recognizing patterns that map to standard algorithms.
+
+---
+
+### 1. Problem Explanation
+
+**The Core Task:**
+We have a grid of `0`s and `1`s. We want to flip the minimum number of `1`s to `0`s such that **no two `1`s are adjacent** (up, down, left, right).
+
+**Visualizing the "Conflict":**
+Imagine the grid represents a seating chart. `1` means a person is sitting there. `0` is an empty seat. People sitting next to each other (adjacent) will fight. We need to remove the minimum number of people so that no two people are sitting next to each other.
+
+**Example 1:**
+
+```text
+Grid:
+1 1 0
+0 1 1
+
+```
+
+Visualizing Adjacencies (Conflicts):
+
+* (0,0) is adjacent to (0,1) -> Conflict!
+* (0,1) is adjacent to (1,1) -> Conflict!
+* (1,1) is adjacent to (1,2) -> Conflict!
+
+We have a chain of conflicts: `(0,0) -- (0,1) -- (1,1) -- (1,2)`
+
+To break *all* links in this chain `A-B-C-D` with minimum removals:
+
+* Option A: Remove A, C. (Removes 2) -> Result: `_ B _ D` (Safe)
+* Option B: Remove B, D. (Removes 2) -> Result: `A _ C _` (Safe)
+* Option C: Remove B, C. (Removes 2) -> Result: `A _ _ D` (Safe)
+
+In this case, the answer is **2**.
+
+**The Realization:**
+This is a graph problem.
+
+* **Nodes:** The cells with `1`.
+* **Edges:** Connection between adjacent `1`s.
+* **Goal:** Find the minimum number of nodes to remove so no edges remain.
+
+In Computer Science terms, this is the **Minimum Vertex Cover** problem.
+
+**Wait, isn't Vertex Cover NP-Hard?**
+For a general graph, yes. Finding the minimum vertex cover is extremely hard (NP-Complete). If this were a general graph, we'd be stuck.
+
+**However...**
+Look at the grid again. It's not a general graph. It's a **Grid Graph**.
+We can color a grid like a chess board (Black and White).
+
+* A "Black" cell is *only* ever adjacent to "White" cells.
+* A "White" cell is *only* ever adjacent to "Black" cells.
+* No "Black" touches "Black". No "White" touches "White".
+
+This means the graph is **Bipartite**.
+
+---
+
+### 2. Solution Explanation
+
+**The Theorem (The "L6 Insight"):**
+There is a famous theorem in combinatorics called **Kőnig's Theorem**.
+It states:
+
+> "In any bipartite graph, the number of edges in a Maximum Matching equals the number of vertices in a Minimum Vertex Cover."
+
+**Translation:**
+Instead of trying to figure out which nodes to remove (Vertex Cover), we can just calculate the **Maximum Matching** (the maximum number of pairs of adjacent 1s we can form such that no two pairs share a cell).
+
+**Why does this work?**
+Imagine you have a pair of adjacent people `A -- B`. To stop them from fighting, you **must** remove either A or B.
+If we find a "Matching" (a set of disjoint pairs), say 5 pairs, we have found 5 independent conflicts. We *must* remove at least 1 person from each pair. So we need at least 5 removals. Kőnig's theorem tells us that for bipartite graphs, this lower bound is exactly the answer.
+
+**Algorithm:**
+
+1. **Divide:** Split `1`s into two sets: `Set A` (row + col is even) and `Set B` (row + col is odd).
+2. **Build Graph:** Draw edges between `Set A` and `Set B` where they are adjacent in the grid.
+3. **Match:** Find the Maximum Bipartite Matching using a standard algorithm (DFS or Hopcroft-Karp).
+4. **Result:** The size of the matching is the answer.
+
+**Visualization of Matching:**
+
+Let's say our grid conflicts look like this:
+
+```text
+(0,1) --- (0,2)    (2,2) --- (2,3)
+  |
+(1,1)
+
+```
+
+Nodes: `(0,1)`, `(0,2)`, `(1,1)`, `(2,2)`, `(2,3)`.
+Edges:
+
+1. `(0,1)-(0,2)`
+2. `(0,1)-(1,1)`
+3. `(2,2)-(2,3)`
+
+**Finding Max Matching:**
+
+* We can pick the pair `(0,1)-(0,2)`.
+* Now `(0,1)` is used. We cannot use the edge `(0,1)-(1,1)`.
+
+
+* We can pick the pair `(2,2)-(2,3)`.
+* Total Matching Size: 2.
+
+**Answer:** 2 operations. (We can remove `(0,1)` and `(2,2)`).
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+**Time Complexity:**
+We use a DFS-based matching algorithm (simplified Hopcroft-Karp).
+In the worst case for DFS matching:
+
+```text
+TC = O(V * E)
+
+Where:
+V = Number of '1's in the grid.
+E = Number of adjacency links between '1's.
+
+In a grid of size N x M:
+Max V = N * M
+Max E = 4 * V (since each cell has at most 4 neighbors)
+
+Therefore:
+TC = O((N*M) * (4*N*M))
+   = O((N*M)^2)
+
+```
+
+*Note: In practice, this is much faster because the graph is sparse and we rarely traverse all edges for every node. For very strict constraints, Hopcroft-Karp would give `O(E * sqrt(V))`, but DFS is standard for interviews.*
+
+**Space Complexity:**
+
+```text
+SC = O(V)
+
+We need:
+1. Visited array for DFS: O(N*M)
+2. 'Match' array to store pairs: O(N*M)
+3. Recursion stack: O(N*M) in worst case (long snake path)
+
+Total SC = O(N*M)
+
+```
+
+---
+
+### 4. Solution Code
+
+Here are the implementations. I've focused on the DFS-based approach as it is concise and sufficient for interview constraints (usually N, M <= 10 or 20, sometimes up to 50).
+
+#### Python Solution
+
+```python
+class Solution:
+    def minimumOperations(self, grid: list[list[int]]) -> int:
+        R, C = len(grid), len(grid[0])
+        
+        # 'match' stores the matching. 
+        # match[encoded_pos] = encoded_partner_pos
+        # We encode (r, c) as r * C + c to use a simple dict/array
+        match = {}
+        
+        # Directions: Up, Down, Left, Right
+        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+        
+        def dfs(u, visited):
+            # Try to match node u with a neighbor v
+            for dr, dc in directions:
+                r, c = u // C, u % C
+                nr, nc = r + dr, c + dc
+                
+                # Check bounds and if neighbor is a '1'
+                if 0 <= nr < R and 0 <= nc < C and grid[nr][nc] == 1:
+                    v = nr * C + nc
+                    
+                    if v in visited: 
+                        continue
+                    visited.add(v)
+                    
+                    # If v is not matched OR we can find a new partner for v's current match
+                    # then we can match u with v
+                    if v not in match or dfs(match[v], visited):
+                        match[v] = u
+                        return True
+            return False
+
+        matches = 0
+        
+        for r in range(R):
+            for c in range(C):
+                # Optimization: Only start DFS from one "color" of the checkerboard.
+                # Let's start from cells where (r + c) is even.
+                # This ensures we treat the graph as bipartite and don't double count.
+                if grid[r][c] == 1 and (r + c) % 2 == 0:
+                    visited = set()
+                    if dfs(r * C + c, visited):
+                        matches += 1
+                        
+        return matches
+
+```
+
+#### Javascript Solution
+
+```javascript
+/**
+ * @param {number[][]} grid
+ * @return {number}
+ */
+var minimumOperations = function(grid) {
+    const R = grid.length;
+    const C = grid[0].length;
+    
+    // Map to store matches: key=node_index, value=matched_node_index
+    // Node index = r * C + c
+    const match = new Map();
+    const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+    
+    // DFS function to find augmenting path
+    // u: current node index
+    // visited: Set to keep track of nodes seen in current DFS path
+    const dfs = (u, visited) => {
+        const r = Math.floor(u / C);
+        const c = u % C;
+        
+        for (const [dr, dc] of directions) {
+            const nr = r + dr;
+            const nc = c + dc;
+            
+            if (nr >= 0 && nr < R && nc >= 0 && nc < C && grid[nr][nc] === 1) {
+                const v = nr * C + nc;
+                
+                if (visited.has(v)) continue;
+                visited.add(v);
+                
+                // If neighbor v is unmatched OR 
+                // we can find a new match for v's current partner
+                if (!match.has(v) || dfs(match.get(v), visited)) {
+                    match.set(v, u);
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+    
+    let matches = 0;
+    
+    for (let r = 0; r < R; r++) {
+        for (let c = 0; c < C; c++) {
+            // Only initiate matching attempts from "Even" (White) cells
+            // to "Odd" (Black) cells to avoid double counting.
+            if (grid[r][c] === 1 && (r + c) % 2 === 0) {
+                const visited = new Set();
+                if (dfs(r * C + c, visited)) {
+                    matches++;
+                }
+            }
+        }
+    }
+    
+    return matches;
+};
+
+```
+
+---
+
+### Note 1: Terms and Techniques
+
+**Maximum Bipartite Matching (Kuhn's Algorithm / DFS Approach):**
+We used a DFS approach to find "Augmenting Paths". An augmenting path is a path that starts at an unmatched node, alternates between unused and used edges, and ends at another unmatched node. Flipping the edges along this path increases the size of the matching by 1.
+
+* **Why it helps:** It systematically finds the maximum number of independent edges.
+* **Application here:** Because of Kőnig's Theorem, calculating this matching size gives us the Vertex Cover size directly, which is our answer.
+
+**Vertex Cover vs Independent Set:**
+
+* **Vertex Cover:** Subset of vertices that touch every edge. (What we solved).
+* **Independent Set:** Subset of vertices where no two are connected.
+* *Relation:* `Size(Vertex Cover) + Size(Independent Set) = Total Vertices`.
+* Sometimes this problem is phrased as "Find the Maximum Independent Set" (Maximum number of 1s we can *keep*). You would solve it by calculating `Total 1s - Matching Size`.
+
+### Note 2: Real World Interview Variations
+
+Top tier companies (Google, Meta, Bloomberg) rarely ask "find the max matching". They hide it in word problems.
+
+1. **Google: "Broken Calculator / Corrupted Memory"**
+* *Question:* You have a grid of memory cells. Some are corrupted (1s). Corrupted cells affect their neighbors. You can isolate a cell to stop the spread. What is the minimum cells to isolate so no two active corrupted cells touch?
+* *Solution:* Identical to this problem. Identify it's bipartite -> Max Matching.
+
+
+2. **Meta: "Seating Arrangement (Pandemic Edition)"**
+* *Question:* You have a classroom grid. Some seats are broken. You want to seat as many students as possible in the working seats, but no two students can sit adjacent (social distancing).
+* *Solution:* This asks for **Maximum Independent Set**.
+* *Logic:* Calculate `Total Working Seats - Maximum Bipartite Matching`.
+
+
+3. **Bloomberg: "Conflicting Trades"**
+* *Question:* You have a list of trades. Some trades conflict with others (graph edges). The conflicts form a bipartite graph (e.g., Buy vs Sell orders). Remove minimum trades to resolve all conflicts.
+* *Solution:* Direct application of Minimum Vertex Cover.
+
+
+# 1349. Maximum Students Taking Exam
+
+Here is a breakdown of how a Senior (L5) or Staff (L6) Engineer at Google would deconstruct, visualize, and solve LeetCode 1349: **Maximum Students Taking Exam**.
+
+### 1. Problem Explanation
+
+**The Core Challenge:**
+You are a teacher trying to fit as many students as possible into a classroom grid. However, to prevent cheating, there are strict rules about where students can sit relative to one another.
+
+**The Rules:**
+
+1. **The Grid:** The classroom is an `m` (rows) by `n` (columns) grid.
+2. **Broken Seats:** Some seats are broken (`#`) and cannot be used.
+3. **Vision Lines (The Constraint):** A student can see the answers of neighbors in specific positions. You cannot place a student where they can "see" another student.
+
+**Who can a student at `(row, col)` see?**
+
+* **Left:** `(row, col - 1)`
+* **Right:** `(row, col + 1)`
+* **Front-Left:** `(row - 1, col - 1)`
+* **Front-Right:** `(row - 1, col + 1)`
+
+*Note: The problem description says students can't see "diagonal" or "left/right". It implies if you sit at `X`, you cannot have students at `L`, `R`, `FL`, or `FR`.*
+
+**ASCII Visualization of Constraints:**
+
+Imagine a Student sits at **S**. The positions marked **X** are forbidden for other students.
+
+```text
+Row i-1:      .   X   .   X   .    (Front-Left & Front-Right forbidden)
+               \ /     \ /
+Row i:        .   X   S   X   .    (Left & Right forbidden)
+
+```
+
+**Goal:**
+Find the **maximum** number of students you can place in the grid without violating these rules.
+
+---
+
+### 2. Solution Explanation: Dynamic Programming with Bitmasking
+
+**The "L6" Insight:**
+When you look at the constraints, you might see `m, n <= 8`. This is a massive hint. In algorithm design, a constraint this small (less than 20) almost always screams **Exponential Time Complexity is acceptable**, likely involving **Bitmasks**.
+
+**Why Row-by-Row?**
+Notice that a student in Row `i` only cares about:
+
+1. Other students in Row `i` (Left/Right).
+2. Students in Row `i-1` (Front Diagonals).
+
+They **do not** care about Row `i-2` or Row `i+1`. This "local dependency" means we can build the solution row by row. If we know the valid configuration of Row `i-1`, we can determine the optimal configuration for Row `i`.
+
+**Representing a Row as a Bitmask:**
+Since a row has at most 8 seats, we can represent the seating arrangement of a single row as a binary number (an integer).
+
+* `1`: A student is sitting here.
+* `0`: Seat is empty.
+
+**Example:**
+Row of length 4: `[Student, Empty, Empty, Student]`
+Binary: `1001`
+Decimal: `9`
+
+**The Algorithm (Step-by-Step):**
+
+**Step 1: Check Intra-Row Validity**
+Before checking valid neighbors between rows, a single row itself must be valid.
+
+1. It cannot place a student on a broken seat (`#`).
+2. It cannot have two `1`s next to each other (e.g., `1100` is invalid).
+
+**Step 2: State Definition**
+We define `DP[row_index][mask]` as:
+
+* The maximum total students we can fit in the grid from row `0` up to `row_index`...
+* ...GIVEN that `row_index` has the seating configuration `mask`.
+
+**Step 3: Transitions (Connecting Rows)**
+To find `DP[i][current_mask]`, we need to look at `DP[i-1][previous_mask]`.
+We iterate through all valid `previous_mask`s from the row above. If `current_mask` and `previous_mask` are compatible (no diagonal cheating), we take the best one.
+
+`DP[i][current_mask] = (count_set_bits(current_mask)) + max(DP[i-1][previous_mask])`
+
+**Visualizing the Compatibility Check:**
+
+Let `curr` be the mask for Row `i` and `prev` be the mask for Row `i-1`.
+
+**Conflict 1: Front-Left**
+If `curr` has a student at bit `k` (position `k`), `prev` cannot have a student at bit `k+1`.
+
+* In binary terms: `(curr << 1) & prev` must be `0`.
+
+```text
+curr:   0 0 1 0   (Student at index 1)
+<< 1:   0 1 0 0   (Shifted left)
+prev:   0 1 0 0   (Student at index 2 - Front Left of curr's student)
+AND:    0 1 0 0   (Result is NOT 0 -> CONFLICT!)
+
+```
+
+**Conflict 2: Front-Right**
+If `curr` has a student at bit `k`, `prev` cannot have a student at bit `k-1`.
+
+* In binary terms: `(curr >> 1) & prev` must be `0`.
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+**Time Complexity Derivation**
+
+Let `M` be the number of rows and `N` be the number of columns.
+
+1. We iterate through each row `i` from `0` to `M`. (Total `M` steps).
+2. For each row, we consider every possible mask `curr`. There are `2^N` possible masks.
+3. For each `curr` mask, we look back at every possible `prev` mask from the previous row to find the max. There are `2^N` previous masks.
+
+**Visual Calculation:**
+
+```text
+Outer Loop (Rows):        |  M iterations
+  Inner Loop (Curr Mask): |    * 2^N iterations
+    Inner Loop (Prev Mask)|      * 2^N iterations
+                          |_______________________
+Total Operations:         |  M * 2^N * 2^N  =  M * 2^(2N) = M * 4^N
+
+```
+
+Given `N <= 8`:
+`2^8 = 256`.
+`4^8 = 65,536`.
+`M = 8`.
+Total ops approx `8 * 65,536 ≈ 524,000`. This is well within the standard limit (usually ~100 million operations per second).
+
+**Space Complexity Derivation**
+
+We need a DP table.
+Dimensions: `Rows` x `Possible Masks`.
+
+```text
+DP Table:
+[ Row 0 ] -> [ size 2^N ]
+[ Row 1 ] -> [ size 2^N ]
+...
+[ Row M ] -> [ size 2^N ]
+
+Total Space = M * 2^N
+
+```
+
+*(Optimization Note: We actually only need the previous row's results to calculate the current row, so we can reduce space to O(2^N) by keeping only two rows in memory).*
+
+**Final Complexity:**
+
+* **Time:** `O(M * 2^N * 2^N)` or `O(M * 4^N)`
+* **Space:** `O(M * 2^N)` (Can be optimized to `O(2^N)`)
+
+---
+
+### 4. Solution Code
+
+Here is the implementation. It includes a helper function to validate row compatibility and uses the iterative DP approach for robustness.
+
+#### Python Solution
+
+```python
+class Solution:
+    def maxStudents(self, seats: list[list[str]]) -> int:
+        m, n = len(seats), len(seats[0])
+        
+        # Precompute the "broken seat" masks for each row.
+        # If seats[i][j] is broken '#', we represent that as a bit 1 in a "validity mask".
+        # Actually, it's easier to store the mask of *usable* seats.
+        # Let's represent 'valid_seats_mask[i]' where 1 means the seat is NOT broken.
+        valid_seats_masks = []
+        for row in seats:
+            mask = 0
+            for col_idx, char in enumerate(row):
+                if char == '.':
+                    # Set the bit corresponding to this column to 1
+                    mask |= (1 << col_idx)
+            valid_seats_masks.append(mask)
+
+        # DP state: dp[mask] stores the max students for the CURRENT row
+        # ending with the configuration 'mask'.
+        # Initialize with -1 to indicate unreachable states.
+        # We start with a dummy "row -1" which has no students, so mask 0 has count 0.
+        dp = {0: 0}
+
+        for row_idx in range(m):
+            new_dp = {}
+            row_validity_mask = valid_seats_masks[row_idx]
+            
+            # Iterate through all theoretically possible masks (0 to 2^n - 1)
+            # for the current row.
+            for curr_mask in range(1 << n):
+                
+                # Check 1: Does the mask place students on broken seats?
+                # (curr_mask & row_validity_mask) must equal curr_mask.
+                if (curr_mask & row_validity_mask) != curr_mask:
+                    continue
+                
+                # Check 2: Are there adjacent students in the current row?
+                # We check this by seeing if (mask) AND (mask shifted right) is non-zero.
+                if (curr_mask & (curr_mask >> 1)) != 0:
+                    continue
+                
+                # If Check 1 & 2 pass, this is a valid placement for THIS row alone.
+                # Now we try to pair it with a valid placement from the PREVIOUS row.
+                
+                max_students_for_curr = -1
+                
+                for prev_mask, prev_count in dp.items():
+                    # Check 3: Cross-row constraints (Diagonal vision)
+                    # No student in 'curr' can see a student in 'prev'.
+                    
+                    # Check Left-Diagonal (Upper Left)
+                    # A student at curr_mask[x] conflicts with prev_mask[x-1]
+                    if (curr_mask & (prev_mask >> 1)) != 0:
+                        continue
+                        
+                    # Check Right-Diagonal (Upper Right)
+                    # A student at curr_mask[x] conflicts with prev_mask[x+1]
+                    if (curr_mask & (prev_mask << 1)) != 0:
+                        continue
+                    
+                    # If we pass all checks, calculate total students
+                    current_row_count = bin(curr_mask).count('1')
+                    total = prev_count + current_row_count
+                    max_students_for_curr = max(max_students_for_curr, total)
+                
+                if max_students_for_curr != -1:
+                    new_dp[curr_mask] = max_students_for_curr
+            
+            # Move to the next row
+            dp = new_dp
+
+        return max(dp.values()) if dp else 0
+
+```
+
+#### Javascript Solution
+
+```javascript
+/**
+ * @param {character[][]} seats
+ * @return {number}
+ */
+var maxStudents = function(seats) {
+    const m = seats.length;
+    const n = seats[0].length;
+    
+    // Helper to count bits (population count)
+    const countSetBits = (n) => {
+        let count = 0;
+        while (n > 0) {
+            n &= (n - 1);
+            count++;
+        }
+        return count;
+    };
+
+    // Precompute validity masks for broken seats
+    // validSeatsMasks[i] will have a 1 if the seat is usable ('.'), 0 if broken ('#')
+    const validSeatsMasks = [];
+    for (let i = 0; i < m; i++) {
+        let mask = 0;
+        for (let j = 0; j < n; j++) {
+            if (seats[i][j] === '.') {
+                mask |= (1 << j);
+            }
+        }
+        validSeatsMasks.push(mask);
+    }
+
+    // dp Map: key = mask, value = max students
+    // Initialize with a dummy "previous row" of mask 0 with 0 students
+    let dp = new Map();
+    dp.set(0, 0);
+
+    for (let row = 0; row < m; row++) {
+        let newDp = new Map();
+        const rowUsableMask = validSeatsMasks[row];
+
+        // Try all 2^n masks for current row
+        for (let currMask = 0; currMask < (1 << n); currMask++) {
+            
+            // Check 1: Does mask use broken seats?
+            if ((currMask & rowUsableMask) !== currMask) continue;
+
+            // Check 2: Horizontal conflict (Left/Right adjacency)
+            if ((currMask & (currMask >> 1)) !== 0) continue;
+
+            // If valid within the row, check against previous row results
+            let currentBitCount = countSetBits(currMask);
+            let maxForThisMask = -1;
+
+            for (let [prevMask, prevCount] of dp) {
+                // Check 3: Diagonal conflicts with previous row
+                
+                // curr student at 'i' cannot have prev student at 'i-1' (Upper Left)
+                if ((currMask & (prevMask >> 1)) !== 0) continue;
+
+                // curr student at 'i' cannot have prev student at 'i+1' (Upper Right)
+                if ((currMask & (prevMask << 1)) !== 0) continue;
+
+                // All checks passed
+                maxForThisMask = Math.max(maxForThisMask, prevCount + currentBitCount);
+            }
+
+            if (maxForThisMask !== -1) {
+                newDp.set(currMask, maxForThisMask);
+            }
+        }
+        dp = newDp;
+    }
+
+    // Return the max value found in the last processed row's DP map
+    let maxStudents = 0;
+    for (let count of dp.values()) {
+        maxStudents = Math.max(maxStudents, count);
+    }
+    return maxStudents;
+};
+
+```
+
+---
+
+### Note 1: Terminology & Techniques
+
+**Bitmasking:**
+This is the technique of using a sequence of bits (an integer) to represent a subset or a state. Here, we used an integer to represent the state of a row (Sitting/Empty). It helps reduce memory usage and allows checking constraints (like adjacency) using extremely fast CPU instructions (AND, OR, SHIFT) rather than iterating through arrays.
+
+**State Compression:**
+This refers to optimizing the DP state. Instead of storing the full grid configuration (which is huge), we realized we only need the *previous row's* configuration to make a decision. We compressed the state of the "world" down to just the "last row's mask".
+
+---
+
+### Note 2: Real World & Interview Variations
+
+Big tech companies (Google, Meta, Bloomberg) rarely ask the exact same LeetCode question. They cloak the underlying logic in real-world scenarios. Here is how this specific "Bitmask DP on Grid" logic appears in interviews:
+
+#### 1. Google: The Datacenter Server Allocation
+
+**Scenario:** You manage a server rack with `M` shelves and `N` slots per shelf. Some slots are broken (power failure). Placing a "High Performance" CPU generates heat.
+**Constraint:** You cannot place High Performance CPUs adjacent to each other (left/right) or immediately diagonal, as the combined heat will melt the casing.
+**Goal:** Maximize the number of CPUs.
+**Solution:** Exact same logic as "Students Taking Exam". The heat constraint maps 1:1 to the vision/cheating constraint.
+
+#### 2. Meta: The Social Distancing Cinema
+
+**Scenario:** You are seating people in a cinema. Due to a virus, people must be socially distanced.
+**Constraint:** If a person sits at `(r, c)`, no one can sit at `(r, c-1)`, `(r, c+1)`, `(r-1, c)`, `(r+1, c)`. (This is the standard "Cross" shape constraint, slightly different from the Exam problem which allows `(r-1, c)`).
+**Solution:**
+
+* This changes the bitmask check. The diagonal check is removed.
+* Instead, you add a check: `(curr_mask & prev_mask) == 0`. (No one directly in front).
+* The rest of the Bitmask DP structure remains identical.
+
+#### 3. Bloomberg: Trading Desk Compliance
+
+**Scenario:** You have a floor of trading desks. You have "Junior Traders" and "Senior Traders".
+**Constraint:** Junior traders cannot sit adjacent to other Junior traders. However, the twist is usually: "Maximize Junior Traders placed, but Senior Traders are fixed in stone at specific coordinates."
+**Solution:**
+
+* The "Broken Seats" logic (`#`) is repurposed. The spots occupied by Senior Traders are treated as "Broken" for the purpose of placing Juniors.
+* However, Senior traders also exert the "vision" constraint.
+* You must pre-process the "validity mask" to exclude Senior spots AND spots adjacent to Seniors before running the DP.
+
+# Maximum Number of Accepted Invitations
+
+Here is a comprehensive breakdown of the "Maximum Number of Accepted Invitations" problem, written from the perspective of a Senior Staff Engineer (L6) who values clarity, depth, and practical application.
+
+### 1. Problem Explanation
+
+At its core, this is a resource allocation problem. You are given a grid (a 2D matrix) representing possible connections between two distinct groups.
+
+**The Scenario:**
+Imagine a school dance.
+
+* **Rows** () represent Boys.
+* **Columns** () represent Girls.
+* If `grid[i][j] == 1`, it means Boy `i` *can* invite Girl `j`.
+* If `grid[i][j] == 0`, they cannot be a pair.
+
+**The Constraints:**
+
+1. A boy can send only **one** invitation that gets accepted.
+2. A girl can accept only **one** invitation.
+
+**The Goal:**
+Find the maximum possible number of pairs we can form.
+
+#### ASCII Visualization: The Setup
+
+Let's look at a concrete example.
+Input: `grid = [[1,1,1], [1,0,1], [0,0,1]]`
+
+This translates to:
+
+* Boy 0 can invite: Girl 0, Girl 1, Girl 2
+* Boy 1 can invite: Girl 0, Girl 2
+* Boy 2 can invite: Girl 2
+
+**Visualizing the Graph:**
+
+```text
+    BOYS            GIRLS
+   (Set U)         (Set V)
+
+    +---+           +---+
+    | 0 |---------->| 0 |
+    +---+ \         +---+
+      |    \
+      |     \       +---+
+    +---+    \----->| 1 |
+    | 1 |---- \     +---+
+    +---+      \
+      |         \   +---+
+      |          -->| 2 |
+    +---+           +---+
+    | 2 |-----------^
+    +---+
+
+```
+
+**Why is this non-trivial?**
+A "greedy" approach (just picking the first available option) often fails.
+
+* **Greedy Failure Example:**
+1. Boy 0 takes Girl 2 (because he can).
+2. Boy 1 takes Girl 0.
+3. Boy 2... looks for Girl 2, but she is taken!
+
+
+* **Total Matches: 2**
+
+
+* **Optimal Approach (Smart Shuffling):**
+1. Boy 0 takes Girl 0.
+2. Boy 1 takes Girl 2 (wait, Boy 2 needs her... let's optimize).
+3. Actually: Boy 0 takes Girl 1. Boy 1 takes Girl 0. Boy 2 takes Girl 2.
+
+
+* **Total Matches: 3**
+
+
+
+We need an algorithm that can "backtrack" and ask previous pairs to "move over" to accommodate new pairs.
+
+---
+
+### 2. Solution Explanation: Maximum Bipartite Matching
+
+This problem is a classic application of **Maximum Bipartite Matching**.
+
+**The Concept:**
+We treat the boys and girls as a **Bipartite Graph** (a graph where nodes are split into two sets, and edges only go from one set to the other). We want to find the "Maximum Matching" (the largest set of edges without common vertices).
+
+**The Algorithm: Augmenting Paths (DFS-based)**
+
+We will iterate through every boy and try to match them. If a boy wants a girl who is already taken, we check if the *current owner* of that girl can switch to a *different* girl.
+
+**The "Can You Switch?" Protocol:**
+
+1. Boy `A` wants Girl `1`.
+2. If Girl `1` is free -> Great! Match them.
+3. If Girl `1` is taken by Boy `B`:
+* We ask Boy `B`: "Do you have any *other* options?"
+* If Boy `B` can switch to Girl `2` -> Boy `B` takes Girl `2`, freeing up Girl `1` for Boy `A`.
+* If Boy `B` cannot switch, Boy `A` must try his next option.
+
+
+
+This recursive shuffling is the heart of the solution.
+
+#### Detailed ASCII Walkthrough
+
+Let's solve `grid = [[1,1,1], [1,0,1], [0,0,1]]`.
+
+**Step 1: Process Boy 0**
+
+* Boy 0 wants Girl 0.
+* Girl 0 is free.
+* **Match:** `Girl 0 <-> Boy 0`
+
+```text
+   STATUS:
+   Girl 0: Taken by Boy 0
+   Girl 1: Free
+   Girl 2: Free
+
+```
+
+**Step 2: Process Boy 1**
+
+* Boy 1 wants Girl 0.
+* Girl 0 is **Taken** by Boy 0.
+* **Recursive Ask:** Can Boy 0 (owner of Girl 0) move?
+* Boy 0 checks his connections. He can also take Girl 1.
+* Girl 1 is free.
+* Boy 0 moves to Girl 1.
+
+
+* Girl 0 is now free for Boy 1.
+* **Matches:** `Girl 1 <-> Boy 0`, `Girl 0 <-> Boy 1`
+
+```text
+   VISUALIZING THE SWITCH:
+
+   (Start) Boy 1 wants G0 --> [Collision with Boy 0]
+                                     |
+   (Recursion) Boy 0 checks G1 --> [Free!]
+                                     |
+   (Result) Boy 0 takes G1. Boy 1 takes G0.
+
+   STATUS:
+   Girl 0: Taken by Boy 1
+   Girl 1: Taken by Boy 0
+   Girl 2: Free
+
+```
+
+**Step 3: Process Boy 2**
+
+* Boy 2 wants Girl 2.
+* Girl 2 is free.
+* **Match:** `Girl 2 <-> Boy 2`
+
+**Final State:**
+
+* Boy 0 -> Girl 1
+* Boy 1 -> Girl 0
+* Boy 2 -> Girl 2
+* **Total Matches: 3**
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+We need to be precise here without using complex notation.
+
+#### Time Complexity
+
+Let `M` be the number of boys and `N` be the number of girls.
+Let `E` be the total number of connections (number of 1s in the grid).
+
+The algorithm runs a loop for every Boy (M times).
+Inside the loop, we run a Depth First Search (DFS) to find a match.
+
+In the worst case of a DFS, we might traverse every edge in the graph to see if a chain of switches is possible.
+
+```text
+   +-------------------------------------+
+   | Outer Loop: Runs M times (for boys) |
+   +-------------------------------------+
+             |
+             v
+   +-----------------------------------------+
+   |  DFS cost: In worst case, we visit      |
+   |  all edges connected to relevant nodes  |
+   |  Cost is proportional to E (Edges)      |
+   +-----------------------------------------+
+
+   Total Time = M * E
+
+```
+
+* **Worst Case:** O(M * E)
+* **Note:** Since `E` can be at most `M * N`, this is roughly O(M * M * N) in a dense grid, but usually much faster in practice.
+
+#### Space Complexity
+
+We need to store:
+
+1. **Matches:** An array of size `N` to track which boy has matched with which girl.
+2. **Visited Array:** An array of size `N` used during *each* DFS to prevent cycles (avoid asking the same girl twice in one "switch" attempt).
+3. **Recursion Stack:** The DFS depth can go as deep as the number of boys `M`.
+
+```text
+   Memory Usage:
+
+   [Match Array]   : Size N  (Who owns whom)
+   [Visited Set]   : Size N  (Used per DFS step)
+   [Recursion Stack]: Size M  (Depth of dependency chain)
+
+   Total Space = O(M + N)
+
+```
+
+* **Space:** O(M + N) (to store the matching and recursion stack).
+
+---
+
+### 4. Solution Code
+
+Here are the implementations. I have provided the optimized DFS-based solution (often called the Kuhn's Algorithm or simplified Hopcroft-Karp for unweighted bipartite matching).
+
+#### Python Implementation
+
+```python
+from typing import List
+
+class Solution:
+    def maximumInvitations(self, grid: List[List[int]]) -> int:
+        """
+        Solves Maximum Bipartite Matching using DFS.
+        """
+        M = len(grid)    # Number of Boys
+        N = len(grid[0]) # Number of Girls
+        
+        # 'match' stores the partner of each girl. 
+        # match[j] = i means Girl j is currently matched with Boy i.
+        # Initialize with -1 (no match).
+        match = [-1] * N
+        
+        def dfs(boy_index, visited):
+            """
+            Tries to find a match for 'boy_index'.
+            Returns True if a match is found (potentially by shifting others),
+            False otherwise.
+            """
+            # Iterate over all girls to see who this boy can invite
+            for girl_index in range(N):
+                # Check if an invitation is possible AND we haven't checked this girl 
+                # yet in this specific DFS chain (to avoid infinite loops)
+                if grid[boy_index][girl_index] == 1 and not visited[girl_index]:
+                    
+                    # Mark girl as visited for this recursion stack
+                    visited[girl_index] = True
+                    
+                    # LOGIC:
+                    # 1. If girl is free (match[girl_index] == -1) -> Take her.
+                    # 2. If girl is taken, ask her current partner (match[girl_index])
+                    #    if they can find a different girl (recursive dfs).
+                    if match[girl_index] == -1 or dfs(match[girl_index], visited):
+                        match[girl_index] = boy_index
+                        return True
+            
+            return False
+
+        result = 0
+        # Try to find a match for every boy
+        for i in range(M):
+            # Reset 'visited' for every new boy's attempt.
+            # We need a fresh visited set because the availability path 
+            # might be different for a new start node.
+            visited = [False] * N
+            if dfs(i, visited):
+                result += 1
+                
+        return result
+
+# Example Usage:
+# sol = Solution()
+# print(sol.maximumInvitations([[1,1,1],[1,0,1],[0,0,1]])) # Output: 3
+
+```
+
+#### JavaScript Implementation
+
+```javascript
+/**
+ * @param {number[][]} grid
+ * @return {number}
+ */
+var maximumInvitations = function(grid) {
+    const m = grid.length;    // Boys
+    const n = grid[0].length; // Girls
+    
+    // Stores which boy is assigned to girl 'j'. 
+    // match[j] = boy_index. -1 means free.
+    const match = new Array(n).fill(-1);
+    
+    // Depth First Search to find an augmenting path
+    const dfs = (u, visited) => {
+        // Iterate through all potential girls
+        for (let v = 0; v < n; v++) {
+            // If boy 'u' can invite girl 'v' AND we haven't tried 'v' in this path
+            if (grid[u][v] === 1 && !visited[v]) {
+                visited[v] = true;
+                
+                // If girl 'v' is not taken OR 
+                // the boy currently assigned to 'v' can switch to someone else
+                if (match[v] === -1 || dfs(match[v], visited)) {
+                    match[v] = u;
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+    
+    let count = 0;
+    
+    // Try to match each boy
+    for (let i = 0; i < m; i++) {
+        // Create a visited array for this specific attempt
+        const visited = new Array(n).fill(false);
+        if (dfs(i, visited)) {
+            count++;
+        }
+    }
+    
+    return count;
+};
+
+```
+
+---
+
+### New Terminology: Maximum Bipartite Matching
+
+This specific problem is the textbook definition of **Maximum Bipartite Matching**.
+
+* **Bipartite Graph:** A graph where vertices can be divided into two disjoint sets (Boys and Girls) such that every edge connects a vertex in one set to one in the other.
+* **Matching:** A set of edges without common vertices.
+* **Augmenting Path:** A path that starts at an unmatched node, alternates between unmatched and matched edges, and ends at an unmatched node. If you find one, you can "flip" the edges (make matched unmatched, and unmatched matched) to increase the total size of the matching by 1.
+
+The algorithm we used is a simplified version of the **Hungarian Algorithm** or, more accurately in this context, **Ford-Fulkerson** applied to unweighted bipartite matching.
+
+---
+
+### Real World / Interview Contexts (Google, Meta, Bloomberg)
+
+In L5/L6 interviews, they rarely ask the problem in the abstract "boys and girls" format. They wrap it in a system design or business logic wrapper.
+
+#### 1. Google: The "Compute Cluster Job Scheduling" Variation
+
+**Problem:** You have a set of `Jobs` (Rows) and a set of `Servers` (Columns). Each Job requires specific hardware (GPU, high RAM, etc.). `grid[i][j] = 1` means Server `j` meets the requirements for Job `i`.
+
+* **Constraint:** Each server can handle only 1 job at a time.
+* **Goal:** Maximize the number of jobs running simultaneously.
+* **L6 Twist:** They might ask, "What if some jobs are higher priority?"
+* **Solution modification:** You would sort the boys (Jobs) by priority before running the matching loop. This ensures high-priority jobs get the "first pick" or force lower-priority jobs to switch/evict.
+
+
+
+#### 2. Meta: The "User Interest Targeting" Variation
+
+**Problem:** You have `Advertisers` and `Ad Slots`. An advertiser only wants to show ads in specific slots (based on demographics).
+
+* **Constraint:** An ad slot can only show one ad. An advertiser only has budget for one slot (simplification).
+* **Goal:** Maximize total ad placements.
+* **L6 Twist:** "What if an advertiser has a budget for 5 slots?"
+* **Solution modification:** This becomes "Maximum Flow". You would add a "Source" node connected to each Advertiser with capacity 5, and run a Max Flow algorithm (like Dinic's Algorithm or Edmonds-Karp).
+
+
+
+#### 3. Bloomberg: The "Trade Settlement" Variation
+
+**Problem:** You have `Buy Orders` for a specific distinct bond and `Sell Orders`. Due to regulatory or internal compliance rules, only certain Buy orders can match with certain Sell orders (e.g., jurisdiction match).
+
+* **Goal:** Clear the maximum number of trades.
+* **L6 Twist:** "The graph is dynamic. Orders come in real-time."
+* **Solution modification:** You cannot re-run the O(M*E) algorithm every millisecond. You would need a greedy approach with a localized repair strategy (trying to fix only the local neighborhood of the new node) or a specific heuristic for online bipartite matching.
