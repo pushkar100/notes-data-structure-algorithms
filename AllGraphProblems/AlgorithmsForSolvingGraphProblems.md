@@ -2653,6 +2653,8 @@ Both algorithms solve the exact same problem, but they approach it differently.
 | **Connectivity** | Can generate a "forest" (multiple disconnected trees) if the graph is disconnected. | Only generates a single tree from the start node. |
 
 
+
+
 # Topological Sort (Kahn's Algorithm)
 
 Here is a detailed, easy-to-understand guide to Topological Sort using Kahn's Algorithm.
