@@ -2651,3 +2651,620 @@ Both algorithms solve the exact same problem, but they approach it differently.
 | **Data Structure** | Uses **Union-Find** (Disjoint Set). | Uses a **Priority Queue** (Min-Heap). |
 | **Best For** | **Sparse Graphs:** (Lots of nodes, fewer edges). It is simpler to implement with an edge list. | **Dense Graphs:** (Lots of edges connecting everything). Since it doesn't need to sort *all* edges upfront, it can be faster here. |
 | **Connectivity** | Can generate a "forest" (multiple disconnected trees) if the graph is disconnected. | Only generates a single tree from the start node. |
+
+
+# Topological Sort (Kahn's Algorithm)
+
+Here is a detailed, easy-to-understand guide to Topological Sort using Kahn's Algorithm.
+
+---
+
+## 1. The Problem: The "Dependency" Nightmare
+
+Imagine you are trying to bake a cake, or perhaps enroll in university courses. You cannot just do things in any random order.
+
+* **Baking:** You must mix the batter *before* you put it in the oven.
+* **College:** You must take "Intro to CS" *before* you take "Advanced Algorithms."
+
+This is the **Dependency Problem**. We have a set of tasks, and some tasks must be completed before others can start.
+
+**Topological Sort** is the algorithm that takes a jumbled list of tasks and dependencies and straightens them out into a linear order where every prerequisite comes *before* the task it enables.
+
+> **Key Rule:** This only works on **Directed Acyclic Graphs (DAGs)**.
+> * **Directed:** A leads to B (one way).
+> * **Acyclic:** No loops! If A waits for B, and B waits for A, you are stuck forever.
+> 
+> 
+
+---
+
+## 2. What is Kahn's Algorithm?
+
+Kahn's Algorithm is a specific way to perform a Topological Sort. It relies on a very simple, intuitive concept called **Indegree**.
+
+* **Indegree:** The number of arrows pointing *at* a node.
+* **Meaning:** If a task has an Indegree of 0, it has **no prerequisites**. It is free to be done immediately!
+
+### The Strategy
+
+1. Find all tasks with **0 dependencies** (Indegree = 0).
+2. "Do" those tasks (add them to our sorted list).
+3. Once a task is done, remove it from the graph.
+4. Check if this removal freed up any new tasks (reduced their Indegree to 0).
+5. Repeat until the graph is empty.
+
+---
+
+## 3. Visual Walkthrough
+
+Let's trace this with a simple graph representing getting dressed.
+
+**The Dependencies:**
+
+* Shirt (A) -> Tie (C)
+* Shirt (A) -> Jacket (D)
+* Pants (B) -> Belt (E)
+* Tie (C) -> Jacket (D)
+
+### Initial State
+
+Nodes: A(Shirt), B(Pants), C(Tie), D(Jacket), E(Belt)
+
+```text
+       +---(A)---+          (B)
+       |    |    |           |
+       v    |    v           v
+      (C)   |   (D)         (E)
+       |    |    ^
+       |    |    |
+       +----+----+
+
+```
+
+**Step 1: Calculate Indegrees**
+Count how many arrows point *into* each letter.
+
+* A: 0 (No arrows pointing in)
+* B: 0
+* C: 1 (From A)
+* D: 2 (From A and C)
+* E: 1 (From B)
+
+**Queue:** `[A, B]` (These have 0 indegree, ready to process)
+**Sorted List:** `[]`
+
+---
+
+### Iteration 1
+
+Pop **A** from the Queue. Add to Sorted List.
+"Remove" A's arrows. This reduces the indegree of its neighbors (C and D).
+
+```text
+Processed: A
+
+            (B)
+             |
+             v
+      (C)   (D)         (E)
+       |     ^
+       |     |
+       +-----+
+
+```
+
+**Updates:**
+
+* C was 1, now **0**. (Added to Queue!)
+* D was 2, now **1**.
+* Queue is now: `[B, C]`
+* Sorted List: `[A]`
+
+---
+
+### Iteration 2
+
+Pop **B** from the Queue. Add to Sorted List.
+"Remove" B's arrows. This reduces the indegree of neighbor E.
+
+```text
+Processed: B
+
+      (C)   (D)         (E)
+       |     ^
+       |     |
+       +-----+
+
+```
+
+**Updates:**
+
+* E was 1, now **0**. (Added to Queue!)
+* Queue is now: `[C, E]`
+* Sorted List: `[A, B]`
+
+---
+
+### Iteration 3
+
+Pop **C** from the Queue. Add to Sorted List.
+"Remove" C's arrows. Reduces indegree of D.
+
+```text
+Processed: C
+
+            (D)         (E)
+
+```
+
+**Updates:**
+
+* D was 1, now **0**. (Added to Queue!)
+* Queue is now: `[E, D]`
+* Sorted List: `[A, B, C]`
+
+---
+
+### Iteration 4 & 5
+
+Pop **E** (no neighbors).
+Pop **D** (no neighbors).
+
+**Final Sorted List:** `[A, B, C, E, D]`
+*(Note: "Shirt, Pants, Tie, Belt, Jacket" is a valid order to get dressed!)*
+
+---
+
+## 4. Code Implementation
+
+Here is the logic in Python and JavaScript.
+
+### Python
+
+```python
+from collections import deque
+
+def topological_sort(num_nodes, edges):
+    # 1. Initialize Graph and Indegrees
+    graph = {i: [] for i in range(num_nodes)}
+    indegree = {i: 0 for i in range(num_nodes)}
+    
+    # 2. Build the graph
+    for src, dest in edges:
+        graph[src].append(dest)
+        indegree[dest] += 1
+        
+    # 3. Add 0-indegree nodes to queue
+    queue = deque()
+    for node in range(num_nodes):
+        if indegree[node] == 0:
+            queue.append(node)
+            
+    sorted_order = []
+    
+    # 4. Process Queue
+    while queue:
+        current = queue.popleft()
+        sorted_order.append(current)
+        
+        # Reduce indegree of neighbors
+        for neighbor in graph[current]:
+            indegree[neighbor] -= 1
+            if indegree[neighbor] == 0:
+                queue.append(neighbor)
+                
+    # Check for cycles (if sorted_order length < num_nodes)
+    if len(sorted_order) != num_nodes:
+        return [] # Cycle detected!
+        
+    return sorted_order
+
+# Example Usage
+# 0: Shirt, 1: Pants, 2: Tie, 3: Jacket, 4: Belt
+print(topological_sort(5, [[0, 2], [0, 3], [1, 4], [2, 3]]))
+
+```
+
+### JavaScript
+
+```javascript
+function topologicalSort(numNodes, edges) {
+    // 1. Initialize Graph and Indegrees
+    const graph = Array.from({ length: numNodes }, () => []);
+    const indegree = new Array(numNodes).fill(0);
+    
+    // 2. Build the graph
+    for (const [src, dest] of edges) {
+        graph[src].push(dest);
+        indegree[dest]++;
+    }
+    
+    // 3. Add 0-indegree nodes to queue
+    const queue = [];
+    for (let i = 0; i < numNodes; i++) {
+        if (indegree[i] === 0) queue.push(i);
+    }
+    
+    const sortedOrder = [];
+    
+    // 4. Process Queue
+    while (queue.length > 0) {
+        const current = queue.shift();
+        sortedOrder.push(current);
+        
+        for (const neighbor of graph[current]) {
+            indegree[neighbor]--;
+            if (indegree[neighbor] === 0) {
+                queue.push(neighbor);
+            }
+        }
+    }
+    
+    // Cycle check
+    return sortedOrder.length === numNodes ? sortedOrder : [];
+}
+
+```
+
+---
+
+## 5. Complexity Analysis
+
+We define:
+
+* **V** = Number of Vertices (Nodes/Tasks)
+* **E** = Number of Edges (Dependencies/Arrows)
+
+### Time Complexity: O(V + E)
+
+Why? We visit every node exactly once and we travel across every edge exactly once.
+
+```text
+  Cost
+   ^
+   |        [Processing Edges]
+   |        ############### (E operations)
+   |
+   | [Building Queue]
+   | ############## (V operations)
+   +------------------------------------->
+            Total Time
+
+```
+
+### Space Complexity: O(V + E)
+
+We need to store the graph (Adjacency List) and the indegree array.
+
+```text
+  Memory
+   ^
+   | [Adjacency List]
+   | ######################### (Stores V lists + E edges)
+   |
+   | [Indegree Array]
+   | ##### (Stores V counts)
+   |
+   | [Queue]
+   | ##### (At peak, stores roughly V nodes)
+   +------------------------------------->
+            Total Space
+
+```
+
+---
+
+## 6. LeetCode Application Strategy
+
+Use this thought process for problems like **LeetCode 207 (Course Schedule)** or **210 (Course Schedule II)**.
+
+**The "Is it Kahn's?" Checklist:**
+
+1. **Is there an order?** Does the problem ask for a "valid sequence," "prerequisites," or "scheduling"?
+2. **Is it directed?** Does A imply B, but B doesn't imply A?
+3. **Is cycle detection needed?** Does the problem imply failure if there's a loop (e.g., "return false if you can't finish all courses")?
+
+**Mental Framework:**
+Think of the graph as a **waterfall**.
+
+* Water flows from top (Indegree 0) to bottom.
+* Kahn's algorithm simply peels off the dry layer at the top, letting the water flow down to the next layer.
+* If you peel everything off and there are still nodes left but no "Indegree 0" nodes, you have a **pool (Cycle)** where water is stuck circling.
+
+---
+
+## 7. Comparison: Kahn's vs. DFS
+
+Both solve Topological Sort, but they feel different.
+
+| Feature | Kahn's Algorithm (BFS based) | DFS Approach |
+| --- | --- | --- |
+| **Method** | **Iterative**. Peels nodes one by one. | **Recursive**. Dives deep, adds to list as it backtracks. |
+| **Direction** | Builds the list naturally: `[First -> Last]` | Builds list in reverse: `[Last -> First]`, then reverses it. |
+| **Cycle Detection** | **Very Easy**. If `result_length < V`, there is a cycle. | **Tricky**. Requires a recursion stack tracker (`visiting` vs `visited` sets). |
+| **Intuition** | "Do what I can do *now*." | "Find the end, then work backwards." |
+
+
+# Trie Data Structure
+
+Here is a detailed guide to the Trie (pronounced "try" or "tree") data structure.
+
+### **1. The Problem: Why do we need a Trie?**
+
+Imagine you are building the "Autocomplete" feature for a search engine. You have a database of 1 million words.
+
+If a user types "ap", you want to instantly suggest: "apple", "apply", "appetite".
+
+**The Naive Approach (List of Strings):**
+If you store all words in a simple list or array, you have to loop through every single word to check if it starts with "ap".
+
+* Word 1: "banana" (No)
+* Word 2: "canary" (No)
+* ...
+* Word 500,000: "apple" (Yes!)
+
+This is too slow. If you have millions of words, the search lags.
+
+**The Solution (Trie):**
+A Trie organizes words by their *characters*. Instead of checking every word, you just follow the path:
+`a` -> `p` -> `p` ...
+
+It solves the problem of **efficient prefix matching**.
+
+---
+
+### **2. What is a Trie?**
+
+A Trie (often called a **Prefix Tree**) is a tree-based data structure used to store a dynamic set of strings.
+
+**Key Characteristics:**
+
+* **Nodes:** Each node represents a single character.
+* **Root:** The top node is empty.
+* **Edges:** Links connect characters to form words.
+* **End Marker:** We usually mark the end of a valid word (often with a boolean flag or a special node).
+
+---
+
+### **3. How It Works: A Visual Walkthrough**
+
+Let's build a Trie containing these three words: **"CAT"**, **"CAR"**, **"DO"**.
+
+#### **Step 1: The Empty Root**
+
+We start with just a root node.
+
+```text
+      (ROOT)
+
+```
+
+#### **Step 2: Insert "CAT"**
+
+We check if 'C' exists. No? Add it. Then 'A'. Then 'T'. Mark 'T' as the end of a word (*).
+
+```text
+      (ROOT)
+        |
+       [C]
+        |
+       [A]
+        |
+       [T]* <-- "CAT" ends here
+
+```
+
+#### **Step 3: Insert "CAR"**
+
+Start at Root.
+
+* Do we have 'C'? Yes. Move there.
+* Do we have 'A'? Yes. Move there.
+* Do we have 'R'? No. Add it. Mark 'R' as end (*).
+
+```text
+      (ROOT)
+        |
+       [C]
+        |
+       [A]
+      /   \
+    [T]* [R]*
+   (CAT)  (CAR)
+
+```
+
+*Notice how "CAT" and "CAR" share the path "C-A". This saves space!*
+
+#### **Step 4: Insert "DO"**
+
+Start at Root.
+
+* Do we have 'D'? No. Add it (new branch).
+* Add 'O'. Mark as end (*).
+
+```text
+          (ROOT)
+         /      \
+       [C]      [D]
+        |        |
+       [A]      [O]*
+      /   \      ^-- "DO" ends here
+    [T]* [R]*
+
+```
+
+---
+
+### **4. Time and Space Complexity**
+
+Let's look at the costs using `L` as the length of the word you are searching/inserting, and `N` as the total number of words.
+
+| Operation | Time Complexity | Explanation |
+| --- | --- | --- |
+| **Insertion** | **O(L)** | You strictly process each character of the word once. |
+| **Search** | **O(L)** | You only traverse the length of the word. Even if the DB has 10 million words, searching for "cat" only takes 3 steps! |
+| **Space** | **Variable** | In the worst case, it can be large, but it saves space when many words share prefixes (like "tele-" in telephone, telegraph, television). |
+
+**Visualization of Efficiency:**
+
+```text
+Searching for "ZOO" in a List of 1 Million Words:
+[Apple, Banana, ... ... ... ... Zoo]
+check, check, ... ... ... ... found
+Steps: 1,000,000 (O(N))
+
+Searching for "ZOO" in a Trie:
+(Root) -> [Z] -> [O] -> [O]
+Steps: 3 (O(L))
+
+```
+
+---
+
+### **5. Code Implementation**
+
+Here is how you build a Trie in Python and JavaScript.
+
+#### **Python Implementation**
+
+```python
+class TrieNode:
+    def __init__(self):
+        # Dictionary to store children nodes
+        # Key: Character, Value: TrieNode
+        self.children = {}
+        # Flag to mark if a word ends at this node
+        self.is_end_of_word = False
+
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
+
+    def insert(self, word):
+        node = self.root
+        for char in word:
+            # If char not in children, create new node
+            if char not in node.children:
+                node.children[char] = TrieNode()
+            # Move to the child node
+            node = node.children[char]
+        # After loop, mark the current node as end of word
+        node.is_end_of_word = True
+
+    def search(self, word):
+        node = self.root
+        for char in word:
+            if char not in node.children:
+                return False # Path doesn't exist
+            node = node.children[char]
+        # Return True only if we are at the marked end of a word
+        return node.is_end_of_word
+
+    def starts_with(self, prefix):
+        node = self.root
+        for char in prefix:
+            if char not in node.children:
+                return False
+            node = node.children[char]
+        return True
+
+# Example Usage
+trie = Trie()
+trie.insert("apple")
+print(trie.search("apple"))   # True
+print(trie.search("app"))     # False (word not finished)
+print(trie.starts_with("app")) # True (prefix exists)
+
+```
+
+#### **JavaScript Implementation**
+
+```javascript
+class TrieNode {
+    constructor() {
+        this.children = {};
+        this.isEndOfWord = false;
+    }
+}
+
+class Trie {
+    constructor() {
+        this.root = new TrieNode();
+    }
+
+    insert(word) {
+        let node = this.root;
+        for (let char of word) {
+            if (!node.children[char]) {
+                node.children[char] = new TrieNode();
+            }
+            node = node.children[char];
+        }
+        node.isEndOfWord = true;
+    }
+
+    search(word) {
+        let node = this.root;
+        for (let char of word) {
+            if (!node.children[char]) {
+                return false;
+            }
+            node = node.children[char];
+        }
+        return node.isEndOfWord;
+    }
+
+    startsWith(prefix) {
+        let node = this.root;
+        for (let char of prefix) {
+            if (!node.children[char]) {
+                return false;
+            }
+            node = node.children[char];
+        }
+        return true;
+    }
+}
+
+```
+
+---
+
+### **6. Applied Learning: LeetCode Strategy**
+
+A classic problem to apply this to is **Word Search II** (Find all words from a dictionary in a 2D board of characters).
+
+**The "Aha!" Moment:**
+If you try to search for every single word in the dictionary separately on the board, it takes forever.
+Instead, put all dictionary words into a **Trie**.
+
+**How to think about it:**
+
+1. **Preprocessing:** Build the Trie from the list of words.
+2. **Traversal:** Walk through the 2D grid (using DFS/Backtracking).
+3. **Synchronization:** As you move on the grid (e.g., you step on 'A', then 'P'), move the pointer in the Trie simultaneously.
+4. **Pruning:** If the Trie pointer says "No word starts with 'QZ'", stop searching that path on the grid immediately!
+
+**Conceptual Diagram for Grid Search:**
+
+```text
+Grid:         Trie Path Check:
+[ C ][ A ]    Start at 'C' -> Exists in Trie? Yes.
+[ T ][ R ]    Move to 'A'  -> Exists in Trie? Yes.
+              Move to 'T'  -> Exists in Trie? Yes. End of word? Yes! Found "CAT".
+              Backtrack to 'A'.
+              Move to 'R'  -> Exists in Trie? Yes. End of word? Yes! Found "CAR".
+
+```
+
+---
+
+### **7. Comparison with Other Algorithms**
+
+| Feature | Trie | Hash Map (HashTable) |
+| --- | --- | --- |
+| **Search Time** | O(L) - Fast and consistent | O(L) - Theoretically fast, but collisions can slow it down. |
+| **Prefix Search** | **Excellent** (Designed for this) | **Poor** (Must scan all keys or convert to list) |
+| **Memory Usage** | Efficient if many words share prefixes. Expensive if words are very unique (lots of pointers). | Efficient, but stores full strings repeatedly. |
+| **Ordering** | Can print words in alphabetical order easily. | Unordered. |
