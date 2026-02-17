@@ -1,452 +1,493 @@
 # Algorithms for graph problems
 
-# Depth-First Search (DFS)
+# Depth-First Search 
 
-Here is a comprehensive guide to the Depth-First Search (DFS) algorithm, designed to be visual and easy to grasp without using complex mathematical notation.
+Here is a detailed, step-by-step guide to the Depth First Search (DFS) algorithm, designed to be easy to visualize and understand without complex mathematical notation.
 
-### **What is Depth-First Search (DFS)?**
+### Part 1: What is DFS and Why Do We Need It?
 
-Imagine you are in a massive maze. You want to find the exit. You stand at a fork in the road.
+**What it is:**
+Depth First Search (DFS) is an algorithm for traversing or searching tree or graph data structures. Think of it like walking through a maze. When you hit a fork in the road, you choose one path and follow it **as deep as possible** until you hit a dead end. Only then do you backtrack to the last fork and try the next path.
 
-* **Strategy A:** You look down the left path, then the right path, just peeking a few steps in. (This is Breadth-First Search).
-* **Strategy B (DFS):** You pick the left path and keep walking. If you hit another fork, you pick left again. You keep going until you hit a dead end. Only then do you retrace your steps (backtrack) to the last fork and try the right path.
+**Why we need it:**
 
-**Depth-First Search** is Strategy B. It explores as far as possible along each branch before backtracking. It is an algorithm used to traverse or search tree and graph data structures.
-
----
-
-### **Why Do We Need It?**
-
-DFS is fundamental for solving problems where you need to visit every location or find a specific path. Common uses include:
-
-1. **Solving Puzzles:** Mazes, Sudoku, and crosswords (finding a solution by trying one path until it fails).
-2. **Finding Connected Components:** Checking if every computer in a network is connected to every other computer.
-3. **Pathfinding:** "Is there a path from Point A to Point B?" (Not necessarily the shortest one, but *a* path).
-4. **Cycle Detection:** Checking if a series of dependencies loops back on itself (like A depends on B, B depends on C, and C depends on A).
+* **Pathfinding:** It is great for finding *a* path (not necessarily the shortest) between two points.
+* **Topological Sorting:** Used in scheduling tasks (e.g., determining which library to compile first).
+* **Solving Puzzles:** Sudoku or mazes, where you need to exhaust one possibility before trying another.
+* **Detecting Cycles:** Checking if a graph has a loop (A connects to B, B connects to A).
 
 ---
 
-### **Visual Walkthrough: How It Works**
+### Part 2: Visual Walkthrough (How it Works)
 
-Let's trace a DFS on a simple graph.
+To understand DFS, we use a data structure called a **Stack** (Last-In, First-Out). This can be done explicitly with a list or implicitly using recursion.
 
 **The Rules:**
 
-1. Visit a node.
-2. Mark it as "Visited" (so you don't go in circles).
-3. Go to an unvisited neighbor and repeat.
-4. If stuck (no unvisited neighbors), **Backtrack** (return to the previous node).
+1. Start at a node. Mark it as **Visited**.
+2. Move to an adjacent unvisited neighbor.
+3. If you reach a node with no unvisited neighbors (a "dead end"), **Backtrack** to the previous node.
+4. Repeat until all nodes are visited.
+
+**The Example Graph:**
+
+```text
+      A
+     / \
+    B   C
+   / \
+  D   E
+
+```
+
+**Step-by-Step Execution:**
+
+**Step 1: Start at A**
+We begin at the root. We mark 'A' as visited and look at its neighbors (B, C). By convention, we'll go left first.
+
+```text
+GRAPH STATE:           TRACKER:
+      A [CURRENT]      Visited List: [A]
+     / \               Stack (Path): [A]
+    B   C
+   / \
+  D   E
+
+```
+
+**Step 2: Dive Deeper to B**
+From A, we move to B. We ignore C for now (we will come back to it later).
+
+```text
+      A
+     / \
+    B [CURRENT]        Visited List: [A, B]
+   / \                 Stack (Path): [A, B]
+  D   E
+
+```
+
+**Step 3: Dive Deeper to D**
+From B, we move to neighbors D and E. Let's pick D.
+
+```text
+      A
+     / \
+    B   C
+   / \
+  D [CURRENT]          Visited List: [A, B, D]
+      E                Stack (Path): [A, B, D]
+
+```
+
+**Step 4: Dead End at D (Backtrack)**
+D has no neighbors (or no unvisited ones). We cannot go deeper. We pop D off the stack and go back up to B to see if it has other options.
+
+```text
+      A
+     / \
+    B [CURRENT]        Visited List: [A, B, D]
+   / \                 Stack (Path): [A, B]  <-- D removed
+  D   E
+
+```
+
+**Step 5: Visit B's other neighbor (E)**
+Back at B, we see D is done, but E is still unvisited. We move to E.
+
+```text
+      A
+     / \
+    B   C
+   / \
+  D   E [CURRENT]      Visited List: [A, B, D, E]
+                       Stack (Path): [A, B, E]
+
+```
+
+**Step 6: Dead End at E (Backtrack)**
+E is a leaf node (dead end). We backtrack to B.
+
+```text
+      A
+     / \
+    B [CURRENT]        Visited List: [A, B, D, E]
+   / \                 Stack (Path): [A, B] <-- E removed
+  D   E
+
+```
+
+**Step 7: Backtrack to A**
+We are back at B. B has no more unvisited neighbors (D and E are done). So we backtrack to A.
+
+```text
+      A [CURRENT]      Visited List: [A, B, D, E]
+     / \               Stack (Path): [A]    <-- B removed
+    B   C
+   / \
+  D   E
+
+```
+
+**Step 8: Visit A's other neighbor (C)**
+Back at A, we see B is done. We move to C.
+
+```text
+      A
+     / \
+    B   C [CURRENT]    Visited List: [A, B, D, E, C]
+   / \                 Stack (Path): [A, C]
+  D   E
+
+```
+
+**Step 9: Finish**
+C is a dead end. Backtrack to A. A has no more neighbors. The stack is empty. We are done.
+
+---
+
+### Part 3: Code Implementation
+
+Here is how you write this algorithm in Python and JavaScript. This uses the **Recursive** approach, which is the most common and "cleanest" way to write DFS.
+
+**Python**
+
+```python
+def dfs(graph, node, visited):
+    # 1. Mark current node as visited
+    if node not in visited:
+        print(node)
+        visited.add(node)
+        
+        # 2. Iterate through all neighbors
+        for neighbor in graph[node]:
+            # 3. Recursively call DFS
+            dfs(graph, neighbor, visited)
+
+# Graph represented as an Adjacency List (Dictionary)
+graph = {
+    'A': ['B', 'C'],
+    'B': ['D', 'E'],
+    'C': [],
+    'D': [],
+    'E': []
+}
+
+visited_set = set()
+dfs(graph, 'A', visited_set)
+
+```
+
+**JavaScript**
+
+```javascript
+function dfs(graph, node, visited) {
+    // 1. Mark current node as visited
+    if (!visited.has(node)) {
+        console.log(node);
+        visited.add(node);
+
+        // 2. Iterate through all neighbors
+        const neighbors = graph[node];
+        for (let neighbor of neighbors) {
+            // 3. Recursively call DFS
+            dfs(graph, neighbor, visited);
+        }
+    }
+}
+
+// Graph represented as an Object (Adjacency List)
+const graph = {
+    'A': ['B', 'C'],
+    'B': ['D', 'E'],
+    'C': [],
+    'D': [],
+    'E': []
+};
+
+const visitedSet = new Set();
+dfs(graph, 'A', visitedSet);
+
+```
+
+---
+
+### Part 4: Analysis & Application
+
+#### Complexity Analysis
+
+We use **V** for Vertices (nodes) and **E** for Edges (connections).
+
+**Time Complexity: O(V + E)**
+
+* **Why?** In the worst case, we visit every node (V) exactly once and cross every connection (E) once.
+* **Diagram:**
+```text
+Processing Nodes (V)  +  Scanning Connections (E)
+[ A, B, C, D, E ]     +  [ A-B, A-C, B-D, B-E ]
+
+```
+
+
+
+**Space Complexity: O(V)**
+
+* **Why?** In the worst case (a long straight line graph), the recursion stack (or memory stack) will hold all vertices at once before backtracking.
+* **Diagram:**
+```text
+Worst Case Stack (Linear Graph):
+A -> B -> C -> D -> E
+Stack: [A, B, C, D, E]  <-- Takes O(V) space
+
+```
+
+
+
+#### How to use DFS on LeetCode
+
+When you see a new problem, ask yourself: *"Does this problem require me to explore every possible path to find a solution?"* or *"Do I need to find connected components (like islands)?"*
+
+**Strategy: "The Island Thinking"**
+Imagine a grid of numbers where 1 is land and 0 is water. To count the number of islands, you land on a '1', then run DFS to mark all connected '1's as visited (sinking the island) so you don't count them again.
+
+**LeetCode Keywords indicating DFS:**
+
+1. "Find all paths..."
+2. "Calculate the depth..."
+3. "Number of islands..."
+4. "Connected components..."
+
+#### DFS vs. BFS (Breadth First Search)
+
+| Feature | DFS (Depth First) | BFS (Breadth First) |
+| --- | --- | --- |
+| **Strategy** | Plunge deep, then backtrack. | Explore neighbors level by level (ripples in a pond). |
+| **Data Structure** | Stack (Recursion). | Queue (First-In, First-Out). |
+| **Best For** | Mazes, Puzzles, Path existence. | Finding the **Shortest Path** (GPS). |
+| **Memory** | Lower memory on wide trees. | Higher memory (stores all neighbors at once). |
+
+# Breadth-First Search 
+
+Here is a detailed guide to the Breadth First Search (BFS) algorithm, designed to be easy to visualize and understand without complex mathematical notation.
+
+### What is Breadth First Search (BFS)?
+
+Breadth First Search (BFS) is a fundamental graph traversal algorithm. Imagine dropping a stone into a calm pond. The ripples move outward in perfect circles, hitting everything close to the center first, then moving further out.
+
+BFS works exactly like those ripples. It starts at a specific node (the "root") and explores all its immediate neighbors first (Layer 1) before moving to the neighbors' neighbors (Layer 2).
+
+**Why do we need it?**
+
+1. **Shortest Path:** In an unweighted graph (where every edge has the same "cost"), BFS guarantees finding the shortest path from the start to the target.
+2. **Level-Order Traversal:** If you need to process data in layers (e.g., organizational hierarchy, networking hops), BFS is the tool.
+3. **Connected Components:** It helps find all items connected to a specific starting point.
+
+---
+
+### How It Works: The "Queue" Strategy
+
+BFS relies on a data structure called a **Queue**. A Queue is **FIFO** (First In, First Out)—like a line of people waiting for a bus. The first person in line is the first one to board.
+
+**The Rules:**
+
+1. **Enqueue (Add):** Add a node to the back of the line.
+2. **Dequeue (Remove):** Remove a node from the front of the line to process it.
+3. **Mark Visited:** Keep a list of nodes you have already seen so you don't process them twice (preventing infinite loops).
+
+---
+
+### Step-by-Step Visual Walkthrough
+
+Let's use a simple graph. We want to traverse every node starting from **A**.
 
 **The Graph:**
 
 ```text
-      (A)
-     /   \
-   (B)   (C)
-   / \     \
- (D) (E)   (F)
+      A
+     / \
+    B   C
+    |   |
+    D   E
 
 ```
 
-**Step 1:** Start at **A**. Mark A as visited.
+* **A** connects to **B** and **C**.
+* **B** connects to **D**.
+* **C** connects to **E**.
 
-* *Current Node:* A
-* *Stack (History):* [A]
+#### Step 1: Initialization
 
-```text
-      [A]  <-- Current
-     /   \
-   (B)   (C)
-
-```
-
-**Step 2:** A has neighbors B and C. Let's pick **B** (convention usually goes left first).
-
-* *Current Node:* B
-* *Stack (History):* [A, B]
+We start at **A**. We look at it, mark it as "Visited," and add it to our Queue.
 
 ```text
-      (A)
-     /
-   [B]  <-- Current (Go Deep!)
+Status: Start at A
+
+QUEUE: [ A ]
+VISITED: { A }
+
+   (A)  <-- In Queue
    / \
- (D) (E)
+  B   C
+  |   |
+  D   E
 
 ```
 
-**Step 3:** B has neighbors D and E. We pick **D**.
+#### Step 2: Process A
 
-* *Current Node:* D
-* *Stack (History):* [A, B, D]
-
-```text
-      (A)
-     /
-   (B)
-   /
- [D]  <-- Current
-
-```
-
-**Step 4:** D has no neighbors (Dead End!). We **Backtrack** by popping D off the stack and returning to B.
-
-* *Current Node:* B
-* *Stack (History):* [A, B]
+We take **A** out of the Queue (dequeue). We look at A's neighbors: **B** and **C**. They haven't been visited, so we add them to the Queue and mark them visited.
 
 ```text
-      (A)
-     /
-   [B]  <-- Back at B. Any other paths? Yes, (E).
+Status: Dequeued A. Found neighbors B, C.
+
+QUEUE: [ B, C ]   <-- A is gone, neighbors added
+VISITED: { A, B, C }
+
+    A   <-- Processed
    / \
- (D) (E)
-  ^
-(Visited)
+ (B) (C) <-- In Queue
+  |   |
+  D   E
 
 ```
 
-**Step 5:** From B, we visit the remaining neighbor **E**.
+#### Step 3: Process B
 
-* *Current Node:* E
-* *Stack (History):* [A, B, E]
+The next item in line is **B**. We dequeue **B**. We look at B's neighbor: **D**. D is not visited, so we add D to the Queue.
 
 ```text
-      (A)
-     /
-   (B)
-     \
-     [E] <-- Current
+Status: Dequeued B. Found neighbor D.
+
+QUEUE: [ C, D ]   <-- C was waiting, D joined back of line
+VISITED: { A, B, C, D }
+
+    A
+   / \
+  B  (C) <-- Next to be processed
+  |   |
+ (D)  E  <-- Just added
 
 ```
 
-**Step 6:** E is a dead end. Backtrack to B. B has no more unvisited neighbors. Backtrack to A.
+#### Step 4: Process C
 
-* *Current Node:* A
-* *Stack (History):* [A]
+The next item in line is **C**. We dequeue **C**. We look at C's neighbor: **E**. E is not visited, so we add E to the Queue.
 
 ```text
-      [A] <-- Back at A. Any other paths? Yes, (C).
-     /   \
-   (B)   (C)
-(All visited)
+Status: Dequeued C. Found neighbor E.
+
+QUEUE: [ D, E ]
+VISITED: { A, B, C, D, E }
+
+    A
+   / \
+  B   C
+  |   |
+ (D) (E) <-- Both in Queue
 
 ```
 
-**Step 7:** Visit **C**. Then Visit **F**.
+#### Step 5: Process D
 
-* Final Path Traveled: A -> B -> D -> E -> C -> F.
-
----
-
-### **Complexity Analysis**
-
-We measure algorithms by Time (how long it takes) and Space (how much memory it uses).
-
-#### **Time Complexity: O(V + E)**
-
-* **V** = Vertices (Nodes/Dots)
-* **E** = Edges (Lines/Connections)
-
-Why? Because in the worst case, you visit every Node once and travel across every Edge once.
+We dequeue **D**. D has no neighbors (or no unvisited neighbors). We do nothing but remove it.
 
 ```text
-Time Taken Visualization:
-|
-| (Visiting every dot) + (Checking every line)
-|
-| [ VVVVVVV ] + [ EEEEEEEEEE ]
-|__________________________________
-            Total Work
+Status: Dequeued D. No new neighbors.
+
+QUEUE: [ E ]
+VISITED: { A, B, C, D, E }
+
+    A
+   / \
+  B   C
+  |   |
+  D  (E) <-- Last one
 
 ```
 
-#### **Space Complexity: O(V)**
+#### Step 6: Process E
 
-Why? Because of the **Stack** (or Recursion). In the worst-case scenario (a long straight line), your recursion stack will hold all the vertices at once before it can backtrack.
+We dequeue **E**. No new neighbors. The Queue is now empty. We are done!
 
 ```text
-Space Used (The Stack) in Worst Case:
+Status: Queue Empty. Finished.
 
-Graph: A -- B -- C -- D -- E
-
-Memory Stack:
-| [E] | < Top
-| [D] |
-| [C] |
-| [B] |
-| [A] | < Bottom
-+-----+
-Width is small, Height = Number of Vertices (V)
-
-```
-
----
-
-### **Algorithm Code**
-
-Here is how you write it. The **Recursive** method is the most common and easiest to write for interviews.
-
-#### **Python (Recursive)**
-
-```python
-# Graph represented as a dictionary (Adjacency List)
-graph = {
-    'A': ['B', 'C'],
-    'B': ['D', 'E'],
-    'C': ['F'],
-    'D': [],
-    'E': [],
-    'F': []
-}
-
-visited = set() # To keep track of visited nodes
-
-def dfs_recursive(node):
-    # 1. Base Case: If already visited, stop.
-    if node in visited:
-        return
-    
-    # 2. Mark the current node as visited
-    print(f"Visiting: {node}")
-    visited.add(node)
-    
-    # 3. Explore neighbors
-    for neighbor in graph[node]:
-        dfs_recursive(neighbor)
-
-# Start the process
-print("DFS Path:")
-dfs_recursive('A')
-
-```
-
-#### **JavaScript (Recursive)**
-
-```javascript
-const graph = {
-    'A': ['B', 'C'],
-    'B': ['D', 'E'],
-    'C': ['F'],
-    'D': [],
-    'E': [],
-    'F': []
-};
-
-const visited = new Set();
-
-function dfsRecursive(node) {
-    // 1. If already visited, stop
-    if (visited.has(node)) {
-        return;
-    }
-
-    // 2. Mark and Process
-    console.log(`Visiting: ${node}`);
-    visited.add(node);
-
-    // 3. Explore neighbors
-    const neighbors = graph[node];
-    for (let neighbor of neighbors) {
-        dfsRecursive(neighbor);
-    }
-}
-
-console.log("DFS Path:");
-dfsRecursive('A');
-
-```
-
----
-
-### **Thinking in LeetCode: "The Flood Fill Strategy"**
-
-When you see a LeetCode problem involving a **Grid (Matrix)** or **Islands**, think DFS immediately.
-
-**Example Scenario:** "Number of Islands" (Given a grid of '1's (land) and '0's (water), count the islands).
-
-**Mental Model:**
-Imagine you are looking at a map. You drop a bucket of paint on a piece of land. The paint flows to all connected land but stops at water.
-
-1. **Iterate:** Loop through every cell in the grid.
-2. **Trigger:** If you see a "1" (Land) that hasn't been visited, increase your `IslandCount` by 1.
-3. **DFS (The Paint):** Immediately trigger DFS on that cell.
-* The DFS turns that cell into a "0" (or marks it visited).
-* It then looks Up, Down, Left, Right.
-* It moves to any neighbor that is a "1" and calls DFS on them.
-
-
-4. **Result:** When the DFS finishes, it has "erased" that entire island. The loop continues to find the next island.
-
-```text
-Grid before DFS:      Grid after DFS starts at (0,0):
-1 1 0 0               x x 0 0
-1 1 0 0      --->     x x 0 0
-0 0 1 0               0 0 1 0  (The 'x's are marked visited)
-
-```
-
----
-
-### **Comparison: DFS vs. BFS**
-
-| Feature | DFS (Depth-First) | BFS (Breadth-First) |
-| --- | --- | --- |
-| **Concept** | Maze Solver (boldly go forward) | Radar / Ripple (scan everywhere nearby) |
-| **Data Structure** | **Stack** (LIFO - Last In, First Out) | **Queue** (FIFO - First In, First Out) |
-| **Best For** | Puzzles, Connecting components | Finding the **Shortest Path** |
-| **Memory** | Good (O(h) where h is height) | Heavy (O(w) where w is width/widest part) |
-
-**Final Tip:** Use DFS when you need to search everything or just check for existence. Use BFS if you specifically need the *shortest* path in an unweighted graph.
-
-# Breadth-First Search (BFS)
-
-**Breadth-First Search (BFS)** is a fundamental graph traversal algorithm. Think of it like a ripple in a pond: it starts at a center point and expands outward in concentric circles, visiting everything close by before moving further away.
-
-### 1. The Problem It Solves
-
-BFS is primarily used for finding the **shortest path** in an unweighted graph (a graph where the distance between all connected nodes is equal).
-
-If you are looking for a key in a house, a random search might take you to the basement, then the attic, then the kitchen. BFS checks the room you are in, then the adjacent rooms, then the rooms adjacent to those. It guarantees that if a solution exists, you will find the one closest to the start.
-
-**Common scenarios:**
-
-* Finding the shortest route on a map (with equal road lengths).
-* Social networks: "Who are the friends of my friends?" (2nd degree connections).
-* Web crawlers: Analyzing links on a website level-by-level.
-
----
-
-### 2. What is BFS?
-
-BFS explores a graph **layer by layer**.
-
-1. Start at a chosen node (Level 0).
-2. Visit all immediate neighbors (Level 1).
-3. Visit all neighbors of those neighbors (Level 2).
-4. Repeat until all reachable nodes are visited.
-
-It uses a **Queue** data structure (First-In, First-Out) to keep track of which node to visit next.
-
----
-
-### 3. Visual Walkthrough
-
-Let's look at this simple graph:
-
-```text
-       [A]          <-- Start Node
-      /   \
-    [B]   [C]       <-- Neighbors of A
-      \     \
-      [D]   [E]     <-- Neighbors of B and C
-
-```
-
-**Step 1: Initialization**
-We start at `A`. We put `A` in the Queue and mark it as "Visited".
-
-```text
-Queue: [A]
-Visited: {A}
-
-```
-
-**Step 2: Processing A**
-We take `A` out of the queue. We look at its neighbors (`B` and `C`). We add them to the queue.
-
-```text
-Processing: A
-Queue: [B, C]     <-- B and C are added to the back
-Visited: {A, B, C}
-
-```
-
-**Step 3: Processing B**
-We take `B` out. We look at its neighbor (`D`). We add `D` to the queue.
-
-```text
-Processing: B
-Queue: [C, D]     <-- C was already there, D joins the back
-Visited: {A, B, C, D}
-
-```
-
-**Step 4: Processing C**
-We take `C` out. We look at its neighbor (`E`). We add `E` to the queue.
-
-```text
-Processing: C
-Queue: [D, E]
-Visited: {A, B, C, D, E}
-
-```
-
-**Step 5: Processing D & E**
-We take `D` out. It has no unvisited neighbors.
-We take `E` out. It has no unvisited neighbors.
-
-```text
-Queue: []
-Status: Done.
+QUEUE: [ ]
 Traversal Order: A -> B -> C -> D -> E
 
 ```
 
 ---
 
-### 4. Complexity Analysis
+### Complexity Analysis
 
-* **V**: Vertices (Nodes)
-* **E**: Edges (Connections)
+Here is the cost of running BFS, visualized.
 
 **Time Complexity: O(V + E)**
-We visit every node once `O(V)` and for every node, we check its connections `O(E)`. Since we process the whole graph, the time taken grows linearly with the size of the graph.
 
-**Space Complexity: O(V)**
-In the worst case, the Queue might have to store the majority of the nodes at once (imagine a "star" graph where the center node is connected to 1,000 other nodes; after processing the center, all 1,000 neighbors go into the queue).
+* **V** = Vertices (Nodes)
+* **E** = Edges (Connections)
+
+We visit every Node once, and we inspect every Connection once.
 
 ```text
-   Worst Case Space (Star Graph)
-         [Center]
-      /  /  |  \  \
-    [1][2] [3] [4][5]...
+| TIME COMPLEXITY VISUALIZED
+|
+|  Processing Nodes (V)  |  Checking Connections (E)
+|  [A] [B] [C] [D] [E]   |  A->B, A->C, B->D, C->E
+|           +            |             +
+|  ------------------------------------------------
+|           Total Work = V + E
 
-Queue becomes: [1, 2, 3, 4, 5...] (Huge width)
+```
+
+**Space Complexity: O(V)**
+In the worst case, we might have to hold many nodes in the Queue at once (for example, if A connected to 100 other nodes immediately).
+
+```text
+| SPACE COMPLEXITY VISUALIZED (Queue Size)
+|
+|  Worst Case: The graph is very "wide"
+|
+|  Queue: [ node1, node2, node3 ... nodeV ]
+|  
+|  Memory Usage scales with the width of the graph (up to V)
 
 ```
 
 ---
 
-### 5. Code Implementation
+### Algorithm Code
+
+Here is how you write this in code.
 
 #### Python
+
+Python uses `deque` (double-ended queue) because popping from the start of a standard list is slow.
 
 ```python
 from collections import deque
 
 def bfs(graph, start_node):
-    visited = set()
+    # 1. Initialize Queue and Visited Set
     queue = deque([start_node])
+    visited = set([start_node])
     
-    # Mark start as visited immediately
-    visited.add(start_node)
-    
-    result = []
+    print(f"Starting BFS from: {start_node}")
 
     while queue:
-        # Dequeue from the front (FIFO)
+        # 2. Dequeue the current node
         current_node = queue.popleft()
-        result.append(current_node)
+        print(f"Processing: {current_node}")
         
-        # Check all neighbors
+        # 3. Explore neighbors
         for neighbor in graph[current_node]:
             if neighbor not in visited:
                 visited.add(neighbor)
                 queue.append(neighbor)
-                
-    return result
 
-# Example Graph
-adj_list = {
+# Example Graph (Adjacency List)
+graph = {
     'A': ['B', 'C'],
     'B': ['D'],
     'C': ['E'],
@@ -454,26 +495,28 @@ adj_list = {
     'E': []
 }
 
-print(bfs(adj_list, 'A')) 
-# Output: ['A', 'B', 'C', 'D', 'E']
+bfs(graph, 'A')
 
 ```
 
 #### JavaScript
 
+In JavaScript, we can use a standard Array. `.shift()` removes from the front, `.push()` adds to the back.
+
 ```javascript
 function bfs(graph, startNode) {
-    let visited = new Set();
+    // 1. Initialize Queue and Visited Set
     let queue = [startNode];
-    visited.add(startNode);
+    let visited = new Set([startNode]);
     
-    let result = [];
+    console.log("Starting BFS from:", startNode);
 
     while (queue.length > 0) {
-        // Dequeue from front
-        let currentNode = queue.shift(); 
-        result.push(currentNode);
+        // 2. Dequeue the current node
+        let currentNode = queue.shift();
+        console.log("Processing:", currentNode);
 
+        // 3. Explore neighbors
         let neighbors = graph[currentNode];
         for (let neighbor of neighbors) {
             if (!visited.has(neighbor)) {
@@ -482,10 +525,10 @@ function bfs(graph, startNode) {
             }
         }
     }
-    return result;
 }
 
-const adjList = {
+// Example Graph
+const graph = {
     'A': ['B', 'C'],
     'B': ['D'],
     'C': ['E'],
@@ -493,252 +536,1679 @@ const adjList = {
     'E': []
 };
 
-console.log(bfs(adjList, 'A'));
-// Output: ['A', 'B', 'C', 'D', 'E']
+bfs(graph, 'A');
 
 ```
 
 ---
 
-### 6. LeetCode Mental Model
+### LeetCode Strategy: How to use BFS
 
-When solving problems, look for these triggers to use BFS:
+**Target Problem:** *Rotting Oranges* or *Shortest Path in Binary Matrix*.
 
-1. **"Shortest Path" / "Minimum Steps":** If the problem asks for the minimum number of steps to convert X to Y (e.g., Word Ladder), use BFS.
-2. **"Level Order":** Anything requiring you to process a tree row-by-row.
-3. **"Rotting Oranges" / "Virus Spread":** Problems where a state spreads to neighbors simultaneously each turn.
+**The Mental Model:**
+When you read a problem, look for these keywords:
 
-**Strategy for "Grid" Problems (Islands, Mazes):**
-Instead of an adjacency list, your "neighbors" are just the cells `(row+1, col)`, `(row-1, col)`, `(row, col+1)`, and `(row, col-1)`.
+1. **"Shortest path"** or **"Minimum steps"**
+2. **"Nearest X"**
+3. **"Level order"**
 
-```text
-Grid Navigation Visual:
-[ ][ ][ ]
-[ ][X][ ]  <- X is current
-[ ][ ][ ]
+**How to approach a grid problem (like a maze):**
+Think of the grid cells as Nodes and the Up/Down/Left/Right movements as Edges.
 
-Neighbors are Up, Down, Left, Right.
-Check bounds (don't go off grid) and check visited set.
+1. **Start:** Put your starting cell `(row, col)` into the Queue.
+2. **Track:** Create a `distance` matrix or map to keep track of how far you have traveled.
+3. **Loop:** While the Queue isn't empty, pop a cell, look at its 4 neighbors. If a neighbor is valid (not a wall) and unvisited, add it to the Queue and increase the distance count by +1.
 
-```
+### Comparison: BFS vs. DFS
 
----
-
-### 7. Comparison with Other Algorithms
-
-| Feature | **BFS (Breadth-First)** | **DFS (Depth-First)** |
+| Feature | BFS (Breadth First) | DFS (Depth First) |
 | --- | --- | --- |
 | **Data Structure** | Queue (FIFO) | Stack (LIFO) or Recursion |
-| **Visual Style** | Expands in a circle (Wave) | Snakes deep into one path |
-| **Shortest Path?** | **Yes** (Guaranteed for unweighted) | **No** (Might take a long detour) |
-| **Memory** | High (Stores width of "wave") | Low (Stores length of path) |
-| **Best For** | Finding closest target | Mazes, Puzzles requiring all solutions |
+| **Movement** | Layer by layer (Wide) | Deep into one path (Deep) |
+| **Best for...** | Shortest path in unweighted graphs | Maze solving, game simulations |
+| **Memory** | High (stores a whole layer) | Low (stores just one active path) |
+| **Visual** | Ripples in a pond | A snake going into a tunnel |
 
-**Analogy:**
+# Topological Sort: Kahn's Algorithm
 
-* **BFS:** Scanning a crowd of people by looking at everyone in the front row, then everyone in the second row.
-* **DFS:** Walking up to one person, asking who they know, walking to that person, asking who *they* know, until you hit a dead end.
+### What is Topological Sort and Why Do We Need It?
 
-# Multi-Source Breadth First Search (Multi-Source BFS)
+Topological Sort is a linear ordering of vertices (nodes) in a directed graph such that for every directed edge from vertex A to vertex B, vertex A comes before vertex B in the ordering.
 
-## Multi-Source Breadth-First Search (BFS)
+**Key Requirement:** It only works on **DAGs** (Directed Acyclic Graphs). If the graph has a cycle (e.g., A -> B -> A), you cannot topologically sort it because there is no clear start or end.
 
-### 1. The Problem: Why Do We Need It?
+**Why we need it (The Problem it Solves):**
+Imagine you are baking a cake or compiling code. You cannot bake the cake before mixing the batter, and you cannot mix the batter before buying eggs. Topological sort solves dependency problems.
 
-Imagine you drop a single stone into a calm pond. Ripples expand outward from that one point. This is **Standard BFS**. It tells you the shortest distance from *one* starting point to anywhere else.
-
-Now, imagine you drop **three** stones into the pond at the exact same time at different locations. Ripples expand from *all three* points simultaneously. If you want to know how soon a ripple reaches a specific leaf floating on the water, you care about the ripple that gets there *first*.
-
-**The Problem:** You have a graph (or grid) and a set of "source" nodes. You need to find the shortest distance from *any* source node to every other node in the graph.
-
-If you ran a Standard BFS from Source A, then another from Source B, and another from Source C, and then compared the results, it would be incredibly slow and inefficient. **Multi-Source BFS** solves this in a single pass.
+* **Task Scheduling:** "Task B depends on Task A."
+* **Build Systems:** "Library X needs Library Y to be built first."
+* **Course Prerequisites:** "You must take Math 101 before Math 102."
 
 ---
 
-### 2. What Is It?
+### How Kahn's Algorithm Works
 
-Multi-Source BFS is a slight modification of the standard BFS algorithm.
+Kahn's Algorithm uses the concept of **"In-Degree"**.
 
-* **Standard BFS:** Initialize the Queue with **one** starting node with distance 0.
-* **Multi-Source BFS:** Initialize the Queue with **all** starting nodes with distance 0 simultaneously.
+* **In-Degree:** The number of edges coming *into* a node.
+* **The Logic:** If a node has an In-Degree of 0, it has no dependencies (or all its dependencies are already met). It is safe to process this node.
 
-Functionally, you can imagine a "fake" invisible node (a Super Source) connected to all your actual starting nodes with an edge weight of 0. You run standard BFS from this Super Source.
+**The Algorithm in Plain English:**
+
+1. Calculate the In-Degree for every node.
+2. Put all nodes with **In-Degree 0** into a Queue.
+3. While the Queue is not empty:
+* Remove a node from the Queue and add it to the Sorted List.
+* "Remove" that node from the graph (virtually) by looking at its neighbors and decreasing their In-Degree by 1.
+* If a neighbor's In-Degree drops to 0, add it to the Queue.
+
+
 
 ---
 
-### 3. Visual Walkthrough
+### Visual Walkthrough
 
-Let's visualize a **virus spreading** on a grid.
+We will sort this simple dependency graph.
 
-* `S` = Source (Infected)
-* `.` = Empty (Uninfected)
-* `X` = Wall (Blockage)
+**The Graph:**
 
-**The Grid:**
+* Node **A** points to **B** and **C**.
+* Node **B** points to **D**.
+* Node **C** points to **D**.
+
+**Edges:** `A -> B`, `A -> C`, `B -> D`, `C -> D`
 
 ```text
-(0,0) (0,1) (0,2) (0,3)
-  S     .     S     .
-  .     .     .     .
-  .     X     .     .
+      [A]
+     /   \
+   [B]   [C]
+     \   /
+      [D]
 
 ```
 
-**Step 0: Initialization**
-We identify all `S` nodes. We add them to our Queue. We set their distance to 0. All other nodes are "unvisited" (infinity).
+#### Step 0: Initialization
 
-* **Queue:** `[(0,0), (0,2)]`
-* **Visited/Distance Map:**
+We calculate the In-Degree for all nodes.
+
+* A: 0 (No arrows pointing in)
+* B: 1 (Arrow from A)
+* C: 1 (Arrow from A)
+* D: 2 (Arrows from B and C)
+
+Since **A** has 0 in-degree, it goes into the Queue.
+
 ```text
-0   inf   0   inf
-inf inf   inf inf
-inf inf   inf inf
+STATUS: Start
+-------------------------------------------------
+Graph State (In-Degrees shown in parens):
+      [A](0)
+     /      \
+   [B](1)   [C](1)
+     \      /
+      [D](2)
+
+Queue:       [ A ]
+Sorted List: []
+-------------------------------------------------
 
 ```
 
+#### Step 1: Process Node A
 
+We pop **A** from the Queue and add it to the Sorted List.
+We look at A's neighbors (**B** and **C**) and decrease their in-degrees by 1.
 
-**Step 1: Process Distance 0 Nodes**
-We pop `(0,0)` and `(0,2)` one by one. We look at their neighbors (Up, Down, Left, Right). If a neighbor is valid and not visited, we infect it (set distance to 1) and add it to the queue.
+* B becomes 0.
+* C becomes 0.
+Both B and C are now ready, so we add them to the Queue.
 
-* Pop `(0,0)`: Neighbors are `(0,1)` and `(1,0)`.
-* Pop `(0,2)`: Neighbors are `(0,1)` (already seen via 0,0? No, let's say we process 0,0 first, so 0,1 gets dist 1), `(0,3)`, `(1,2)`.
-* **Queue:** `[(0,1), (1,0), (0,3), (1,2)]` (These are the "1"s)
-* **Grid State (Current Distances):**
 ```text
-0     1     0     1
-1     inf   1     inf
-inf   X     inf   inf
+STATUS: Processing A
+-------------------------------------------------
+      (Processed)
+          |
+         [A] -- removed dependency --> [B](0)  (Added to Queue)
+          |
+          +--- removed dependency --> [C](0)  (Added to Queue)
+
+      [D](2)  (Unchanged)
+
+Queue:       [ B, C ]
+Sorted List: [ A ]
+-------------------------------------------------
 
 ```
 
+#### Step 2: Process Node B
 
+We pop **B** from the Queue.
+We look at B's neighbor (**D**) and decrease its in-degree by 1.
 
-**Step 2: Process Distance 1 Nodes**
-The "ripples" expand again. We process the nodes currently in the queue. Their unvisited neighbors become distance 2.
+* D was 2, now becomes 1.
+D is not 0 yet, so we do *not* add it to the Queue.
 
-* Pop `(0,1)`: Neighbors `(1,1)` becomes 2.
-* Pop `(1,0)`: Neighbor `(2,0)` becomes 2.
-* Pop `(0,3)`: Neighbor `(1,3)` becomes 2.
-* Pop `(1,2)`: Neighbors `(1,1)` (already visited), `(1,3)` (already visited), `(2,2)` becomes 2.
-* **Queue:** `[(1,1), (2,0), (1,3), (2,2)]`
-* **Grid State:**
 ```text
-0     1     0     1
-1     2     1     2
-2     X     2     inf
+STATUS: Processing B
+-------------------------------------------------
+      (Processed)
+          |
+         [A]
+        /   \
+(Processed) [C](0)  (Waiting in Queue)
+   [B]
+     \
+      +--- removed dependency --> [D](1)
+
+Queue:       [ C ]
+Sorted List: [ A, B ]
+-------------------------------------------------
 
 ```
 
+#### Step 3: Process Node C
 
+We pop **C** from the Queue.
+We look at C's neighbor (**D**) and decrease its in-degree by 1.
 
-**Step 3: Process Distance 2 Nodes**
-Final expansion.
+* D was 1, now becomes 0.
+D is now ready! Add D to the Queue.
 
-* Pop `(1,1)`: Neighbors `(1,0)` (visited), `(1,2)` (visited), `(0,1)` (visited), `(2,1)` (It's a wall 'X', ignore).
-* ...
-* Pop `(2,2)`: Neighbor `(2,3)` becomes 3.
-* **Final Grid:**
 ```text
-0     1     0     1
-1     2     1     2
-2     X     2     3
+STATUS: Processing C
+-------------------------------------------------
+      (Processed)
+          |
+         [A]
+        /   \
+(Processed) (Processed)
+   [B]       [C]
+     \       /
+      \     +--- removed dependency --> [D](0) (Added to Queue)
+       \
+        (from B, already handled)
+
+Queue:       [ D ]
+Sorted List: [ A, B, C ]
+-------------------------------------------------
 
 ```
 
+#### Step 4: Process Node D
 
+We pop **D** from the Queue.
+D has no outgoing edges, so we stop there.
 
-This tells us exactly how many steps it takes for the virus to reach any cell, regardless of which source it came from.
+```text
+STATUS: Processing D
+-------------------------------------------------
+      (Processed)
+          |
+         [A]
+        /   \
+(Processed) (Processed)
+   [B]       [C]
+     \       /
+      (Processed)
+         [D]
+
+Queue:       [ ]  (Empty -> Done!)
+Sorted List: [ A, B, C, D ]
+-------------------------------------------------
+
+```
+
+**Final Topological Sort:** A, B, C, D (Note: A, C, B, D is also a valid valid answer depending on queue order).
 
 ---
 
-### 4. Implementation
+### Complexity Analysis
 
-#### Python Code
+Here is the breakdown of the efficiency.
 
-Using `collections.deque` for an efficient O(1) pop from the left.
+```text
++---------------------------------------------------------+
+|                TIME COMPLEXITY: O(V + E)                |
++---------------------------------------------------------+
+| 1. Calculate In-Degrees | Visit every node and edge once|
+|                         | Cost: O(V + E)                |
+|-------------------------|-------------------------------|
+| 2. Queue Operations     | Each Node is added/removed    |
+|                         | once.                         |
+|                         | Cost: O(V)                    |
+|-------------------------|-------------------------------|
+| 3. Neighbor Updates     | We iterate through neighbors  |
+|                         | of each node. Total edges.    |
+|                         | Cost: O(E)                    |
++---------------------------------------------------------+
+| TOTAL                   | V (Vertices) + E (Edges)      |
++---------------------------------------------------------+
+
+```
+
+```text
++---------------------------------------------------------+
+|               SPACE COMPLEXITY: O(V + E)                |
++---------------------------------------------------------+
+| 1. Adjacency List       | Stores the graph structure    |
+|                         | Cost: O(V + E)                |
+|-------------------------|-------------------------------|
+| 2. In-Degree Array      | Stores count for each node    |
+|                         | Cost: O(V)                    |
+|-------------------------|-------------------------------|
+| 3. Queue                | Worst case stores all nodes   |
+|                         | Cost: O(V)                    |
++---------------------------------------------------------+
+
+```
+
+---
+
+### Code Implementation
+
+The graph is represented as a dictionary/map where keys are nodes and values are lists of neighbors.
+
+#### Python
 
 ```python
 from collections import deque
 
-def multi_source_bfs(grid):
-    rows = len(grid)
-    cols = len(grid[0])
+def topological_sort(vertices, edges):
+    # 1. Initialize Graph and In-Degree
+    graph = {v: [] for v in vertices}
+    in_degree = {v: 0 for v in vertices}
     
-    # Queue for BFS
-    queue = deque()
+    # Build the graph and count in-degrees
+    for src, dest in edges:
+        graph[src].append(dest)
+        in_degree[dest] += 1
+        
+    # 2. Add 0 in-degree nodes to Queue
+    queue = deque([node for node in vertices if in_degree[node] == 0])
+    sorted_order = []
     
-    # Visited set or distance matrix initialized to infinity
-    # Using a distance matrix allows us to track steps
-    dist = [[-1 for _ in range(cols)] for _ in range(rows)]
-    
-    # 1. INITIALIZATION: Add ALL sources to the queue
-    for r in range(rows):
-        for c in range(cols):
-            if grid[r][c] == 'S':  # 'S' is a source
-                queue.append((r, c))
-                dist[r][c] = 0
-    
-    # Directions: Up, Down, Left, Right
-    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-    
-    # 2. STANDARD BFS LOOP
+    # 3. Process Queue
     while queue:
-        curr_r, curr_c = queue.popleft()
+        current = queue.popleft()
+        sorted_order.append(current)
         
-        current_distance = dist[curr_r][curr_c]
+        # Decrease in-degree of neighbors
+        for neighbor in graph[current]:
+            in_degree[neighbor] -= 1
+            if in_degree[neighbor] == 0:
+                queue.append(neighbor)
+                
+    # Check for cycles
+    if len(sorted_order) != len(vertices):
+        return "Cycle detected! Topological sort not possible."
         
-        for dr, dc in directions:
-            new_r, new_c = curr_r + dr, curr_c + dc
-            
-            # Check bounds
-            if 0 <= new_r < rows and 0 <= new_c < cols:
-                # Check if not visited (dist is -1) and not a wall
-                if dist[new_r][new_c] == -1 and grid[new_r][new_c] != 'X':
-                    dist[new_r][new_c] = current_distance + 1
-                    queue.append((new_r, new_c))
-                    
-    return dist
+    return sorted_order
+
+# Example Usage
+nodes = ["A", "B", "C", "D"]
+edge_list = [("A", "B"), ("A", "C"), ("B", "D"), ("C", "D")]
+print(topological_sort(nodes, edge_list))
+# Output: ['A', 'B', 'C', 'D']
 
 ```
 
-#### JavaScript Code
+#### JavaScript
 
 ```javascript
-function multiSourceBFS(grid) {
-    const rows = grid.length;
-    const cols = grid[0].length;
+function topologicalSort(vertices, edges) {
+    // 1. Initialize Graph and In-Degree
+    const graph = new Map();
+    const inDegree = new Map();
+    
+    vertices.forEach(v => {
+        graph.set(v, []);
+        inDegree.set(v, 0);
+    });
+    
+    // Build graph
+    edges.forEach(([src, dest]) => {
+        graph.get(src).push(dest);
+        inDegree.set(dest, inDegree.get(dest) + 1);
+    });
+    
+    // 2. Add 0 in-degree nodes to Queue
     const queue = [];
+    vertices.forEach(v => {
+        if (inDegree.get(v) === 0) queue.push(v);
+    });
     
-    // Initialize distance matrix with -1 (representing infinity/unvisited)
-    const dist = Array.from({ length: rows }, () => Array(cols).fill(-1));
+    const sortedOrder = [];
     
-    // 1. INITIALIZATION
-    for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-            if (grid[r][c] === 'S') {
-                queue.push([r, c]);
-                dist[r][c] = 0;
+    // 3. Process Queue
+    while (queue.length > 0) {
+        const current = queue.shift(); // Remove from front
+        sortedOrder.push(current);
+        
+        const neighbors = graph.get(current);
+        neighbors.forEach(neighbor => {
+            inDegree.set(neighbor, inDegree.get(neighbor) - 1);
+            if (inDegree.get(neighbor) === 0) {
+                queue.push(neighbor);
+            }
+        });
+    }
+    
+    // Check for cycles
+    if (sortedOrder.length !== vertices.length) {
+        return "Cycle detected!";
+    }
+    
+    return sortedOrder;
+}
+
+const nodes = ["A", "B", "C", "D"];
+const links = [["A", "B"], ["A", "C"], ["B", "D"], ["C", "D"]];
+console.log(topologicalSort(nodes, links));
+
+```
+
+---
+
+### Comparison & LeetCode Strategy
+
+#### LeetCode Strategy: "Course Schedule"
+
+When you see a problem asking:
+
+1. "Can all courses be finished?"
+2. "Find the order to take courses."
+3. "Detect a circular dependency."
+
+**Think Kahn's Algorithm immediately.**
+
+**Pro-Tip for Cycle Detection:**
+If the length of your `sorted_order` list is **less** than the total number of nodes (V), it means a cycle exists. This is because nodes involved in a cycle will never reach an In-Degree of 0 and will never enter the queue.
+
+#### Kahn's Algorithm (BFS) vs. DFS Approach
+
+| Feature | Kahn's Algorithm (BFS based) | DFS Approach |
+| --- | --- | --- |
+| **Concept** | Iteratively peel off "free" nodes (0 in-degree). | Traverse deep, add node to list when backtracking. |
+| **Data Structure** | Queue + In-Degree Array. | Recursion Stack + Visited Set. |
+| **Cycle Detection** | Very Intuitive (check result length). | Requires an extra "recursion stack" tracker. |
+| **Order Direction** | Generates order naturally (First to Last). | Generates Reverse Order (must reverse list at end). |
+
+**Winner:** Kahn's is generally easier to implement and reason about for **cycle detection** and simple ordering. DFS is better if you are already doing a deep traversal for other graph properties (like finding connected components).
+
+# Distinct Set Union: Union-Find Algorithm
+
+Here is a detailed, step-by-step guide to the Disjoint Set Union (DSU) algorithm, also known as Union-Find.
+
+---
+
+## 1. The Problem: Dynamic Connectivity
+
+Imagine you are building a computer network. You start with isolated computers. Gradually, you add cables (connections) between them. At any point, you need to quickly answer two questions:
+
+1. **Are Computer A and Computer B connected?** (Directly or indirectly).
+2. **Connect Computer A and Computer B.**
+
+If you used standard Graph algorithms like BFS or DFS, checking connectivity is fast, but adding new connections and maintaining the structure efficiently is hard. If you have millions of nodes and edges, running a full traversal every time you add a cable is too slow.
+
+**We need a data structure that effectively supports:**
+
+* **Union:** Connecting two objects.
+* **Find:** Determining if two objects are in the same component (group).
+
+---
+
+## 2. What is Union-Find?
+
+Union-Find is a data structure that tracks a set of elements partitioned into a number of disjoint (non-overlapping) subsets.
+
+It thinks of every group of connected nodes as a "clan" or a "tree." Every clan has a **Representative** (often called the **Root** or **Leader**).
+
+* **Find(x):** "Who is the leader of x?" (Traverse up the tree until you find the root).
+* **Union(x, y):** "Merge the clan of x and the clan of y." (Find the leaders of both, and make one leader report to the other).
+
+### The Two Critical Optimizations
+
+To make this incredibly fast, we use two tricks:
+
+1. **Path Compression:** When looking up a node's leader, we flatten the path so future lookups are instant.
+2. **Union by Rank (or Size):** When merging two trees, always attach the shorter tree to the taller tree to prevent the tree from getting too deep.
+
+---
+
+## 3. Visual Walkthrough (ASCII)
+
+Let's trace the algorithm with a small example: **5 nodes (0 to 4)**.
+
+### State 0: Initialization
+
+Initially, every node is its own parent. Everyone is a leader of their own set.
+
+**Parent Array:** `[0, 1, 2, 3, 4]`
+
+**Graph State:**
+
+```text
+  0      1      2      3      4
+ (L)    (L)    (L)    (L)    (L)
+
+```
+
+*(L) denotes a Leader/Root.*
+
+---
+
+### Step 1: Union(0, 1)
+
+We want to connect 0 and 1.
+
+1. Find leader of 0 -> 0.
+2. Find leader of 1 -> 1.
+3. Roots are different. Make 0 the parent of 1.
+
+**Parent Array:** `[0, 0, 2, 3, 4]` (Index 1 now holds value 0)
+
+**Graph State:**
+
+```text
+    0       2      3      4
+   /       (L)    (L)    (L)
+  1
+
+```
+
+*Node 0 is now the Leader of the set {0, 1}.*
+
+---
+
+### Step 2: Union(2, 3)
+
+Connect 2 and 3.
+
+1. Find leader of 2 -> 2.
+2. Find leader of 3 -> 3.
+3. Make 2 the parent of 3.
+
+**Parent Array:** `[0, 0, 2, 2, 4]`
+
+**Graph State:**
+
+```text
+    0           2           4
+   /           /           (L)
+  1           3
+
+```
+
+*We now have three sets: {0,1}, {2,3}, and {4}.*
+
+---
+
+### Step 3: Union(1, 4)
+
+Connect 1 and 4.
+
+1. **Find(1):** Go up from 1 to 0. Leader is **0**.
+2. **Find(4):** Leader is **4**.
+3. Merge leader 4 into leader 0.
+
+**Parent Array:** `[0, 0, 2, 2, 0]` (Index 4 now points to 0)
+
+**Graph State:**
+
+```text
+      0           2
+     / \         /
+    1   4       3
+
+```
+
+*Note: Even though we called Union(1, 4), we actually connected the ROOTS (0 and 4). Node 4 becomes a sibling of 1.*
+
+---
+
+### Step 4: Union(3, 4)
+
+Connect 3 and 4.
+
+1. **Find(3):** Go up from 3 -> 2. Leader is **2**.
+2. **Find(4):** Go up from 4 -> 0. Leader is **0**.
+3. Merge leader 2 into leader 0. (We attach the tree rooted at 2 to the tree rooted at 0).
+
+**Parent Array:** `[0, 0, 0, 2, 0]` (Index 2 now points to 0)
+
+**Graph State (Before Path Compression):**
+
+```text
+        0
+      / | \
+     1  4  2
+            \
+             3
+
+```
+
+*Everyone is now in one big set rooted at 0.*
+
+---
+
+### Step 5: Find(3) with Path Compression
+
+Now, let's see the magic. We ask: "Who is the leader of 3?"
+
+1. Start at 3. Parent is 2.
+2. Go to 2. Parent is 0.
+3. Go to 0. Parent is 0 (Root found).
+4. **Compression:** As we return, we update the parent of visited nodes to point directly to the root.
+* Node 3's parent becomes 0.
+
+
+
+**Graph State (After Find(3)):**
+
+```text
+         0
+      / / | \
+     1 3  4  2
+
+```
+
+*Node 3 moved! It now points directly to 0. Next time we search for 3, it's just one step.*
+
+---
+
+## 4. Complexity Analysis
+
+### Time Complexity: Inverse Ackermann Function
+
+The time complexity is technically `O(alpha(n))`.
+
+**Visualizing alpha(n):**
+Imagine a graph of growth.
+
+* Linear O(n) goes up steadily.
+* Logarithmic O(log n) goes up slowly.
+* **alpha(n)** is incredibly flat.
+
+```text
+Time
+ |
+ |                                     /  Linear O(n)
+ |                                   /
+ |                       ___________/     Logarithmic O(log n)
+ |______________________/________________ Inverse Ackermann O(alpha(n))
+ |_______________________________________
+                       Input Size (n)
+
+```
+
+For all practical purposes in the universe (up to 10^80 atoms), `alpha(n)` is **less than 5**.
+It is **nearly constant time**, i.e., almost O(1).
+
+### Space Complexity
+
+We need two arrays (Parent and Rank/Size), both of size N.
+**Space:** O(N)
+
+```text
+Memory Usage:
+[ P0 | P1 | P2 | ... | Pn ]  <- Parent Array
+[ R0 | R1 | R2 | ... | Rn ]  <- Rank Array
+
+```
+
+---
+
+## 5. Implementation
+
+Here is the code implementing both **Path Compression** and **Union by Rank**.
+
+### Python
+
+```python
+class UnionFind:
+    def __init__(self, size):
+        # Initially, each node is its own parent
+        self.parent = list(range(size))
+        # Rank helps keep the tree flat
+        self.rank = [1] * size
+
+    def find(self, x):
+        # Path Compression
+        if self.parent[x] != x:
+            # Recursively find the root and point x directly to it
+            self.parent[x] = self.find(self.parent[x])
+        return self.parent[x]
+
+    def union(self, x, y):
+        rootX = self.find(x)
+        rootY = self.find(y)
+
+        if rootX != rootY:
+            # Union by Rank: Attach smaller tree to larger tree
+            if self.rank[rootX] > self.rank[rootY]:
+                self.parent[rootY] = rootX
+            elif self.rank[rootX] < self.rank[rootY]:
+                self.parent[rootX] = rootY
+            else:
+                self.parent[rootY] = rootX
+                self.rank[rootX] += 1
+            return True # Connection successful
+        return False # Already connected
+
+```
+
+### JavaScript
+
+```javascript
+class UnionFind {
+    constructor(size) {
+        // Initially, parent[i] = i
+        this.parent = Array.from({ length: size }, (_, i) => i);
+        this.rank = new Array(size).fill(1);
+    }
+
+    find(x) {
+        if (this.parent[x] !== x) {
+            // Path compression
+            this.parent[x] = this.find(this.parent[x]);
+        }
+        return this.parent[x];
+    }
+
+    union(x, y) {
+        let rootX = this.find(x);
+        let rootY = this.find(y);
+
+        if (rootX !== rootY) {
+            // Union by Rank
+            if (this.rank[rootX] > this.rank[rootY]) {
+                this.parent[rootY] = rootX;
+            } else if (this.rank[rootX] < this.rank[rootY]) {
+                this.parent[rootX] = rootY;
+            } else {
+                this.parent[rootY] = rootX;
+                this.rank[rootX] += 1;
+            }
+            return true;
+        }
+        return false;
+    }
+}
+
+```
+
+---
+
+## 6. Comparison & Strategy
+
+### When to use DSU on LeetCode?
+
+Use DSU when you see problems involving:
+
+1. **Connected Components:** "Count the number of provinces/islands."
+2. **Cycle Detection:** "Is there a cycle in this undirected graph?" (If `find(u) == find(v)` before you union them, there is a cycle).
+3. **Equivalence Classes:** "Group A is equivalent to B, B to C... is A equivalent to C?"
+
+### Comparison Table
+
+| Feature | DFS / BFS | Union-Find (DSU) |
+| --- | --- | --- |
+| **Connectivity Check** | O(V + E) (Slow for dynamic) | Nearly O(1) (Fast) |
+| **Adding an Edge** | O(1) (But requires re-traversal) | Nearly O(1) |
+| **Path Finding** | **Yes** (Can tell you the path) | **No** (Only tells you *if* connected) |
+| **Graph Type** | Directed & Undirected | Best for **Undirected** |
+
+> **Strategy Tip:** If the problem asks "What is the path from A to B?", use BFS. If the problem asks "Are A and B connected?" or "Group these items," use DSU.
+
+# Single Source Shortest Path: Dijkstra's Algorithm
+
+Here is a detailed, step-by-step explanation of Dijkstra's Algorithm, designed to be easy to visualize and understand without complex mathematical notation.
+
+### What is Dijkstra's Algorithm?
+
+**The Problem:** Imagine you are in a city (Node A) and want to get to another city (Node D). There are many roads (edges), and each road takes a different amount of time to travel (weight). You want to find the absolute fastest route not just to Node D, but potentially to every other city from your starting point.
+
+**The Solution:** Dijkstra's Algorithm is a "greedy" algorithm. It finds the shortest path from a **Single Source** (starting node) to all other nodes in a graph with **non-negative weights**.
+
+**Why we need it:**
+
+* GPS Navigation (Google Maps finding the fastest route).
+* Network Routing (sending data packets via the fastest path).
+* Social Networks (degrees of separation).
+
+---
+
+### How It Works (The Logic)
+
+1. **Initialization:** Set the distance to your starting node to **0** and the distance to all other nodes to **Infinity**.
+2. **Visit Priority:** Look at the node with the **smallest** known distance that you haven't "finished" yet.
+3. **Exploration (Relaxation):** Check all neighbors of this current node. Calculate the distance to them *through* the current node.
+4. **Update:** If this calculated distance is shorter than the distance you previously had on record for that neighbor, update the neighbor's distance.
+5. **Repeat:** Mark the current node as "finished" (visited) and repeat the process until all reachable nodes are visited.
+
+---
+
+### Visual Walkthrough
+
+We will use a simple Directed Graph with 4 nodes: **A, B, C, D**.
+**Goal:** Find the shortest path from **A** to all other nodes.
+
+**The Graph Map:**
+
+* A connects to B (cost 4)
+* A connects to C (cost 1)
+* C connects to B (cost 2)
+* B connects to D (cost 1)
+* C connects to D (cost 5)
+
+#### Initial State
+
+We track two things:
+
+1. **Distances:** The best distance found so far (Start = A).
+2. **Priority Queue:** A list of nodes to process, sorted by shortest distance.
+
+```text
+      (4)
+  [A]----->[B]
+   |      / |
+(1)|   (2)  | (1)
+   v  /     v
+  [C]----->[D]
+      (5)
+
+Distances: { A: 0,  B: inf,  C: inf,  D: inf }
+Queue:     [(0, A)]  <-- We start with A because distance is 0
+Visited:   {}
+
+```
+
+---
+
+#### Step 1: Process Node A
+
+We pop **A** (dist 0). We look at A's neighbors: **B** and **C**.
+
+1. **A -> B:** Current dist to A (0) + Edge (4) = 4. Since 4 < inf, update B.
+2. **A -> C:** Current dist to A (0) + Edge (1) = 1. Since 1 < inf, update C.
+
+```text
+       *
+      (4)
+  [A]=====>[B]  <-- Updated B to 4
+   |      / |
+(1)|   (2)  | (1)
+   * /     v
+  [C]----->[D]
+   ^
+   Updated C to 1
+
+Distances: { A: 0,  B: 4,  C: 1,  D: inf }
+Queue:     [(1, C), (4, B)]
+Visited:   { A }
+
+```
+
+*Note: C is at the front of the queue because 1 < 4.*
+
+---
+
+#### Step 2: Process Node C
+
+We pop **C** (dist 1). Neighbors of C are **B** and **D**.
+
+1. **C -> B:** Dist to C (1) + Edge (2) = 3.
+* Compare: Is 3 smaller than B's current distance (4)? **Yes.**
+* Update B to 3.
+
+
+2. **C -> D:** Dist to C (1) + Edge (5) = 6.
+* Compare: Is 6 smaller than D's current distance (inf)? **Yes.**
+* Update D to 6.
+
+
+
+```text
+      (4)
+  [A]----->[B]
+   |      ^ |
+(1)|   (2)| | (1)
+   v  /     v
+  [C]=====>[D]
+     =====
+     ^
+     Processing C
+
+Distances: { A: 0,  B: 3,  C: 1,  D: 6 }
+Queue:     [(3, B), (4, B_old), (6, D)]
+Visited:   { A, C }
+
+```
+
+*Note: We found a shortcut to B! Going A->C->B (cost 3) is faster than A->B (cost 4).*
+
+---
+
+#### Step 3: Process Node B
+
+We pop **B** (dist 3). Neighbor of B is **D**.
+
+1. **B -> D:** Dist to B (3) + Edge (1) = 4.
+* Compare: Is 4 smaller than D's current distance (6)? **Yes.**
+* Update D to 4.
+
+
+
+```text
+      (4)
+  [A]----->[B]
+   |      / |
+(1)|   (2)  | (1) *
+   v  /     v
+  [C]----->[D]
+            ^
+            Updated D to 4
+
+Distances: { A: 0,  B: 3,  C: 1,  D: 4 }
+Queue:     [(4, D), (6, D_old)]
+Visited:   { A, C, B }
+
+```
+
+*Note: We found a shortcut to D! Path A->C->B->D (cost 4) is faster than A->C->D (cost 6).*
+
+---
+
+#### Step 4: Process Node D
+
+We pop **D** (dist 4).
+D has no outgoing neighbors. We are done with D.
+
+Any "old" entries in the queue (like the old distance of 6 for D) are ignored because we have already processed D with a shorter distance.
+
+#### Final Result
+
+The shortest path from A to every other node:
+
+* **A:** 0
+* **B:** 3 (Path: A->C->B)
+* **C:** 1 (Path: A->C)
+* **D:** 4 (Path: A->C->B->D)
+
+---
+
+### Complexity Analysis
+
+Here is how the efficiency breaks down, visualized.
+**V** = Number of Vertices (Nodes)
+**E** = Number of Edges
+
+#### Time Complexity: O(E * log V)
+
+We visit every edge once (E), and for every edge, we might update the Priority Queue. Updating a Priority Queue (Heap) takes `log V` time.
+
+```text
+  Cost
+   ^
+   |           /
+   |          /   <-- O(E * log V)
+   |         /
+   |        /
+   |_______/_______
+                  Input Size (Graph Size)
+
+```
+
+*Why it matters:* It is much faster than checking every single combination of paths, but slower than a simple Breadth-First Search (BFS) which only works on unweighted graphs.
+
+#### Space Complexity: O(V + E)
+
+We need to store the graph (Adjacency List) and the distances for every node.
+
+```text
+  Memory Usage
+  [ Node A | Neighbors... ]
+  [ Node B | Neighbors... ]  <-- Graph Storage (V + E)
+  [ Node C | Neighbors... ]
+  
+  [ Dist Array (Size V) ]    <-- Tracking Costs
+
+```
+
+---
+
+### Code Implementation
+
+#### Python Solution
+
+Python is excellent for this because it has a built-in "min-heap" library called `heapq` that handles the sorting for us efficiently.
+
+```python
+import heapq
+
+def dijkstra(graph, start_node):
+    # Initialize distances to infinity, start_node to 0
+    distances = {node: float('infinity') for node in graph}
+    distances[start_node] = 0
+    
+    # Priority Queue: stores tuples of (current_distance, current_node)
+    # We start with the source node
+    pq = [(0, start_node)]
+    
+    while pq:
+        # 1. Pop the node with the smallest distance
+        current_dist, current_node = heapq.heappop(pq)
+        
+        # Optimization: If we found a shorter way to this node already, skip
+        if current_dist > distances[current_node]:
+            continue
+        
+        # 2. Explore neighbors
+        for neighbor, weight in graph[current_node].items():
+            distance = current_dist + weight
+            
+            # 3. Relaxation: If new path is shorter, update and push to Q
+            if distance < distances[neighbor]:
+                distances[neighbor] = distance
+                heapq.heappush(pq, (distance, neighbor))
+                
+    return distances
+
+# Graph from our example
+graph_example = {
+    'A': {'B': 4, 'C': 1},
+    'B': {'D': 1},
+    'C': {'B': 2, 'D': 5},
+    'D': {}
+}
+
+print(dijkstra(graph_example, 'A'))
+# Output: {'A': 0, 'B': 3, 'C': 1, 'D': 4}
+
+```
+
+#### JavaScript Solution
+
+JavaScript does not have a built-in Priority Queue. In a real interview or production, you would use a library. For this example, we will use a simple array sort to simulate the priority queue (note: this makes the time complexity worse, but the logic is the same).
+
+```javascript
+function dijkstra(graph, startNode) {
+    // Initialize distances
+    let distances = {};
+    for (let node in graph) {
+        distances[node] = Infinity;
+    }
+    distances[startNode] = 0;
+    
+    // Simple array as a queue (simulating a priority queue)
+    let pq = [[0, startNode]]; // [distance, node]
+    
+    while (pq.length > 0) {
+        // 1. Sort to ensure we process the smallest distance first
+        // (In a real scenario, a MinHeap data structure is O(log N))
+        pq.sort((a, b) => a[0] - b[0]);
+        
+        // Pop the smallest
+        let [currentDist, currentNode] = pq.shift();
+        
+        // Optimization check
+        if (currentDist > distances[currentNode]) continue;
+        
+        // 2. Explore neighbors
+        let neighbors = graph[currentNode];
+        for (let neighbor in neighbors) {
+            let weight = neighbors[neighbor];
+            let newDist = currentDist + weight;
+            
+            // 3. Relaxation step
+            if (newDist < distances[neighbor]) {
+                distances[neighbor] = newDist;
+                pq.push([newDist, neighbor]);
             }
         }
     }
+    return distances;
+}
+
+const graph = {
+    'A': {'B': 4, 'C': 1},
+    'B': {'D': 1},
+    'C': {'B': 2, 'D': 5},
+    'D': {}
+};
+
+console.log(dijkstra(graph, 'A'));
+// Output: { A: 0, B: 3, C: 1, D: 4 }
+
+```
+
+---
+
+### LeetCode Strategy: How to Spot It
+
+Use Dijkstra's Algorithm when you see a problem with these characteristics:
+
+1. **"Shortest Path" or "Minimum Cost":** You need to go from A to B (or A to all).
+2. **Weighted Edges:** The connections between nodes have a cost (time, price, distance) and the costs are **not** all the same.
+3. **No Negative Weights:** The costs are all 0 or positive. (If negative, Dijkstra fails).
+
+**Typical Problem phrasing:**
+
+* "Find the minimum time to send a signal..." (Network Delay Time).
+* "Find the cheapest flight with K stops..."
+* "Minimum effort path in a grid..."
+
+### Comparison with Other Algorithms
+
+| Algorithm | Best Used For | Key Difference |
+| --- | --- | --- |
+| **BFS (Breadth-First Search)** | Unweighted Graphs | Only works if all edges have weight 1. It spreads out in layers. Dijkstra is essentially BFS with a Priority Queue. |
+| **Dijkstra** | Weighted Graphs (Positive) | Smarter than BFS because it prioritizes "cheaper" paths first. |
+| **Bellman-Ford** | Graphs with Negative Weights | Can handle negative edge weights, but is much slower (O(V * E)). |
+
+
+# Single Source Shortest Path: Bellman Ford Algorithm
+
+### **Single Source Shortest Path: Bellman-Ford Algorithm**
+
+**Why do we need it?**
+Imagine you are planning a road trip. Most algorithms (like Dijkstra's) are great at finding the fastest route, assuming all roads take positive time to travel. But what if a road actually *gives* you time back?
+
+In computer science graphs, this is a "negative weight edge." This could represent a rebate, a time-travel mechanic in a game, or an energy gain in a physics simulation.
+
+* **The Problem:** Standard algorithms break when edges have negative weights. They assume once a node is visited, the shortest path is set in stone.
+* **The Solution:** Bellman-Ford handles these negative weights gracefully and can also detect "Negative Cycles" (infinite loops where you keep gaining benefits forever).
+
+---
+
+### **How it Works: The "Relaxation" Concept**
+
+Bellman-Ford is brute-force but smart. It relies on a concept called **Relaxation**.
+
+**Relaxing an Edge**
+Think of a rubber band stretching between two cities. The "distance" is currently infinite (or very high). When we find a road, we "relax" the tension by shortening the estimated distance to the correct value.
+
+**The Rule:**
+If the distance to node **u** + weight of edge **(u, v)** is less than the current distance to node **v**:
+
+> Update distance to **v** = distance to **u** + weight of **(u, v)**
+
+**The Algorithm Steps:**
+
+1. Set the distance to the Start Node to 0 and all others to Infinity.
+2. Repeat this process **V - 1** times (where V is the number of vertices/nodes):
+* Check **every single edge** in the graph.
+* If you can find a shortcut using that edge, update the distance.
+
+
+3. (Optional) Run one more time to check for negative cycles. If a distance changes, a negative cycle exists.
+
+---
+
+### **Visual Walkthrough**
+
+**The Scenario:**
+We want to go from Node **A** (Source) to all other nodes.
+
+* Nodes (V): 4 (A, B, C, D)
+* Edges (E): 5
+
+**The Graph:**
+Notice the path `B -> C` has a weight of `-3`.
+
+```text
+       (4)
+  [A] -----> [B]
+   |          |
+(5)|          |(-3)
+   v          v
+  [D] <----- [C]
+       (2)
+       
+  *Also, let's assume an edge C -> D with weight 4 for connectivity, 
+   but for this simple walkthrough, let's use:
+   A->B (4)
+   A->D (5)
+   B->C (-3)
+   D->C (2)
+   C->D (Is typically needed to create a cycle, let's keep it simple: 
+   Let's just connect C->? or leave it. 
+   
+   Let's refine the example to be perfectly clear with one update chain.*
+
+```
+
+**Refined Example Graph:**
+
+* **A** is the Source.
+* **A -> B** (Weight: 4)
+* **A -> C** (Weight: 5)
+* **B -> D** (Weight: -2)
+* **C -> B** (Weight: -2)
+* **D -> C** (Weight: 3)
+
+```text
+      (4)        (-2)
+  [A] -----> [B] -----> [D]
+   |        ^  \         |
+   |       /    \        |
+(5)|   (-2)/     \       |(3)
+   |     /        \      |
+   v    /          \     v
+  [C] -/            \-> [C] (Wait, let's keep topology simple)
+
+```
+
+**Let's use this clean Graph:**
+
+1. **A -> B** (Cost: 5)
+2. **A -> C** (Cost: 2)
+3. **C -> B** (Cost: -4) *The shortcut!*
+4. **B -> D** (Cost: 3)
+
+**Goal:** Shortest path from A to D.
+
+#### **Initialization**
+
+We track distances in a list. `INF` means we haven't reached it yet.
+
+```text
+DISTANCES:
+ [A]: 0    (Source)
+ [B]: INF
+ [C]: INF
+ [D]: INF
+
+GRAPH STATE:
+(Values in [] are current shortest distance from A)
+
+      (5)
+  [A:0] -----> [B:INF]
+    |           |
+ (2)|           |(3)
+    v           v
+  [C:INF]      [D:INF]
+    \           ^
+     \_________/
+     (-4 implies C->B, arrow pointing up-right)
+
+```
+
+---
+
+#### **Iteration 1 (Process all edges)**
+
+We iterate through the edge list: `(A,B,5)`, `(A,C,2)`, `(C,B,-4)`, `(B,D,3)`.
+
+1. **Check A -> B (weight 5):**
+* Current B is INF.
+* A is 0. 0 + 5 = 5.
+* 5 < INF. **Update B to 5.**
+
+
+2. **Check A -> C (weight 2):**
+* Current C is INF.
+* A is 0. 0 + 2 = 2.
+* 2 < INF. **Update C to 2.**
+
+
+3. **Check C -> B (weight -4):**
+* Current B is 5.
+* Current C is 2.
+* Path A->C->B = 2 + (-4) = -2.
+* -2 < 5. **Update B to -2.**
+
+
+4. **Check B -> D (weight 3):**
+* Current D is INF.
+* Current B is -2 (just updated!).
+* -2 + 3 = 1.
+* 1 < INF. **Update D to 1.**
+
+
+
+```text
+End of Iteration 1 Status:
+
+DISTANCES:
+ [A]: 0
+ [B]: -2  (Updated via C)
+ [C]: 2   (Updated via A)
+ [D]: 1   (Updated via B)
+
+VISUALIZATION:
+      (5)
+  [A:0] -----> [B:-2]
+    |           |
+ (2)|           |(3)
+    v           v
+  [C:2]        [D:1]
+     \_________/
+        (-4)
+
+```
+
+*Note: In a real algorithm, the order of edge processing matters for how fast we converge, but after V-1 iterations, it is guaranteed to be correct.*
+
+---
+
+#### **Iteration 2 (Process all edges again)**
+
+We do this again to ensure changes propagate.
+
+1. **Check A -> B (5):** Is 0 + 5 < -2? No.
+2. **Check A -> C (2):** Is 0 + 2 < 2? No.
+3. **Check C -> B (-4):** Is 2 + (-4) < -2? No (they are equal).
+4. **Check B -> D (3):** Is -2 + 3 < 1? No.
+
+No changes occurred. The algorithm has stabilized.
+
+**Final Result:**
+
+* Shortest path to B is -2 (Path: A->C->B).
+* Shortest path to D is 1 (Path: A->C->B->D).
+
+---
+
+### **Complexity Analysis (Visualized)**
+
+#### **Time Complexity: O(V * E)**
+
+We run a loop `V` times. Inside that loop, we check `E` edges.
+
+```text
+  | <------ V Iterations ------> |
+  ________________________________
+ |                                |
+ |  [ Check Edge 1 ]              |
+ |  [ Check Edge 2 ]              |
+ |  [ ...          ]   (E Edges)  |
+ |  [ Check Edge E ]              |
+ |________________________________|
+ 
+ Calculation: V vertices * E edges = O(V * E)
+
+```
+
+#### **Space Complexity: O(V)**
+
+We only need to store the distance array for the vertices.
+
+```text
+  Storage Array:
+  [ Slot 1 ] [ Slot 2 ] [ Slot 3 ] ... [ Slot V ]
+  
+  Calculation: Linear space relative to vertices = O(V)
+
+```
+
+---
+
+### **Code Implementation**
+
+#### **Python**
+
+```python
+def bellman_ford(graph, V, src):
+    # Step 1: Initialize distances
+    # distances[i] will hold the shortest distance from src to i
+    dist = [float("inf")] * V
+    dist[src] = 0
+
+    # Step 2: Relax all edges |V| - 1 times
+    # graph is represented as a list of [u, v, w]
+    for _ in range(V - 1):
+        for u, v, w in graph:
+            if dist[u] != float("inf") and dist[u] + w < dist[v]:
+                dist[v] = dist[u] + w
+
+    # Step 3: Check for negative weight cycles
+    # If we can still relax an edge, then we have a negative cycle
+    for u, v, w in graph:
+        if dist[u] != float("inf") and dist[u] + w < dist[v]:
+            print("Graph contains negative weight cycle")
+            return None
+
+    return dist
+
+# Example Usage
+# Edge format: [source, destination, weight]
+edges = [
+    [0, 1, 5],   # A->B
+    [0, 2, 2],   # A->C
+    [2, 1, -4],  # C->B
+    [1, 3, 3]    # B->D
+]
+# Vertices: 0=A, 1=B, 2=C, 3=D
+print(bellman_ford(edges, 4, 0)) 
+# Output: [0, -2, 2, 1]
+
+```
+
+#### **JavaScript**
+
+```javascript
+function bellmanFord(edges, V, src) {
+    // Step 1: Initialize distances
+    let dist = new Array(V).fill(Infinity);
+    dist[src] = 0;
+
+    // Step 2: Relax all edges V - 1 times
+    for (let i = 0; i < V - 1; i++) {
+        for (let edge of edges) {
+            let [u, v, w] = edge;
+            if (dist[u] !== Infinity && dist[u] + w < dist[v]) {
+                dist[v] = dist[u] + w;
+            }
+        }
+    }
+
+    // Step 3: Check for negative cycles
+    for (let edge of edges) {
+        let [u, v, w] = edge;
+        if (dist[u] !== Infinity && dist[u] + w < dist[v]) {
+            console.log("Graph contains negative weight cycle");
+            return null;
+        }
+    }
+
+    return dist;
+}
+
+const edges = [
+    [0, 1, 5], 
+    [0, 2, 2], 
+    [2, 1, -4], 
+    [1, 3, 3]
+];
+console.log(bellmanFord(edges, 4, 0));
+
+```
+
+---
+
+### **LeetCode Strategy**
+
+When solving problems (like *Cheapest Flights Within K Stops* or *Network Delay Time*), think of Bellman-Ford when:
+
+1. **Negative Costs:** The problem explicitly mentions costs can be negative (Dijkstra fails here).
+2. **Restricted Hops:** The problem asks for the shortest path "using at most K edges."
+* *Why?* The outer loop of Bellman-Ford controls the number of edges used. Iteration 1 gives shortest paths using 1 edge. Iteration 2 gives shortest paths using 2 edges. If you stop the loop at `K`, you get the answer for K-stops.
+
+
+3. **Detecting Arbitrage:** If the problem asks if you can make infinite money/gain by looping through conversions, it is asking for a **Negative Cycle Detection**.
+
+### **Comparison: Bellman-Ford vs. Dijkstra**
+
+| Feature | Dijkstra | Bellman-Ford |
+| --- | --- | --- |
+| **Speed** | Faster: `O(E + V log V)` | Slower: `O(V * E)` |
+| **Negative Edges?** | **Fails** (Produces wrong answers) | **Works** (Handles them correctly) |
+| **Complexity** | Uses a Priority Queue (Heap) | Uses simple Loops |
+| **Use Case** | GPS, standard routing | Finance, Arbitrage, Constraints |
+
+# All-Pairs Shortest Path: Floyd-Warshall Algorithm
+
+Here is a detailed guide to the Floyd-Warshall Algorithm.
+
+### **1. What is it and Why do we need it?**
+
+**The Problem:**
+Imagine you have a map of cities and roads. You don't just want to know the shortest path from City A to City B; you want to know the shortest path between **every single pair of cities** on the map.
+
+**The Solution:**
+Floyd-Warshall is an "All-Pairs Shortest Path" algorithm.
+
+* **Why not just use Dijkstra?** Dijkstra's algorithm is great for one start point. Running Dijkstra N times (once for every node) works, but Floyd-Warshall handles **negative edge weights** (unlike Dijkstra) and is much simpler to implement for dense graphs (lots of connections).
+* **The Catch:** It detects negative cycles (a loop where the total weight is negative), but it cannot find the correct path if one exists.
+
+---
+
+### **2. How It Works (The Core Logic)**
+
+The algorithm relies on a simple idea: **The Intermediate Node.**
+
+For any two nodes `i` and `j`, is it faster to go directly from `i` to `j`, or is it faster to go from `i` to an intermediate node `k`, and then from `k` to `j`?
+
+**The Formula:**
+`New Distance = Distance(i to k) + Distance(k to j)`
+
+If `New Distance` is smaller than the current `Distance(i to j)`, we update our map. We repeat this process trying **every** node as the intermediate node `k`.
+
+---
+
+### **3. Complexity Analysis**
+
+**Time Complexity: O(N^3)**
+We have three nested loops: one for the intermediate node `k`, one for the source `i`, and one for the destination `j`.
+
+```text
+Complexity Visualization:
+      (k)      (i)      (j)
+    |-------|-------|-------|
+       N    x   N   x   N    = N^3 operations
+
+    If N = 10,  Ops ~ 1,000
+    If N = 100, Ops ~ 1,000,000
+    If N = 500, Ops ~ 125,000,000 (Limit for typical coding interviews)
+
+```
+
+**Space Complexity: O(N^2)**
+We need a 2D matrix to store the distances between every pair of nodes.
+
+```text
+Space Visualization:
+    [ ] [ ] [ ] [ ]
+    [ ] [ ] [ ] [ ]  N rows * N columns = N^2
+    [ ] [ ] [ ] [ ]
+    [ ] [ ] [ ] [ ]
+
+```
+
+---
+
+### **4. Step-by-Step Walkthrough**
+
+Let's find the shortest paths for this 4-node directed graph.
+
+**Input Graph (ASCII Diagram):**
+
+```text
+      (5)
+ [0] -----> [1]
+  |          |
+  | (10)     | (3)
+  v          v
+ [3] <----- [2]
+       (1)
+
+```
+
+* Node 0 goes to 1 (weight 5) and 3 (weight 10).
+* Node 1 goes to 2 (weight 3).
+* Node 2 goes to 3 (weight 1).
+* Node 3 has no outgoing edges.
+* **Goal:** Notice that `0 -> 3` is cost 10 directly. But `0 -> 1 -> 2 -> 3` is `5 + 3 + 1 = 9`. The algorithm should find this.
+
+#### **Step 0: Initialization (Distance Matrix)**
+
+We create a table (matrix).
+
+* If there is a direct edge, put the weight.
+* If it's the same node (0 to 0), put 0.
+* If there is no direct edge, put Infinity (INF).
+
+**Current State (Matrix D0):**
+
+```text
+      To: 0   1   2   3
+From:
+  0     [ 0,  5, INF, 10 ]
+  1     [INF, 0,  3, INF ]
+  2     [INF,INF, 0,  1  ]
+  3     [INF,INF,INF, 0  ]
+
+```
+
+#### **Step 1: Loop k = 0 (Using Node 0 as a bridge)**
+
+We check: Can we shorten any path by going through Node 0?
+
+* Logic: `D[i][j] = min(D[i][j], D[i][0] + D[0][j])`
+* Since Node 0 only has outgoing edges and no incoming edges (except from itself), it cannot act as a shortcut for other nodes yet.
+
+**State after k=0:** (No changes)
+
+```text
+      To: 0   1   2   3
+From:
+  0     [ 0,  5, INF, 10 ]
+  1     [INF, 0,  3, INF ]
+  2     [INF,INF, 0,  1  ]
+  3     [INF,INF,INF, 0  ]
+
+```
+
+#### **Step 2: Loop k = 1 (Using Node 1 as a bridge)**
+
+We check: Can we shorten paths by going through Node 1?
+
+* We look for paths like `i -> 1 -> j`.
+* Check `0 -> 2`:
+* Current direct cost: INF
+* Path via 1: `(0->1)` + `(1->2)` = `5 + 3 = 8`
+* **Update!** `0 -> 2` becomes 8.
+
+
+
+**State after k=1:**
+
+```text
+      To: 0   1   2   3
+From:
+  0     [ 0,  5, *8*, 10 ]  <-- Updated (was INF)
+  1     [INF, 0,  3, INF ]
+  2     [INF,INF, 0,  1  ]
+  3     [INF,INF,INF, 0  ]
+
+```
+
+#### **Step 3: Loop k = 2 (Using Node 2 as a bridge)**
+
+We check: Can we shorten paths by going through Node 2?
+
+* We look for paths like `i -> 2 -> j`.
+* Check `0 -> 3`:
+* Current cost: 10 (direct)
+* Path via 2: `(0->2)` + `(2->3)`
+* Wait, what is `0->2`? We just updated it to 8 in the previous step!
+* New cost: `8 + 1 = 9`.
+* Is 9 < 10? Yes. **Update!**
+
+
+* Check `1 -> 3`:
+* Current cost: INF
+* Path via 2: `(1->2)` + `(2->3)` = `3 + 1 = 4`.
+* **Update!**
+
+
+
+**State after k=2:**
+
+```text
+      To: 0   1   2   3
+From:
+  0     [ 0,  5,  8, *9* ]  <-- Updated (was 10)
+  1     [INF, 0,  3, *4* ]  <-- Updated (was INF)
+  2     [INF,INF, 0,  1  ]
+  3     [INF,INF,INF, 0  ]
+
+```
+
+#### **Step 4: Loop k = 3 (Using Node 3 as a bridge)**
+
+Node 3 has no outgoing edges, so it cannot act as a bridge to anywhere.
+
+**Final State:**
+
+```text
+      To: 0   1   2   3
+From:
+  0     [ 0,  5,  8,  9  ]
+  1     [INF, 0,  3,  4  ]
+  2     [INF,INF, 0,  1  ]
+  3     [INF,INF,INF, 0  ]
+
+```
+
+The algorithm is complete. We now have the shortest path between every pair.
+
+---
+
+### **5. Code Implementation**
+
+#### **Python**
+
+```python
+def floyd_warshall(n, edges):
+    # Initialize matrix with Infinity
+    dist = [[float('inf')] * n for _ in range(n)]
     
-    const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
-    let head = 0; // Optimization for queue pointer rather than shifting array
-    
-    // 2. BFS LOOP
-    while (head < queue.length) {
-        const [currR, currC] = queue[head++];
-        const currentDist = dist[currR][currC];
+    # Distance to self is 0
+    for i in range(n):
+        dist[i][i] = 0
         
-        for (const [dr, dc] of directions) {
-            const newR = currR + dr;
-            const newC = currC + dc;
-            
-            if (newR >= 0 && newR < rows && newC >= 0 && newC < cols) {
-                if (dist[newR][newC] === -1 && grid[newR][newC] !== 'X') {
-                    dist[newR][newC] = currentDist + 1;
-                    queue.push([newR, newC]);
+    # Set initial edge weights
+    for u, v, w in edges:
+        dist[u][v] = w
+        
+    # The Algorithm: 3 Nested Loops
+    # k = intermediate node
+    # i = source node
+    # j = destination node
+    for k in range(n):
+        for i in range(n):
+            for j in range(n):
+                # If going through k is shorter, update dist[i][j]
+                if dist[i][k] + dist[k][j] < dist[i][j]:
+                    dist[i][j] = dist[i][k] + dist[k][j]
+                    
+    return dist
+
+# Example Usage
+# Nodes: 0, 1, 2, 3
+edges = [[0,1,5], [0,3,10], [1,2,3], [2,3,1]]
+result = floyd_warshall(4, edges)
+for row in result:
+    print(row)
+
+```
+
+#### **JavaScript**
+
+```javascript
+function floydWarshall(n, edges) {
+    // Create n x n matrix filled with Infinity
+    let dist = Array.from({ length: n }, () => Array(n).fill(Infinity));
+
+    // Distance to self is 0
+    for (let i = 0; i < n; i++) {
+        dist[i][i] = 0;
+    }
+
+    // Set initial edge weights
+    for (let [u, v, w] of edges) {
+        dist[u][v] = w;
+    }
+
+    // The Algorithm
+    for (let k = 0; k < n; k++) {
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < n; j++) {
+                if (dist[i][k] + dist[k][j] < dist[i][j]) {
+                    dist[i][j] = dist[i][k] + dist[k][j];
                 }
             }
         }
@@ -750,2523 +2220,1013 @@ function multiSourceBFS(grid) {
 
 ---
 
-### 5. Complexity Analysis
+### **6. LeetCode Strategy & Comparison**
 
-Let **V** be the number of vertices (or cells R * C) and **E** be the number of edges.
+#### **When to use this on LeetCode?**
 
-**Time Complexity: O(V + E)**
+Look for the **Constraint Check**:
 
-* Why? Even though we have multiple sources, every node is added to the queue and processed **at most once**.
-* In a grid, E is roughly 4 * V, so it simplifies to O(V) or **O(R * C)**.
+1. **Input size:** If `N <= 500`, O(N^3) solutions are usually acceptable (500^3 = 125,000,000 ops, which is borderline but often passes in Python/C++). If `N > 1000`, do not use this.
+2. **Keywords:** "All pairs," "Transitive closure," "Find the city with the fewest neighbors within a threshold."
+3. **Example Problem:** *Find the City With the Smallest Number of Neighbors at a Threshold Distance* (LeetCode 1334).
 
-**Space Complexity: O(V)**
+#### **Comparison Table**
 
-* Why? In the worst case (e.g., a completely filled grid), the queue might hold a significant portion of the nodes. We also store the `dist` array which is size V.
-* In a grid: **O(R * C)**.
-
-#### Visualization of Complexity
-
-```text
-| Node Processing (Time) | Memory Usage (Space)   |
-|------------------------|------------------------|
-| [X] Processed Once     | [Q] Queue Storage      |
-| [X] Processed Once     | [D] Distance Matrix    |
-| [X] Processed Once     |                        |
-| ...                    |                        |
-| Total: Linear Prop.    | Total: Linear Prop.    |
-| to Grid Size           | to Grid Size           |
-
-```
-
----
-
-### 6. LeetCode Strategy: How to Think
-
-When you see a problem, ask yourself these questions to decide if you need Multi-Source BFS:
-
-1. **"Nearest X to Y":** Does the problem ask for the distance to the *nearest* specific item (like nearest gate, nearest zero, nearest safe zone)?
-2. **Simultaneous Start:** Does the process happen everywhere at once? (e.g., rotten oranges rotting neighbors simultaneously).
-3. **Parallel Flooding:** Can I visualize the problem as water flooding from multiple leaks?
-
-**Classic LeetCode Examples:**
-
-* **01 Matrix (LeetCode 542):** Find distance of nearest 0 for each cell.
-* *Strategy:* Push all '0' cells into queue first.
-
-
-* **Rotting Oranges (LeetCode 994):** Minimum time until all oranges rot.
-* *Strategy:* Push all initially rotten oranges into queue.
-
-
-* **Map of Highest Peak (LeetCode 1765):** Assign heights such that water cells are 0 and height diff is at most 1.
-* *Strategy:* Push all water cells into queue.
-
-
-
----
-
-### 7. Comparison with Other Algorithms
-
-| Feature | Single-Source BFS | Multi-Source BFS | Dijkstra | Floyd-Warshall |
-| --- | --- | --- | --- | --- |
-| **Input Sources** | One (e.g., Start) | Many (e.g., All Monsters) | One | All Pairs |
-| **Weights** | Unweighted (1) | Unweighted (1) | Weighted (non-negative) | Weighted |
-| **Best For** | Shortest path A to B | Shortest path {Set A} to rest | Shortest path with costs | All-to-All paths |
-| **Speed** | Fast O(V+E) | Fast O(V+E) | Slower O(E log V) | Very Slow O(V^3) |
-
-> **Key Takeaway:** Multi-Source BFS is just BFS, but you "cheat" by starting the race with multiple runners already on the track.
-
-
-# Disjoint Set Union: Union-Find Algorithm
-
-Here is a detailed, easy-to-understand guide to the Disjoint Set Union (DSU), also known as the Union-Find algorithm.
-
----
-
-### **1. Why Do We Need It? (The Problem)**
-
-Imagine you are managing a social network. You have a massive list of people, and occasionally, two people become "friends." Friends of friends are also considered connected.
-
-**The Challenge:**
-You frequently get two types of queries:
-
-1. **Connect:** "Alice and Bob just became friends."
-2. **Query:** "Are Alice and Charlie connected (directly or indirectly)?"
-
-If you use standard Graph algorithms like BFS or DFS (Breadth-First Search) to answer "Are they connected?", it takes **O(N)** time (linear time) for *every* query. If you have millions of users and millions of queries, BFS is too slow.
-
-**The Solution:**
-We need a way to connect items and check connectivity almost **instantly**. This is what Union-Find does. It solves the **Dynamic Connectivity Problem**.
-
----
-
-### **2. What Is It?**
-
-Union-Find is a data structure that keeps track of a set of elements partitioned into a number of disjoint (non-overlapping) subsets.
-
-Think of it as a collection of "gangs" or "clubs."
-
-* Initially, everyone is in their own club of one.
-* **Union:** Merging two clubs together.
-* **Find:** Asking "Which club does this person belong to?" (represented by the club's leader).
-
-If Person A and Person B have the same leader, they are in the same club.
-
----
-
-### **3. How It Works**
-
-We represent these sets as **Trees**.
-
-* Each element is a node.
-* Each subset is a tree.
-* The "Leader" (or Representative) is the **root** of the tree.
-
-#### **Key Optimizations**
-
-To make this algorithm lightning fast, we use two tricks:
-
-1. **Path Compression (The "Shortcut"):**
-When we look for the leader of a node, we make that node point *directly* to the leader so we don't have to traverse the whole chain next time.
-**Before Find(D):**
-A (Leader) -> B -> C -> D
-**After Find(D):**
-A (Leader) -> B
-A (Leader) -> C
-A (Leader) -> D
-*(Now C and D point directly to A)*
-2. **Union by Rank/Size (The "Balance"):**
-When merging two trees, we always attach the **shorter** tree under the **taller** tree. This prevents the tree from becoming a long, thin line (linked list), keeping it flat and fast.
-
----
-
-### **4. Visual Walkthrough**
-
-Let's say we have 5 elements: `0, 1, 2, 3, 4`.
-
-**Step 1: Initialization**
-Everyone is their own parent (leader).
-
-```text
-[0]   [1]   [2]   [3]   [4]
- ^     ^     ^     ^     ^
- |     |     |     |     |
-Leader Leader Leader Leader Leader
-
-```
-
-* Parent Array: `[0, 1, 2, 3, 4]`
-
-**Step 2: Union(0, 1)**
-Connect 0 and 1. We make 0 the leader of 1.
-
-```text
-   0 (Leader)
-  /
- 1
-
-[2]   [3]   [4]
-
-```
-
-* Parent Array: `[0, 0, 2, 3, 4]`
-
-**Step 3: Union(2, 3)**
-Connect 2 and 3. We make 2 the leader of 3.
-
-```text
-   0          2 (Leader)
-  /          /
- 1          3
-
-[4]
-
-```
-
-* Parent Array: `[0, 0, 2, 2, 4]`
-
-**Step 4: Union(1, 4)**
-We find the leader of 1 (which is 0). We find the leader of 4 (which is 4). We attach 4 to 0.
-
-```text
-      0 (Leader)     2 (Leader)
-     / \            /
-    1   4          3
-
-```
-
-* Parent Array: `[0, 0, 2, 2, 0]`
-
-**Step 5: Union(3, 4)**
-This connects the two big components.
-
-1. Find leader of 3 -> **2**
-2. Find leader of 4 -> **0**
-3. Attach 2 (shorter tree) under 0 (taller tree).
-
-```text
-         0 (Ultimate Leader)
-       / | \
-      1  4  2
-            |
-            3
-
-```
-
-* Now, `Find(3)` will return 0. `Find(1)` returns 0. They are connected.
-
----
-
-### **5. Complexity Analysis**
-
-Using both Path Compression and Union by Rank, the time complexity is nearly constant.
-
-**Time Complexity:** `O(alpha(N))`
-
-* `alpha` is the **Inverse Ackermann function**.
-* For all practical values of N (even up to the number of atoms in the universe), `alpha(N)` is **less than 5**.
-* It is essentially `O(1)` (constant time) for practical purposes.
-
-**Space Complexity:** `O(N)`
-
-* We need an array to store the parent of each node.
-
-**Visualization of Speed:**
-
-```text
-Time taken per operation
-^
-|
-|   O(N) - Linear (DFS/BFS)
-|   /
-|  /
-| /
-|/
-|----------------------- O(log N) - Logarithmic (Binary Search)
-|
-|_______________________ O(alpha(N)) - Union Find (The floor!)
-+-----------------------> Number of Elements
-
-```
-
----
-
-### **6. Implementation**
-
-Here is the efficient implementation with Path Compression and Union by Rank.
-
-#### **Python**
-
-```python
-class UnionFind:
-    def __init__(self, size):
-        # Initially, each node is its own parent
-        self.parent = list(range(size))
-        # Rank helps to keep the tree flat (height approximation)
-        self.rank = [1] * size
-
-    def find(self, p):
-        # Path Compression:
-        # If p is not its own parent, recursively find the root
-        # and update p's parent to directly point to the root.
-        if self.parent[p] != p:
-            self.parent[p] = self.find(self.parent[p])
-        return self.parent[p]
-
-    def union(self, p, q):
-        rootP = self.find(p)
-        rootQ = self.find(q)
-
-        # If they are already in the same set, do nothing
-        if rootP == rootQ:
-            return False
-
-        # Union by Rank: Attach smaller tree to larger tree
-        if self.rank[rootP] > self.rank[rootQ]:
-            self.parent[rootQ] = rootP
-        elif self.rank[rootP] < self.rank[rootQ]:
-            self.parent[rootP] = rootQ
-        else:
-            self.parent[rootQ] = rootP
-            self.rank[rootP] += 1
-        
-        return True
-
-# Usage
-dsu = UnionFind(5)
-dsu.union(0, 1)
-dsu.union(2, 3)
-dsu.union(1, 4)
-print(dsu.find(3) == dsu.find(4)) # False (before connecting components)
-dsu.union(3, 4)
-print(dsu.find(3) == dsu.find(4)) # True (after connecting)
-
-```
-
-#### **JavaScript**
-
-```javascript
-class UnionFind {
-    constructor(size) {
-        // Create array [0, 1, 2, ..., size-1]
-        this.parent = Array.from({ length: size }, (_, i) => i);
-        this.rank = new Array(size).fill(1);
-    }
-
-    find(p) {
-        // Path Compression
-        if (this.parent[p] !== p) {
-            this.parent[p] = this.find(this.parent[p]);
-        }
-        return this.parent[p];
-    }
-
-    union(p, q) {
-        const rootP = this.find(p);
-        const rootQ = this.find(q);
-
-        if (rootP === rootQ) return false;
-
-        // Union by Rank
-        if (this.rank[rootP] > this.rank[rootQ]) {
-            this.parent[rootQ] = rootP;
-        } else if (this.rank[rootP] < this.rank[rootQ]) {
-            this.parent[rootP] = rootQ;
-        } else {
-            this.parent[rootQ] = rootP;
-            this.rank[rootP] += 1;
-        }
-        return true;
-    }
-}
-
-```
-
----
-
-### **7. How to Apply to LeetCode Problems**
-
-**Problem Idea: "Redundant Connection" (LeetCode 684)**
-
-* **The Prompt:** You are given a set of edges. A graph is a tree if it has no cycles. Find an edge that, if removed, makes the graph a tree (i.e., find the edge that created a cycle).
-
-**Strategy:**
-Iterate through every edge `[u, v]` in the input.
-
-1. Check `find(u)` and `find(v)`.
-2. If `find(u) == find(v)`, it means `u` and `v` are **already connected** by a previous path. Adding this edge `[u, v]` would create a loop (a cycle). **This is your answer!**
-3. If they are not connected, `union(u, v)` and continue.
-
-**Other Identifiers:**
-Use Union-Find when you see keywords like:
-
-* "Number of connected components"
-* "Group the items together"
-* "Equivalence classes"
-* "Graph validity" (checking for cycles)
-
----
-
-### **8. Comparison with Other Algorithms**
-
-| Feature | Union-Find | DFS / BFS |
-| --- | --- | --- |
-| **Primary Use** | Dynamic Connectivity (adding edges live) | Static Connectivity (graph is fixed) |
-| **Handling Cycles** | Excellent (Detects cycle instantly) | Good (Detects via visited set) |
-| **Path Finding** | Cannot find the *path* (only if connected) | Can find the actual path between nodes |
-| **Complexity** | Almost O(1) per operation | O(V + E) per traversal |
-| **Implementation** | Array-based (Very compact) | Stack/Queue + Adjacency List |
-
-
-# Single Source Shortest Path: Djikstra's Algorithm
-
-Here is a comprehensive guide to **Dijkstra's Algorithm**, explained using plain text, ASCII visualizations, and code, strictly adhering to your preference for non-mathematical notation.
-
----
-
-## 1. The Problem: Why Do We Need This?
-
-Imagine you are driving and using a GPS. You are at **Point A** (Home) and want to get to **Point B** (Work).
-
-* There are many roads (edges) connecting many intersections (nodes).
-* Each road has a "cost" or "weight." This could be **distance**, **time** (traffic), or **tolls**.
-
-You don't just want *any* path; you want the **cheapest** path (shortest distance or fastest time).
-
-**The Challenge:**
-A simple breadth-first search (BFS) assumes every road takes the same amount of time (weight = 1). In the real world, highways are faster than dirt roads. We need an algorithm that respects these different weights.
-
----
-
-## 2. What is Dijkstra's Algorithm?
-
-**Dijkstra's Algorithm** finds the shortest path from a single starting point (Source) to **all other points** in a graph with **non-negative weights**.
-
-**Key Analogy:**
-Imagine dumping a bucket of water on the starting node. The water spreads along the pipes (edges). It will reach closer nodes first before flowing to further ones. Dijkstra's algorithm calculates exactly when the water reaches every other node.
-
-**Core Principles:**
-
-1. **Greedy Approach:** Always process the closest "unvisited" node next.
-2. **Relaxation:** If we find a shortcut to a node through the current node, we update its distance.
-* *Example:* If I thought it took 10 minutes to get to Node X, but I found a path through Node Y that takes only 8 minutes, I "relax" the edge and update Node X's distance to 8.
-
-
-
----
-
-## 3. Visual Walkthrough (ASCII)
-
-Let's find the shortest path from **Start Node (A)** to all other nodes.
-
-**The Graph:**
-
-* Nodes: A, B, C, D, E
-* Weights are numbers on the lines.
-
-```text
-      (4)
-  A --------> B
-  |           | \
-  |           |  \ (3)
-  | (2)       | (1)
-  v           v    \
-  C --------> D ---> E
-      (5)      (1)
-
-```
-
-**Connections (Weights):**
-
-* A -> B (4)
-* A -> C (2)
-* C -> B (1)  <-- Note: This creates a shortcut to B!
-* C -> D (5)
-* B -> D (1)
-* B -> E (3)
-* D -> E (1)
-
-### Initialization
-
-We track two things:
-
-1. **Shortest Distance:** Known distance from A to a node (starts at 'infinity' for everyone except A).
-2. **Priority Queue:** A list of nodes to visit, sorted by shortest distance.
-
-**Start State:**
-
-* Current Node: **A** (Distance: 0)
-* Unvisited: {B, C, D, E}
-
-```text
-DISTANCES:
-[ A: 0 ]
-[ B: inf ]
-[ C: inf ]
-[ D: inf ]
-[ E: inf ]
-
-```
-
----
-
-### Step 1: Visit Node A
-
-Look at neighbors of A: **B** and **C**.
-
-* Distance to B = A's dist (0) + weight (4) = **4**. (4 is less than inf, so update).
-* Distance to C = A's dist (0) + weight (2) = **2**. (2 is less than inf, so update).
-
-**Mark A as visited.**
-Who is next? We look at the unvisited nodes with the smallest distance: B(4) vs C(2). **C is smaller.**
-
-```text
-STATUS UPDATE:
-Visited: {A}
-Queue: [ C: 2, B: 4 ]  <-- C is at the front because 2 < 4
-
-DISTANCES:
-[ A: 0 ]
-[ B: 4 ]
-[ C: 2 ]  <-- Next to visit
-[ D: inf ]
-[ E: inf ]
-
-```
-
----
-
-### Step 2: Visit Node C (Distance: 2)
-
-Neighbors of C: **B** and **D**.
-
-* **Check B:**
-* Current known distance to B is **4** (via A->B).
-* New path via C: (Distance to C) + (C->B) = 2 + 1 = **3**.
-* **3 < 4**, so we found a shortcut! **Update B to 3.**
-
-
-* **Check D:**
-* New path via C: (Distance to C) + (C->D) = 2 + 5 = **7**.
-* Update D to 7.
-
-
-
-**Mark C as visited.**
-Who is next? Smallest in Queue: B(3) vs D(7). **B is smaller.**
-
-```text
-STATUS UPDATE:
-Visited: {A, C}
-Queue: [ B: 3, D: 7 ]
-
-DISTANCES:
-[ A: 0 ]
-[ B: 3 ]  <-- Updated from 4! (Shortcut found)
-[ C: 2 ]
-[ D: 7 ]
-[ E: inf ]
-
-```
-
----
-
-### Step 3: Visit Node B (Distance: 3)
-
-Neighbors of B: **D** and **E**.
-
-* **Check D:**
-* Current known distance to D is **7** (via C).
-* New path via B: (Distance to B) + (B->D) = 3 + 1 = **4**.
-* **4 < 7**, shortcut found! **Update D to 4.**
-
-
-* **Check E:**
-* New path via B: (Distance to B) + (B->E) = 3 + 3 = **6**.
-* Update E to 6.
-
-
-
-**Mark B as visited.**
-Who is next? Smallest in Queue: D(4) vs E(6). **D is smaller.**
-
-```text
-STATUS UPDATE:
-Visited: {A, C, B}
-Queue: [ D: 4, E: 6 ]
-
-DISTANCES:
-[ A: 0 ]
-[ B: 3 ]
-[ C: 2 ]
-[ D: 4 ]  <-- Updated from 7!
-[ E: 6 ]
-
-```
-
----
-
-### Step 4: Visit Node D (Distance: 4)
-
-Neighbors of D: **E**.
-
-* **Check E:**
-* Current known distance to E is **6**.
-* New path via D: (Distance to D) + (D->E) = 4 + 1 = **5**.
-* **5 < 6**, shortcut found! **Update E to 5.**
-
-
-
-**Mark D as visited.**
-Only E is left.
-
-```text
-STATUS UPDATE:
-Visited: {A, C, B, D}
-Queue: [ E: 5 ]
-
-DISTANCES:
-[ A: 0 ]
-[ B: 3 ]
-[ C: 2 ]
-[ D: 4 ]
-[ E: 5 ]  <-- Updated from 6!
-
-```
-
----
-
-### Final Result
-
-Shortest paths from A:
-
-* A: 0
-* B: 3 (Path: A -> C -> B)
-* C: 2 (Path: A -> C)
-* D: 4 (Path: A -> C -> B -> D)
-* E: 5 (Path: A -> C -> B -> D -> E)
-
----
-
-## 4. Complexity Analysis (ASCII)
-
-Here is how the algorithm scales.
-
-* **V** = Number of Vertices (Nodes)
-* **E** = Number of Edges (Connections)
-
-### Time Complexity
-
-Using a Min-Priority Queue (Heap): **O(E * log V)**
-
-Think of it as: For every road (Edge), we might have to sort the list of cities (log V).
-
-```text
-TIME SPENT
-|
-|         (Edges * log(Nodes))
-|       ________________________
-|      |                        |
-|      | Processing Neighbors   |
-|      | & Updating Queue       |
-|      |________________________|
-|__________________________________
-           Input Size
-
-```
-
-### Space Complexity
-
-**O(V + E)**
-We need to store the graph (V + E) and the distances/priority queue (V).
-
-```text
-MEMORY USED
-|
-|    [Graph Storage]    [Distances Array]
-|    (Nodes + Edges)       (Nodes)
-|       O(V + E)            O(V)
-|__________________________________________
-
-```
-
----
-
-## 5. Code Implementation
-
-### Python
-
-We use `heapq` because it is efficient.
-
-```python
-import heapq
-
-def dijkstra(graph, start_node):
-    # 1. Initialize distances to infinity, start_node to 0
-    # Dictionary to store shortest distance to each node
-    distances = {node: float('inf') for node in graph}
-    distances[start_node] = 0
-    
-    # 2. Priority Queue: stores tuples of (current_distance, node)
-    # We start with the source node
-    priority_queue = [(0, start_node)]
-    
-    while priority_queue:
-        # Pop the node with the smallest distance
-        current_dist, current_node = heapq.heappop(priority_queue)
-        
-        # Optimization: If we found a shorter way to this node already, skip
-        if current_dist > distances[current_node]:
-            continue
-        
-        # Explore neighbors
-        for neighbor, weight in graph[current_node].items():
-            distance = current_dist + weight
-            
-            # If a shorter path is found
-            if distance < distances[neighbor]:
-                distances[neighbor] = distance
-                # Push to queue with new priority
-                heapq.heappush(priority_queue, (distance, neighbor))
-                
-    return distances
-
-# Example Graph (from the ASCII diagrams)
-graph = {
-    'A': {'B': 4, 'C': 2},
-    'B': {'D': 1, 'E': 3},
-    'C': {'B': 1, 'D': 5},
-    'D': {'E': 1},
-    'E': {}
-}
-
-print(dijkstra(graph, 'A'))
-# Output: {'A': 0, 'B': 3, 'C': 2, 'D': 4, 'E': 5}
-
-```
-
-### JavaScript
-
-JavaScript does not have a built-in Priority Queue, so for simple problems, we can use an array and sort it (less efficient) or implement a MinHeap class (efficient). Below is a conceptual version using a simple array sort for readability.
-
-```javascript
-function dijkstra(graph, startNode) {
-    // 1. Initialize distances
-    let distances = {};
-    for (let node in graph) {
-        distances[node] = Infinity;
-    }
-    distances[startNode] = 0;
-
-    // 2. Priority Queue (Simple Array for demo)
-    // In production, use a proper MinHeap data structure
-    let pq = [[0, startNode]];
-
-    while (pq.length > 0) {
-        // Sort to simulate Priority Queue (Smallest distance first)
-        pq.sort((a, b) => a[0] - b[0]);
-        
-        // Get node with smallest distance
-        let [currentDist, currentNode] = pq.shift();
-
-        if (currentDist > distances[currentNode]) continue;
-
-        // Check neighbors
-        let neighbors = graph[currentNode];
-        for (let neighbor in neighbors) {
-            let weight = neighbors[neighbor];
-            let newDist = currentDist + weight;
-
-            if (newDist < distances[neighbor]) {
-                distances[neighbor] = newDist;
-                pq.push([newDist, neighbor]);
-            }
-        }
-    }
-    return distances;
-}
-
-const graph = {
-    'A': {'B': 4, 'C': 2},
-    'B': {'D': 1, 'E': 3},
-    'C': {'B': 1, 'D': 5},
-    'D': {'E': 1},
-    'E': {}
-};
-
-console.log(dijkstra(graph, 'A'));
-
-```
-
----
-
-## 6. LeetCode Strategy: How to use this
-
-When you see a problem on LeetCode, ask yourself these questions to see if Dijkstra is the right tool:
-
-1. **Is it a graph?** (Are there states/nodes and connections?)
-2. **Are there weights?** (Does moving from A to B cost something different than C to D?)
-3. **Are weights non-negative?** (Dijkstra fails if weights are negative).
-4. **Are you looking for a minimum cost/time/path?**
-
-**Mental Template for Solving:**
-
-> "I need to track the 'best so far' cost for every node. I will use a Min-Heap to always process the cheapest option next. If I find a cheaper way to a node, I update it and add it to the heap."
-
-**Common LeetCode variations:**
-
-* **Network Delay Time:** Find how long it takes for a signal to reach all nodes. (Classic Dijkstra).
-* **Cheapest Flights Within K Stops:** Dijkstra, but with a constraint on the number of edges used (often requires a slight modification or Bellman-Ford if straightforward).
-* **Path with Minimum Effort:** The "weight" might be the absolute difference in height between two cells in a grid.
-
----
-
-## 7. Comparison with Other Algorithms
-
-| Algorithm | Best Used For | Key Difference | Weights Allowed |
+| Feature | Floyd-Warshall | Dijkstra | Bellman-Ford |
 | --- | --- | --- | --- |
-| **BFS (Breadth-First Search)** | Unweighted Graphs | Explores layer by layer. Like Dijkstra but assumes all edge weights are 1. | N/A (assumes 1) |
-| **Dijkstra** | Weighted Graphs | Uses a Priority Queue to prioritize lower costs. | Must be **Positive** |
-| **Bellman-Ford** | Graphs with Negative Weights | Can detect negative cycles. Much slower than Dijkstra. | Positive & **Negative** |
-| **A* (A-Star)** | Pathfinding to a specific Target | Uses a "Heuristic" (guess) to guide the search toward the goal faster. | Positive |
+| **Goal** | All-Pairs Shortest Path | Single-Source Shortest Path | Single-Source Shortest Path |
+| **Complexity** | **O(N^3)** | **O(E + V log V)** | **O(V * E)** |
+| **Negative Edges?** | Yes | No | Yes |
+| **Implementation** | Very Short (4-5 lines of logic) | Moderate (Priority Queue needed) | Moderate |
+| **Best For** | Small graphs (N < 500), Dense graphs | Large graphs, Sparse graphs | Detecting negative cycles |
 
-### Summary Algorithm Choice Flowchart (ASCII)
+# Minimum Spanning Tree: Prim's Algorithm
+
+Here is a complete, easy-to-understand breakdown of Prim's Algorithm, showing exactly how it works without getting bogged down in unnecessary theory.
+
+## The Problem It Solves
+
+Imagine you are a city planner who needs to connect a set of new towns with a power grid. Laying down power lines costs money, and the cost varies depending on the distance and terrain between specific towns.
+
+You need to connect all the towns together so power can flow anywhere, but you want to spend the absolute minimum amount of money. You do not care if the path between Town A and Town Z is indirect, as long as they are connected.
+
+This is the **Minimum Spanning Tree (MST)** problem. A "Spanning Tree" is a subset of paths that connects all points together without forming any redundant loops (cycles). The "Minimum" part means it has the lowest possible total cost.
+
+## What It Is & How It Works
+
+Prim's Algorithm is a **greedy algorithm** used to find the Minimum Spanning Tree for a weighted, undirected graph.
+
+It works by building the tree one step at a time, always making the cheapest local choice:
+
+1. **Start anywhere:** Pick a random starting node. Mark it as "visited".
+2. **Look around:** Look at all the edges connecting your visited nodes to unvisited nodes.
+3. **Be greedy:** Pick the edge with the absolute lowest cost.
+4. **Expand:** Add the new node to your "visited" group.
+5. **Repeat:** Repeat steps 2-4 until every single node is visited.
+
+---
+
+## Example Walkthrough
+
+Let's use a simple graph with 4 nodes (A, B, C, D) and 5 connecting edges. We will build the MST step by step.
 
 ```text
-Is the graph Weighted?
-      |
-      NO -----> Use BFS (Simple Queue)
-      |
-      YES
-      |
-      v
-Are there Negative Weights?
-      |
-      YES ----> Use Bellman-Ford
-      |
-      NO
-      |
-      v
-Dijkstra's Algorithm (Min-Heap)
+=== Step 0: The Initial Graph ===
+Here are our nodes and the cost to travel between them.
+    (4)
+ A-------C
+  \     / \
+(1)\   /(2)\(3)
+    \ /     \
+     B-------D
+        (5)
 
 ```
-
-# Single Source Shortest Path: Bellman Ford Algorithm
-
-Here is a detailed guide to the Bellman-Ford Algorithm, designed to be clear and visual without using complex mathematical notation.
-
----
-
-## 1. The Problem: Why do we need Bellman-Ford?
-
-In graph theory, the **Single Source Shortest Path (SSSP)** problem asks: *"If I start at Node A, what is the shortest path to every other node in the graph?"*
-
-Most people use **Dijkstra's Algorithm** for this. However, Dijkstra's algorithm fails if the graph has **negative edge weights**.
-
-* **Example:** Imagine a game where traveling usually costs energy (positive weight), but sliding down a magic chute *gives* you energy back (negative weight). Dijkstra cannot handle the magic chute correctly.
-
-**The Solution:** The **Bellman-Ford Algorithm** can calculate shortest paths even if edges have negative weights. It can also detect **Negative Weight Cycles** (infinite loops where you keep gaining energy forever).
-
----
-
-## 2. What is it and How does it work?
-
-Bellman-Ford is based on the **Relaxation Principle**. It is slower than Dijkstra but more versatile.
-
-### The Core Idea: "Relaxation"
-
-To "relax" an edge means to check if we can improve the shortest path to a node by going through a specific neighbor.
-
-* Current best distance to Node B is infinity.
-* Current best distance to Node A is 5.
-* There is an edge from A -> B with weight 2.
-* **Relaxation:** Is `(Distance to A) + (Weight A->B) < (Current Distance to B)`?
-* Is `5 + 2 < infinity`?
-* Yes! Update distance to Node B to 7.
-
-
-### The Algorithm Logic
-
-1. **Initialize:** Set the distance to the Source Node to 0 and all other nodes to Infinity.
-2. **Iterate:** Repeat the following process **V - 1** times (where V is the number of vertices/nodes):
-* Look at **every single edge** in the graph.
-* Try to relax that edge.
-
-
-3. **Check for Cycles:** Run the relaxation one more time. If any distance still changes, it means there is a **Negative Weight Cycle**.
-
----
-
-## 3. Complexity Analysis
-
-Here is the breakdown of the efficiency using ASCII visualizations.
-
-### Time Complexity
-
-Since we iterate (V-1) times and check all E edges each time:
-
-```text
-  Time Complexity: O(V * E)
-  
-  +-----------------------+
-  | Loop V times          |  <-- Outer Loop (Vertices)
-  |   +-----------------+ |
-  |   | Check E edges   | |  <-- Inner Loop (Edges)
-  |   +-----------------+ |
-  +-----------------------+
-
-```
-
-* **Best Case:** O(E) (If the edges happen to be ordered perfectly, though standard implementation is always O(V*E)).
-* **Worst Case:** O(V * E).
-
-### Space Complexity
-
-We only need to store the distance to each node.
-
-```text
-  Space Complexity: O(V)
-
-  [ Dist A | Dist B | Dist C | ... | Dist V ]
-
-```
-
----
-
-## 4. Visual Walkthrough (ASCII)
-
-Let's find the shortest path from **Node A**.
-
-**The Graph:**
-
-* Nodes: A, B, C
-* Edges:
-* A -> B (weight: 4)
-* A -> C (weight: 2)
-* C -> B (weight: -10) **(Negative Edge!)**
-
-
-
-### Step 0: Initialization
-
-Set Source (A) to 0, others to Infinity (Inf).
-
-```text
-      (0)            (Inf)
-       A ------------> B
-       |             ^
-       | (2)         | (-10)
-       |             |
-       v             |
-       C ------------+
-     (Inf)
-
-```
-
-### Iteration 1 (Relax all edges)
-
-1. **Check A -> B (weight 4):**
-* Is `Dist(A) + 4 < Dist(B)`?
-* `0 + 4 < Inf`? **YES**.
-* Update B to 4.
-
-
-2. **Check A -> C (weight 2):**
-* Is `Dist(A) + 2 < Dist(C)`?
-* `0 + 2 < Inf`? **YES**.
-* Update C to 2.
-
-
-3. **Check C -> B (weight -10):**
-* Is `Dist(C) + (-10) < Dist(B)`?
-* `2 + (-10) < 4`?
-* `-8 < 4`? **YES**.
-* Update B to -8.
-
-
-
-**End of Iteration 1:**
-
-```text
-      (0)             (-8)
-       A ------------> B
-       |             ^
-       | (2)         | (-10)
-       |             |
-       v             |
-       C ------------+
-      (2)
-
-```
-
-*Note: We normally repeat this V-1 times (2 times here). In the second iteration, no values would change because the paths are already optimal.*
-
-**Final Result:**
-
-* Path A -> B is cost -8 (Route: A -> C -> B).
-* Path A -> C is cost 2.
-
----
-
-## 5. Implementation
-
-### Python Code
-
-```python
-def bellman_ford(graph, num_nodes, start_node):
-    # Step 1: Initialize distances
-    # Using float('inf') to represent infinity
-    distances = {node: float('inf') for node in range(num_nodes)}
-    distances[start_node] = 0
-
-    # Step 2: Relax edges V-1 times
-    # 'graph' is a list of tuples: (u, v, weight)
-    for _ in range(num_nodes - 1):
-        for u, v, weight in graph:
-            if distances[u] != float('inf') and distances[u] + weight < distances[v]:
-                distances[v] = distances[u] + weight
-
-    # Step 3: Check for Negative Cycles
-    for u, v, weight in graph:
-        if distances[u] != float('inf') and distances[u] + weight < distances[v]:
-            print("Graph contains negative weight cycle")
-            return None
-
-    return distances
-
-# Example Usage
-# Nodes: 0, 1, 2
-# Edges: 0->1 (4), 0->2 (2), 2->1 (-10)
-edges = [
-    (0, 1, 4),
-    (0, 2, 2),
-    (2, 1, -10)
-]
-print(bellman_ford(edges, 3, 0))
-# Output: {0: 0, 1: -8, 2: 2}
-
-```
-
-### JavaScript Code
-
-```javascript
-function bellmanFord(edges, numNodes, startNode) {
-    // Step 1: Initialize distances
-    let distances = new Array(numNodes).fill(Infinity);
-    distances[startNode] = 0;
-
-    // Step 2: Relax edges V-1 times
-    for (let i = 0; i < numNodes - 1; i++) {
-        for (let [u, v, weight] of edges) {
-            if (distances[u] !== Infinity && distances[u] + weight < distances[v]) {
-                distances[v] = distances[u] + weight;
-            }
-        }
-    }
-
-    // Step 3: Check for Negative Cycles
-    for (let [u, v, weight] of edges) {
-        if (distances[u] !== Infinity && distances[u] + weight < distances[v]) {
-            console.log("Graph contains negative weight cycle");
-            return null;
-        }
-    }
-
-    return distances;
-}
-
-// Example Usage
-const edges = [
-    [0, 1, 4],
-    [0, 2, 2],
-    [2, 1, -10]
-];
-console.log(bellmanFord(edges, 3, 0));
-// Output: [ 0, -8, 2 ]
-
-```
-
----
-
-## 6. How to Use this for LeetCode
-
-When you see a graph problem on LeetCode, use this mental checklist to decide if Bellman-Ford is the right tool:
-
-1. **Does the problem mention costs/weights that can be negative?**
-* *Yes:* Immediate Bellman-Ford signal.
-
-
-2. **Does the problem ask to find a "cycle" that reduces cost?**
-* *Yes:* This is a Negative Cycle Detection problem.
-
-
-3. **Is the graph small?**
-* Bellman-Ford is O(V*E). If V > 5,000, this might Time Out (TLE). Dijkstra is faster (O(E log V)) but stricter on weights.
-
-
-
-**Specific LeetCode Problem Strategy:**
-
-* **Problem:** "Cheapest Flights Within K Stops"
-* **Strategy:** This is a modified Bellman-Ford. Instead of running the loop `V-1` times, you run it exactly `K+1` times. This restricts the path to only finding routes that use `K` stops or fewer.
-
----
-
-## 7. Comparison Table
-
-| Feature | Bellman-Ford | Dijkstra | BFS (Breadth-First Search) |
-| --- | --- | --- | --- |
-| **Edge Weights** | Handles Positive & Negative | Must be Non-Negative | Unweighted (all edges = 1) |
-| **Time Complexity** | Slow: O(V * E) | Fast: O(E log V) | Very Fast: O(V + E) |
-| **Detects Cycles?** | Yes (Negative Cycles) | No | No (for weights) |
-| **Use Case** | Financial graphs (arbitrage), small graphs with weird rules. | GPS, Maps, Network routing. | Peer-to-peer networks, web crawlers. |
-
-
-### Practice Problem with negative weights: "The Time Travel Paradox"
-
-**The Scenario:**
-Imagine you are navigating a network of star systems. Most routes take time (positive cost). However, there is a "wormhole" that actually sends you back in time (negative cost).
-
-**The Question:**
-Determine if there is a path in this star map where you can keep looping forever to travel infinitely far back in the past. In Computer Science terms: **"Does this graph contain a Negative Weight Cycle?"**
-
----
-
-### 1. The Graph Setup (ASCII)
-
-* **Nodes (Star Systems):** 0, 1, 2
-* **Edges (Routes):**
-* 0 -> 1 (Cost: 1)
-* 1 -> 2 (Cost: -5)  <-- *The Wormhole*
-* 2 -> 0 (Cost: 3)
-
-
-
-**Cycle Math:**
-If you go 0 -> 1 -> 2 -> 0:
-`1 + (-5) + 3 = -1`
-Every time you complete this loop, the total cost decreases by 1. This is a **Negative Cycle**.
-
----
-
-### 2. Step-by-Step Algorithm Walkthrough
-
-We have **3 Nodes** (V=3).
-We must run the relaxation loop **V-1 times** (2 times).
-Finally, we run it **1 extra time** to detect the cycle.
-
-**Initialization:**
-`Distances: [0, Inf, Inf]` (Start at Node 0)
-
-#### Iteration 1 (Standard Bellman-Ford Pass)
-
-We check all edges:
-
-1. **Edge 0->1 (weight 1):**
-* `Dist[0] + 1 < Dist[1]`? -> `0 + 1 < Inf`? **Yes.**
-* Update `Dist[1]` to **1**.
-* *State: [0, 1, Inf]*
-
-
-2. **Edge 1->2 (weight -5):**
-* `Dist[1] + (-5) < Dist[2]`? -> `1 - 5 < Inf`? **Yes.**
-* Update `Dist[2]` to **-4**.
-* *State: [0, 1, -4]*
-
-
-3. **Edge 2->0 (weight 3):**
-* `Dist[2] + 3 < Dist[0]`? -> `-4 + 3 < 0`? **Yes.**
-* Update `Dist[0]` to **-1**.
-* *State: [-1, 1, -4]*
-
-
-
-#### Iteration 2 (Standard Bellman-Ford Pass)
-
-We check all edges again using the new values `[-1, 1, -4]`:
-
-1. **Edge 0->1 (weight 1):**
-* `Dist[0] + 1 < Dist[1]`? -> `-1 + 1 < 1`? **Yes.**
-* Update `Dist[1]` to **0**.
-* *State: [-1, 0, -4]*
-
-
-2. **Edge 1->2 (weight -5):**
-* `Dist[1] - 5 < Dist[2]`? -> `0 - 5 < -4`? **Yes.**
-* Update `Dist[2]` to **-5**.
-* *State: [-1, 0, -5]*
-
-
-3. **Edge 2->0 (weight 3):**
-* `Dist[2] + 3 < Dist[0]`? -> `-5 + 3 < -1`? **Yes.**
-* Update `Dist[0]` to **-2**.
-* *State: [-2, 0, -5]*
-
-
-
-#### The Detection Step (Iteration 3)
-
-According to the algorithm, after V-1 iterations, we should be done. **If we can still relax an edge, a cycle exists.**
-
-Let's test **Edge 0->1** again:
-
-* Current `Dist[0]` is **-2**.
-* Current `Dist[1]` is **0**.
-* Check: `Dist[0] + 1 < Dist[1]`?
-* `-2 + 1 < 0`? -> `-1 < 0`? **YES!**
-
-**Conclusion:**
-Because we could still reduce the cost in the extra step, we have proven a **Negative Weight Cycle** exists. Infinite time travel is possible!
-
----
-
-### 3. Solution Code
-
-Here is how you would write a function specifically to **detect** this boolean condition.
-
-#### Python Solution
-
-```python
-def has_negative_cycle(num_nodes, edges, start_node):
-    # Step 1: Initialize
-    dist = {i: float('inf') for i in range(num_nodes)}
-    dist[start_node] = 0
-    
-    # Step 2: Relax V-1 times
-    for _ in range(num_nodes - 1):
-        for u, v, weight in edges:
-            if dist[u] != float('inf') and dist[u] + weight < dist[v]:
-                dist[v] = dist[u] + weight
-                
-    # Step 3: Cycle Detection Check
-    # We iterate through all edges ONE more time
-    for u, v, weight in edges:
-        if dist[u] != float('inf') and dist[u] + weight < dist[v]:
-            print(f"Cycle detected! Node {u} to {v} can still be reduced.")
-            return True # Cycle exists!
-            
-    return False # Safe graph
-
-# Test with our Time Travel graph
-# Nodes: 0, 1, 2
-# Edges: (0->1, w=1), (1->2, w=-5), (2->0, w=3)
-my_edges = [
-    (0, 1, 1),
-    (1, 2, -5),
-    (2, 0, 3)
-]
-
-print(f"Negative Cycle Detected? {has_negative_cycle(3, my_edges, 0)}")
-
-```
-
-#### JavaScript Solution
-
-```javascript
-function hasNegativeCycle(numNodes, edges, startNode) {
-    let dist = new Array(numNodes).fill(Infinity);
-    dist[startNode] = 0;
-    
-    // Step 2: Relax V-1 times
-    for (let i = 0; i < numNodes - 1; i++) {
-        for (let [u, v, weight] of edges) {
-            if (dist[u] !== Infinity && dist[u] + weight < dist[v]) {
-                dist[v] = dist[u] + weight;
-            }
-        }
-    }
-    
-    // Step 3: Cycle Detection Check
-    for (let [u, v, weight] of edges) {
-        if (dist[u] !== Infinity && dist[u] + weight < dist[v]) {
-            console.log(`Cycle detected between ${u} and ${v}`);
-            return true; // Cycle exists!
-        }
-    }
-    
-    return false;
-}
-
-const myEdges = [
-    [0, 1, 1],
-    [1, 2, -5],
-    [2, 0, 3]
-];
-
-console.log("Negative Cycle Detected?", hasNegativeCycle(3, myEdges, 0));
-
-```
-
-
-# Minimum Spanning Tree (MST): Prim's Algorithm
-
-### What Problem Does It Solve?
-
-Imagine you are a city planner who needs to connect several neighborhoods with fiber optic cables.
-
-* **The Goal:** Every neighborhood must be connected to the network (directly or indirectly).
-* **The Constraint:** You want to minimize the total cost of the cable used.
-* **The Catch:** You don't need redundant loops. If Neighborhood A is connected to B, and B to C, you don't need a direct cable from A to C if the cost is higher.
-
-This is the **Minimum Spanning Tree (MST)** problem. You have a "graph" of points (vertices) and possible connections (edges) with costs (weights). You need to select a subset of edges that connects everyone with the lowest total weight and no cycles.
-
----
-
-### What is Prim's Algorithm?
-
-Prim's Algorithm is a "greedy" strategy to find this MST. It builds the tree one node at a time, always picking the cheapest connection available from the nodes you have *already visited* to a node you *haven't visited yet*.
-
-**Core Logic:**
-
-1. Start at an arbitrary node.
-2. Look at all edges connecting your current "tree" to the outside world.
-3. Pick the shortest (cheapest) edge that leads to a new node.
-4. Add that node and edge to your tree.
-5. Repeat until all nodes are included.
-
----
-
-### Visual Walkthrough
-
-Let's trace Prim's algorithm on a simple graph.
-
-**The Graph:**
-Nodes: A, B, C, D, E
-
-Weights:
-
-* A-B: 4
-* A-C: 2
-* B-C: 3
-* B-D: 2
-* B-E: 3
-* C-D: 4
-* C-E: 5
-* D-E: 1
 
 **Step 1: Start at Node A**
-
-* **Visited:** {A}
-* **Available Edges from Visited:**
-* A -> B (cost 4)
-* A -> C (cost 2)
-
-
-* **Decision:** A -> C is cheaper (2 vs 4). Choose A-C.
+We start at A. We look at all edges connecting A to unvisited nodes. We can go to B (cost 1) or C (cost 4). We greedily pick the cheapest: A-B.
 
 ```text
-       A
-      /
-    (2)
-    /
-   C
+=== Step 1: Pick A-B (Cost 1) ===
+
+ A       C
+  \
+(1)\
+    \
+     B       D
+
+Visited: {A, B}
+Edges available to unvisited: A-C (4), B-C (2), B-D (5)
 
 ```
 
-**Step 2: Tree is now {A, C}**
-
-* **Visited:** {A, C}
-* **Available Edges from {A, C} to Unvisited:**
-* A -> B (cost 4)
-* C -> B (cost 3)
-* C -> D (cost 4)
-* C -> E (cost 5)
-
-
-* **Decision:** C -> B is the cheapest (cost 3). Choose C-B.
-* *Note: We ignore A->B (cost 4) because we found a cheaper way to get to B via C.*
+**Step 2: Expand the Tree**
+Now we look at all edges connecting our growing tree {A, B} to the unvisited nodes {C, D}. The cheapest available edge is B-C (cost 2). We pick it.
 
 ```text
-       A
-      /
-    (2)
-    /
-   C ---(3)--- B
+=== Step 2: Pick B-C (Cost 2) ===
+
+ A       C
+  \     /
+(1)\   /(2)
+    \ /
+     B       D
+
+Visited: {A, B, C}
+Edges available to unvisited: A-C (4), B-D (5), C-D (3)
+*Note: A-C (4) connects two already visited nodes, which would form a loop. We ignore it.*
 
 ```
 
-**Step 3: Tree is now {A, C, B}**
-
-* **Visited:** {A, C, B}
-* **Available Edges from {A, C, B} to Unvisited:**
-* C -> D (cost 4)
-* C -> E (cost 5)
-* B -> D (cost 2)
-* B -> E (cost 3)
-
-
-* **Decision:** B -> D is the cheapest (cost 2). Choose B-D.
+**Step 3: Finish the Tree**
+We need to connect D. The available edges are B-D (cost 5) or C-D (cost 3). We pick C-D.
 
 ```text
-       A
-      /
-    (2)
-    /
-   C ---(3)--- B
-               |
-              (2)
-               |
-               D
+=== Step 3: Pick C-D (Cost 3) ===
 
-```
+ A       C
+  \     / \
+(1)\   /(2)\(3)
+    \ /     \
+     B       D
 
-**Step 4: Tree is now {A, C, B, D}**
-
-* **Visited:** {A, C, B, D}
-* **Available Edges from {A, C, B, D} to Unvisited:**
-* C -> E (cost 5)
-* B -> E (cost 3)
-* D -> E (cost 1)
-
-
-* **Decision:** D -> E is the cheapest (cost 1). Choose D-E.
-
-```text
-       A
-      /
-    (2)
-    /
-   C ---(3)--- B
-               |
-              (2)
-               |
-               D ---(1)--- E
-
-```
-
-**Result:**
-All nodes {A, B, C, D, E} are visited.
-Total Cost: 2 + 3 + 2 + 1 = **8**
-
----
-
-### Complexity Analysis
-
-Here is the breakdown of efficiency using a Min-Priority Queue (the standard implementation).
-
-V = Number of Vertices (Nodes)
-E = Number of Edges
-
-| Metric | Complexity | Explanation |
-| --- | --- | --- |
-| **Time** | O(E * log V) | For every edge, we might push/pop from the priority queue. The heap operations take logarithmic time relative to the number of vertices. |
-| **Space** | O(V + E) | We need to store the graph (adjacency list) and the arrays to track weights and visited status. |
-
-**Ascii Visualization of Complexity:**
-
-```text
-Time Complexity Scale:
-Low -----------------------------------------> High
-       O(1)      O(V)      O(E log V)     O(V^2)
-                            ^
-                            |
-                     Prim's (Binary Heap)
+Visited: {A, B, C, D}
+All nodes visited! Algorithm finished.
+Total Minimum Cost = 1 + 2 + 3 = 6
 
 ```
 
 ---
 
-### Implementation
+## Code Implementation
 
-Here is how you would code this efficiently using a Min-Heap (Priority Queue).
+### Python (Min-Heap Approach)
 
-#### Python Code
+Using a priority queue (min-heap) is the most efficient way to continuously find the "cheapest available edge."
 
 ```python
 import heapq
 
 def prims_algorithm(n, edges):
-    # n: number of nodes
-    # edges: list of [u, v, weight]
-    
-    # Build Adjacency List
+    # Create an adjacency list: node -> [(weight, neighbor)]
     adj = {i: [] for i in range(n)}
-    for u, v, w in edges:
-        adj[u].append((v, w))
-        adj[v].append((u, w)) # MST is for undirected graphs
-
-    # Min-Heap to pick smallest weight edge
-    # Format: (weight, node_to)
-    min_heap = [(0, 0)] # Start at node 0 with cost 0
-    
-    visited = set()
-    total_cost = 0
-    mst_edges = 0
-    
-    while min_heap:
-        weight, u = heapq.heappop(min_heap)
+    for u, v, weight in edges:
+        adj[u].append((weight, v))
+        adj[v].append((weight, u))
         
-        # If we already visited this node, skip it
-        if u in visited:
+    mst_cost = 0
+    visited = set()
+    # Min-heap stores tuples of (weight, node). Start at node 0.
+    min_heap = [(0, 0)] 
+    
+    while len(visited) < n:
+        weight, node = heapq.heappop(min_heap)
+        
+        # If we've already added this node to our tree, skip it
+        if node in visited:
             continue
             
-        visited.add(u)
-        total_cost += weight
-        mst_edges += 1
+        visited.add(node)
+        mst_cost += weight
         
-        # If we have visited all nodes, we can stop early
-        if mst_edges == n:
-            break
-            
-        # Check neighbors
-        for v, w in adj[u]:
-            if v not in visited:
-                heapq.heappush(min_heap, (w, v))
+        # Add all unvisited neighbors to the priority queue
+        for next_weight, neighbor in adj[node]:
+            if neighbor not in visited:
+                heapq.heappush(min_heap, (next_weight, neighbor))
                 
-    return total_cost if len(visited) == n else -1
-
-# Example Usage
-# Nodes 0, 1, 2, 3, 4 represent A, B, C, D, E
-edges_data = [
-    [0, 1, 4], [0, 2, 2], [1, 2, 3], 
-    [1, 3, 2], [1, 4, 3], [2, 3, 4], 
-    [2, 4, 5], [3, 4, 1]
-]
-print(prims_algorithm(5, edges_data)) # Output: 8
+    return mst_cost
 
 ```
 
-#### JavaScript Code
+### JavaScript (Array Approach)
+
+JavaScript doesn't have a built-in priority queue. For smaller graphs, we can implement Prim's using an array to track the minimum edge connecting each node to the growing tree.
 
 ```javascript
-class MinPriorityQueue {
-  // Simple implementation of a Min Priority Queue for visualization
-  constructor() { this.heap = []; }
-  
-  enqueue(element, priority) {
-    this.heap.push({ element, priority });
-    this.heap.sort((a, b) => a.priority - b.priority); // O(N log N) for simplicity here
-  }
-  
-  dequeue() { return this.heap.shift(); }
-  isEmpty() { return this.heap.length === 0; }
-}
-
 function primsAlgorithm(n, edges) {
-    const adj = new Map();
-    for (let i = 0; i < n; i++) adj.set(i, []);
-    
-    for (const [u, v, w] of edges) {
-        adj.get(u).push([v, w]);
-        adj.get(v).push([u, w]);
+    const adj = Array.from({length: n}, () => []);
+    for (let [u, v, weight] of edges) {
+        adj[u].push([v, weight]);
+        adj[v].push([u, weight]);
     }
-
-    const pq = new MinPriorityQueue();
-    pq.enqueue(0, 0); // Start at node 0, cost 0
     
     const visited = new Set();
-    let totalCost = 0;
-
-    while (!pq.isEmpty()) {
-        const { element: u, priority: weight } = pq.dequeue();
-
-        if (visited.has(u)) continue;
-
-        visited.add(u);
-        totalCost += weight;
-
-        if (visited.size === n) break;
-
-        for (const [v, w] of adj.get(u)) {
-            if (!visited.has(v)) {
-                pq.enqueue(v, w);
+    const minEdge = Array(n).fill(Infinity);
+    minEdge[0] = 0; // Start at node 0
+    let mstCost = 0;
+    
+    for (let i = 0; i < n; i++) {
+        let currNode = -1;
+        let currMin = Infinity;
+        
+        // Find the unvisited node with the cheapest connection to our tree
+        for (let j = 0; j < n; j++) {
+            if (!visited.has(j) && minEdge[j] < currMin) {
+                currMin = minEdge[j];
+                currNode = j;
+            }
+        }
+        
+        if (currNode === -1) break; // Graph might be disconnected
+        
+        visited.add(currNode);
+        mstCost += currMin;
+        
+        // Update the minimum connection cost for unvisited neighbors
+        for (let [neighbor, weight] of adj[currNode]) {
+            if (!visited.has(neighbor) && weight < minEdge[neighbor]) {
+                minEdge[neighbor] = weight;
             }
         }
     }
-    
-    return visited.size === n ? totalCost : -1;
+    return mstCost;
 }
-
-// Example Usage
-const edgesData = [
-    [0, 1, 4], [0, 2, 2], [1, 2, 3], 
-    [1, 3, 2], [1, 4, 3], [2, 3, 4], 
-    [2, 4, 5], [3, 4, 1]
-];
-console.log(primsAlgorithm(5, edgesData)); // Output: 8
 
 ```
 
 ---
 
-### Algorithm Comparisons
+## Complexity Analysis
 
-It is helpful to know when to use Prim's versus others.
+```text
++-----------------------------------------------------------------+
+| Time and Space Complexity (Prim's Algorithm)                    |
++-----------------------------------------------------------------+
+| Approach              | Time               | Space              |
++-----------------------+--------------------+--------------------+
+| Array (JS Code)       | O(V^2)             | O(V + E)           |
+| Min-Heap (Python Code)| O(E log V)         | O(V + E)           |
+| Fibonacci Heap        | O(E + V log V)     | O(V + E)           |
++-----------------------+--------------------+--------------------+
+| V = Number of Vertices (Nodes)                                  |
+| E = Number of Edges                                             |
++-----------------------------------------------------------------+
 
-| Feature | Prim's Algorithm | Kruskal's Algorithm | Dijkstra's Algorithm |
-| --- | --- | --- | --- |
-| **Goal** | Minimum Spanning Tree (MST) | Minimum Spanning Tree (MST) | Shortest Path from Source |
-| **Strategy** | Grow a single tree from a source node. | Sort all edges by weight and merge disjoint sets. | Grow path from source, minimizing total distance from start. |
-| **Best For** | **Dense Graphs** (lots of edges per node). | **Sparse Graphs** (fewer edges). | Finding shortest route (GPS). |
-| **Data Structure** | Priority Queue + Visited Set | Union-Find (Disjoint Set) + Sorting | Priority Queue + Distance Array |
-| **Analogy** | A mold spreading to nearest food. | Building bridges between islands until all connected. | Driving directions. |
+```
 
----
-
-### Applying to LeetCode: "Min Cost to Connect All Points"
-
-A classic problem is **LeetCode 1584: Min Cost to Connect All Points**.
-
-**The Setup:**
-You are given an array of coordinates `points = [[x1,y1], [x2,y2]...]`. You need to connect all points. The cost is the Manhattan distance: `|x1 - x2| + |y1 - y2|`.
-
-**How to Think About It:**
-
-1. **Identify the structure:** "Connect all points" + "Min Cost" = Minimum Spanning Tree.
-2. **Dense Graph:** Since *every* point can connect to *every other* point, this is a "Complete Graph" (Dense).
-3. **Selection:** Prim's is usually preferred over Kruskal's for dense graphs because Kruskal's requires sorting O(E log E) edges. In a complete graph, E is roughly V^2, making sorting very expensive. Prim's avoids processing every single edge explicitly if implemented optimally.
-
-**Strategy:**
-
-* Treat point 0 as your starting node.
-* Calculate the distance from point 0 to all others and push to a Min-Heap.
-* Pop the closest point, add it to visited, and calculate distances from *that* point to remaining unvisited points.
-
-Would you like me to generate a solution specifically for that LeetCode problem?
-
-# Minimum Spanning Tree (MST): Kruskal's Algorithm
-
-Here is a detailed guide to Minimum Spanning Trees (MST) and Kruskal's Algorithm.
-
-### **The Problem: Why Do We Need This?**
-
-Imagine you are a city planner who needs to connect several neighborhoods with fiber-optic cables.
-
-* **Goal:** You must ensure *every* neighborhood is connected to the network.
-* **Constraint:** You have a limited budget, so you want to use the least amount of cable possible.
-* **Rule:** You don't need redundant loops (cycles). If Neighborhood A connects to B, and B connects to C, A is already connected to C. Adding a direct cable from A to C is unnecessary expense.
-
-This is the **Minimum Spanning Tree** problem. You need a subset of connections (edges) that connects all points (vertices) with the minimum total cost (weight).
+*Note: A Fibonacci heap gives the theoretically best time complexity, but is rarely used in standard interviews due to its complex implementation.*
 
 ---
 
-### **What is Kruskal's Algorithm?**
+## Application: LeetCode
 
-Kruskal's Algorithm is a **greedy** strategy to solve the MST problem. It builds the spanning tree by adding edges one by one into a growing spanning tree.
+**Problem Suggestion:** LeetCode 1584 - *Min Cost to Connect All Points*
+**How to think about it:** You are given an array of points on a 2D plane. The cost to connect two points is the Manhattan distance: `|xi - xj| + |yi - yj|`.
 
-**The Strategy:**
+1. Treat every point as a node.
+2. Because any point can connect to any other point, treat it as a fully connected graph where the "edge weight" is the Manhattan distance.
+3. Apply Prim's algorithm starting from point 0. Keep track of the cheapest distance to connect unvisited points to your growing cluster. This is the exact scenario Prim's was built for!
 
-1. **Be Cheap:** Always pick the smallest weight edge available in the entire graph.
-2. **Be Safe:** Only add that edge if it doesn't create a loop (cycle). If it creates a loop, discard it.
-3. **Repeat:** Keep doing this until all vertices are connected.
+---
 
-To handle the "cycle detection" efficiently, Kruskal's uses a data structure called **Disjoint Set Union (DSU)** or **Union-Find**. This keeps track of which vertices are already in the same group.
+## Comparison With Other Algorithms
+
+* **Prim's vs. Kruskal's Algorithm:** Both find the Minimum Spanning Tree. Kruskal's sorts *all* edges globally and picks them from cheapest to most expensive (skipping loops using a Union-Find data structure). Prim's builds a single tree outwards like a puddle expanding. Prim's is generally faster for dense graphs (lots of edges), while Kruskal's is great for sparse graphs.
+* **Prim's vs. Dijkstra's Algorithm:** They look incredibly similar and both use priority queues. However, Dijkstra's finds the shortest path from a starting node to *all other nodes*. It keeps track of the total accumulated distance from the start. Prim's only cares about the shortest distance from the *current tree edge* to the next node, ignoring how far away the starting node is.
+
+
+# Minimum Spanning Tree: Kruskal's Algorithm
+
+Here is a detailed guide to Kruskal's Algorithm, designed to be easy to visualize and apply.
+
+### 1. What is Kruskal's Algorithm and Why Do We Need It?
+
+**The Problem:** Imagine you are a city planner. You have several houses (nodes) that need to be connected to the power grid. You can build power lines (edges) between them, but each line costs a different amount of money based on distance or terrain (weight).
+
+**The Goal:** You need to connect **all** the houses so that everyone has power, but you want to spend the **minimum** amount of money possible. You do not need to create loops (redundant paths); you just need a single connected network.
+
+**The Solution:** This "cheapest connected network" is called a **Minimum Spanning Tree (MST)**. Kruskal's Algorithm is a strategy to find this MST efficiently.
+
+**How It Works (The "Greedy" Strategy):**
+Kruskal's is simple: it always picks the cheapest available option first.
+
+1. **Sort:** List every possible connection from cheapest to most expensive.
+2. **Select:** Start buying the cheapest connections.
+3. **Check:** Before buying a connection, check: "Does this create a loop (cycle)?"
+* If **No**: Buy it.
+* If **Yes**: Skip it (because those houses are already connected indirectly, so this line is a waste of money).
+
+
+4. **Repeat:** Keep going until all houses are part of a single network.
+
+---
+
+### 2. Visual Walkthrough
+
+Let's trace this step-by-step using a graph with **4 Nodes (0, 1, 2, 3)**.
+
+**Initial Graph (with Edge Weights):**
+
+```text
+      (0)
+     /   \
+   10     6
+   /       \
+ (1)--15--(2)
+   \       /
+    5     4
+     \   /
+      (3)
+
+```
+
+*List of Edges:* (0,1): 10 | (0,2): 6 | (1,2): 15 | (1,3): 5 | (2,3): 4
+
+**Step 1: Sort all edges by weight (Low to High)**
+
+1. (2, 3) - Weight: 4
+2. (1, 3) - Weight: 5
+3. (0, 2) - Weight: 6
+4. (0, 1) - Weight: 10
+5. (1, 2) - Weight: 15
+
+**Step 2: Process Edges**
+
+**Iteration A: Pick Edge (2, 3) [Weight 4]**
+*Check:* Are 2 and 3 connected? No.
+*Action:* **Add Edge.**
+
+```text
+      (0)       (Unconnected)
+
+   (1)        (2)
+               |
+               4  <-- Link formed
+               |
+              (3)
+
+```
+
+**Iteration B: Pick Edge (1, 3) [Weight 5]**
+*Check:* Are 1 and 3 connected? No.
+*Action:* **Add Edge.**
+
+```text
+      (0)       (Unconnected)
+
+   (1)        (2)
+     \         |
+      5        4
+       \       |
+        -----(3)
+
+```
+
+*Current Network:* 1-3-2 are all connected.
+
+**Iteration C: Pick Edge (0, 2) [Weight 6]**
+*Check:* Are 0 and 2 connected? No.
+*Action:* **Add Edge.**
+
+```text
+      (0)
+       \
+        6
+         \
+   (1)----(2)
+     \     |
+      5    4
+       \   |
+        --(3)
+
+```
+
+*Current Network:* All nodes (0, 1, 2, 3) are now connected!
+
+**Iteration D: Pick Edge (0, 1) [Weight 10]**
+*Check:* Are 0 and 1 connected?
+
+* 0 is connected to 2.
+* 2 is connected to 3.
+* 3 is connected to 1.
+* **Yes**, they are already in the same group. Adding this would create a closed loop (0-2-3-1-0).
+*Action:* **Skip / Discard.**
+
+**Iteration E: Pick Edge (1, 2) [Weight 15]**
+*Check:* Are 1 and 2 connected? Yes (via 3).
+*Action:* **Skip / Discard.**
+
+**Final Minimum Spanning Tree:**
+Total Cost = 4 + 5 + 6 = **15**
+
+```text
+      (0)
+       \
+        \
+         \
+   (1)    (2)
+     \     |
+      \    |
+       \   |
+        --(3)
+
+```
+
+---
+
+### 3. Complexity Analysis
+
+To implement the "Check" step efficiently (checking if nodes are already connected), we use a data structure called **Union-Find** (Disjoint Set Union).
+
+**Time Complexity: O(E log E)**
+E = Number of Edges, V = Number of Vertices (Nodes).
+
+```text
+  +---------------------------+---------------------------------------+
+  | Operation                 | Complexity                            |
+  +---------------------------+---------------------------------------+
+  | 1. Sorting Edges          | O(E log E)   <-- The dominant step    |
+  |                           |                                       |
+  | 2. Iterating Edges        | O(E)                                  |
+  |                           |                                       |
+  | 3. Union-Find Operations  | O(alpha(V))  <-- Nearly constant time |
+  +---------------------------+---------------------------------------+
+  | TOTAL                     | O(E log E)                            |
+  +---------------------------+---------------------------------------+
+
+```
+
+*Note: Sorting is usually the most expensive part. O(E log E) is effectively the same as O(E log V) for simple graphs.*
+
+**Space Complexity: O(V)**
+
+```text
+  [ Union-Find Arrays (Parent/Rank) ]
+  | Node 0 | Node 1 | Node 2 | ... | Node V |  --> Requires O(V) space
+
+```
+
+---
+
+### 4. Implementation Code
+
+Here is the clean implementation using the Union-Find helper structure.
+
+**Python:**
+
+```python
+class UnionFind:
+    def __init__(self, n):
+        # Initially, every node is its own parent
+        self.parent = list(range(n))
+        
+    def find(self, node):
+        # Find the representative (root) of the set
+        if self.parent[node] != node:
+            # Path compression: point directly to the root
+            self.parent[node] = self.find(self.parent[node])
+        return self.parent[node]
+    
+    def union(self, node1, node2):
+        root1 = self.find(node1)
+        root2 = self.find(node2)
+        
+        if root1 != root2:
+            # Union: Attach one root to the other
+            self.parent[root1] = root2
+            return True # Union was successful
+        return False # Cycle detected (already connected)
+
+def kruskals_algorithm(num_nodes, edges):
+    # edges format: [ [u, v, weight], ... ]
+    
+    # Step 1: Sort edges by weight (ascending)
+    edges.sort(key=lambda x: x[2])
+    
+    mst = []
+    min_cost = 0
+    uf = UnionFind(num_nodes)
+    edges_count = 0
+    
+    for u, v, weight in edges:
+        # Step 2 & 3: Check cycle and Add
+        if uf.union(u, v):
+            mst.append([u, v, weight])
+            min_cost += weight
+            edges_count += 1
+            
+            # Optimization: Stop if we have V-1 edges (tree is complete)
+            if edges_count == num_nodes - 1:
+                break
+                
+    return min_cost, mst
+
+# Example usage
+# Nodes: 0, 1, 2, 3
+graph_edges = [
+    [0, 1, 10],
+    [0, 2, 6],
+    [0, 3, 5], # Adding an extra edge for example
+    [1, 3, 15],
+    [2, 3, 4]
+]
+
+cost, tree = kruskals_algorithm(4, graph_edges)
+print(f"Minimum Cost: {cost}")
+print(f"Edges in MST: {tree}")
+
+```
+
+**JavaScript:**
+
+```javascript
+class UnionFind {
+  constructor(n) {
+    this.parent = Array.from({ length: n }, (_, i) => i);
+  }
+
+  find(node) {
+    if (this.parent[node] !== node) {
+      this.parent[node] = this.find(this.parent[node]);
+    }
+    return this.parent[node];
+  }
+
+  union(node1, node2) {
+    const root1 = this.find(node1);
+    const root2 = this.find(node2);
+
+    if (root1 !== root2) {
+      this.parent[root1] = root2;
+      return true;
+    }
+    return false;
+  }
+}
+
+function kruskalsAlgorithm(numNodes, edges) {
+  // Step 1: Sort edges by weight
+  edges.sort((a, b) => a[2] - b[2]);
+
+  const uf = new UnionFind(numNodes);
+  let minCost = 0;
+  const mstEdges = [];
+  let edgesCount = 0;
+
+  for (const [u, v, weight] of edges) {
+    // Step 2 & 3: Check cycle and Add
+    if (uf.union(u, v)) {
+      minCost += weight;
+      mstEdges.push([u, v, weight]);
+      edgesCount++;
+      
+      if (edgesCount === numNodes - 1) break;
+    }
+  }
+
+  return { minCost, mstEdges };
+}
+
+// Example usage
+const edges = [
+  [0, 1, 10], [0, 2, 6], [0, 3, 5],
+  [1, 3, 15], [2, 3, 4]
+];
+
+console.log(kruskalsAlgorithm(4, edges));
+
+```
+
+---
+
+### 5. Application & Comparison
+
+**LeetCode Strategy:**
+When you see a problem asking to "connect points" or "find the minimum cost to reach all nodes," think Kruskal's.
+
+* **Specific Problem:** *Min Cost to Connect All Points* (LeetCode 1584).
+* **Mental Model:** Treat every point as a node. Calculate the distance between every pair of points to create your edges. Sort those distances and run Kruskal's.
+
+**Comparison with Prim's Algorithm:**
+
+| Feature | Kruskal's Algorithm | Prim's Algorithm |
+| --- | --- | --- |
+| **Approach** | **Edge-centric:** Sorts all edges and picks the smallest. | **Node-centric:** Grows a tree from a single starting node. |
+| **Graph Type** | Better for **Sparse Graphs** (fewer edges). | Better for **Dense Graphs** (lots of edges). |
+| **Data Structure** | Uses **Union-Find**. | Uses **Priority Queue** (Min-Heap). |
+| **Disconnected?** | Can generate a "Forest" (multiple trees) if the graph isn't fully connected. | Only generates a single tree from the start node. |
+
+# Strongly Connected Components: Tarjan Algorithm
+
+### **Introduction to Tarjan's Algorithm**
+
+**What it is:**
+Tarjan's Algorithm is a highly efficient method used to find **Strongly Connected Components (SCCs)** in a directed graph.
+
+**What is an SCC?**
+A Strongly Connected Component is a group of nodes where every node can reach every other node within that specific group.
+
+**Why do we need it?**
+
+1. **Cycle Detection:** If an SCC has more than one node, or a single node with a self-loop, it contains a cycle.
+2. **Condensing Graphs:** It helps convert a messy graph with cycles into a "Directed Acyclic Graph" (DAG) of components, which is much easier to analyze.
+3. **Social Networks:** Finding tightly knit groups of friends where everyone knows everyone else.
+
+---
+
+### **Core Concepts**
+
+To understand Tarjan's, you only need to track two numbers for every node you visit:
+
+1. **ID (Discovery Time):** A unique number assigned to a node when you first visit it (0, 1, 2...).
+2. **Low Link Value:** The lowest ID that a node can reach (including itself) using the path it is currently on.
+
+**The Golden Rule:**
+If a node's **Low Link Value** is equal to its **ID** after you have finished checking all its neighbors, that node is the "root" or beginning of a Strongly Connected Component. You then pop everything off the stack until you reach that node.
 
 ---
 
 ### **Visual Walkthrough**
 
-Let's visualize this with a graph.
+We will use a Depth First Search (DFS). We also use a **Stack** to keep track of the nodes currently in our recursion.
 
 **The Graph:**
 
-* **Vertices (Nodes):** 0, 1, 2, 3
-* **Edges (Connections):**
-* 0 to 1 (Weight: 10)
-* 0 to 2 (Weight: 6)
-* 0 to 3 (Weight: 5)
-* 1 to 3 (Weight: 15)
-* 2 to 3 (Weight: 4)
-
-
-
-**Step 1: Sort All Edges**
-First, we list all edges and sort them from smallest weight to largest.
+* Node **A** points to **B**
+* Node **B** points to **C**
+* Node **C** points back to **A** (creating a cycle)
+* Node **B** also points to **D**
 
 ```text
-|   Source  | Destination |  Weight  |
-|-----------|-------------|----------|
-|     2     |      3      |     4    |  <-- Smallest
-|     0     |      3      |     5    |
-|     0     |      2      |     6    |
-|     0     |      1      |    10    |
-|     1     |      3      |    15    |  <-- Largest
+    +---+      +---+      +---+
+    | A | ---> | B | ---> | D |
+    +---+      +---+      +---+
+      ^          |
+      |          |
+      +----------+
+           |
+         (from C)
+           |
+         +---+
+         | C |
+         +---+
 
 ```
 
-**Step 2: Processing Edges**
+#### **Step 1: Start at Node A**
 
-**Iteration 1:** Pick edge (2, 3) with weight 4.
-
-* Are 2 and 3 connected? No.
-* **Action:** Add edge. Join sets {2} and {3}.
+We visit A. We assign it an ID of 0 and a Low Link of 0. We push it onto the stack.
 
 ```text
-Visual:
-(0)     (1)
+Current Node: A
+Stack: [A]
 
-(2)=====(3)  <-- Edge added
+IDs:
+A: 0
+
+Low Links:
+A: 0
+
+Graph State:
+(A) -> B -> D
+ ^     |
+ |     v
+ +----(C)
 
 ```
 
-**Iteration 2:** Pick edge (0, 3) with weight 5.
+#### **Step 2: Move to Neighbor B**
 
-* Are 0 and 3 connected? No.
-* **Action:** Add edge. Join set {0} with set {2, 3}.
+From A, we go to B. Assign ID 1, Low Link 1. Push B to stack.
 
 ```text
-Visual:
-(0)     (1)
-  \
-   \
-(2)=====(3)
+Current Node: B
+Stack: [A, B]
+
+IDs:
+A: 0, B: 1
+
+Low Links:
+A: 0, B: 1
+
+Graph State:
+ A -> (B) -> D
+ ^     |
+ |     v
+ +---- C
 
 ```
 
-**Iteration 3:** Pick edge (0, 2) with weight 6.
+#### **Step 3: Move to Neighbor C**
 
-* Are 0 and 2 connected?
-* Trace: 0 is connected to 3, and 3 is connected to 2.
-* Yes, they are in the same group.
-
-
-* **Action:** Discard (SKIP). Adding this would create a triangle cycle (0-2-3).
+From B, we go to C. Assign ID 2, Low Link 2. Push C to stack.
 
 ```text
-Visual (No Change):
-(0)     (1)
-  \
-   \
-(2)=====(3)
-   ^
-   |
- Attempted to add connection here (0-2), but rejected.
+Current Node: C
+Stack: [A, B, C]
+
+IDs:
+A: 0, B: 1, C: 2
+
+Low Links:
+A: 0, B: 1, C: 2
+
+Graph State:
+ A ->  B -> D
+ ^     |
+ |     v
+ +----(C)
 
 ```
 
-**Iteration 4:** Pick edge (0, 1) with weight 10.
+#### **Step 4: Check Neighbor of C (It is A)**
 
-* Are 0 and 1 connected? No.
-* **Action:** Add edge. Join set {1} with set {0, 2, 3}.
+C points to A.
+
+* Is A visited? **Yes.**
+* Is A on the stack? **Yes.**
+* **Action:** We update C's Low Link. We want the minimum of (Current Low Link, Neighbor's ID).
+* Low Link (C) = min(2, 0) -> **0**.
+
+*Note: C has virtually "reached back" to the start.*
 
 ```text
-Visual:
-(0)-----(1)
-  \
-   \
-(2)=====(3)
+Current Node: C (checking A)
+Stack: [A, B, C]
+
+IDs:
+A: 0, B: 1, C: 2
+
+Low Links:
+A: 0, B: 1, C: 0  <-- UPDATED!
+
+Graph State:
+(A)<---(C) Connection found!
 
 ```
 
-**Iteration 5:** Pick edge (1, 3) with weight 15.
+#### **Step 5: Backtrack to B**
 
-* Are 1 and 3 connected? Yes (via 0).
-* **Action:** Discard (SKIP).
+We finish with C. We return to B.
 
-**Final Result:**
+* **Action:** Update B's Low Link using C's Low Link.
+* Low Link (B) = min(Low Link B, Low Link C)
+* Low Link (B) = min(1, 0) -> **0**.
 
-* Edges: (2,3), (0,3), (0,1)
-* Total Minimum Cost: 4 + 5 + 10 = **19**
+```text
+Current Node: B (returned from C)
+Stack: [A, B, C]
+
+IDs:
+A: 0, B: 1, C: 2
+
+Low Links:
+A: 0, B: 0, C: 0  <-- UPDATED!
+      ^
+      |
+B inherits 0 from C
+
+```
+
+#### **Step 6: Visit Neighbor D (from B)**
+
+B also points to D. We visit D. Assign ID 3, Low Link 3. Push D to stack.
+
+```text
+Current Node: D
+Stack: [A, B, C, D]
+
+IDs:
+A: 0, B: 1, C: 2, D: 3
+
+Low Links:
+A: 0, B: 0, C: 0, D: 3
+
+Graph State:
+ A ->  B -> (D)
+
+```
+
+#### **Step 7: D has no neighbors**
+
+D is a dead end. We check the Golden Rule:
+
+* Does ID(D) == Low Link(D)?
+* 3 == 3. **YES.**
+* **Action:** D is the start of an SCC. Pop elements off the stack until we hit D.
+
+**Result:** Found SCC **{D}**.
+
+```text
+Current Node: D
+Stack: [A, B, C]  <-- D popped
+
+Found SCC #1: { D }
+
+```
+
+#### **Step 8: Backtrack to B (Finish B)**
+
+We return to B. We update B's Low Link based on D, but since D was an SCC, we generally ignore it or take the min (which doesn't change anything here because D's low link was higher).
+B's Low Link is 0. B's ID is 1.
+
+* Does 1 == 0? **No.**
+* B is not the root of an SCC yet. Backtrack.
+
+#### **Step 9: Backtrack to A (Finish A)**
+
+We return to A. Update A's Low Link based on B.
+
+* Low Link (A) = min(Low Link A, Low Link B)
+* Low Link (A) = min(0, 0) -> **0**.
+
+Now we check the Golden Rule for A:
+
+* Does ID(A) == Low Link(A)?
+* 0 == 0. **YES.**
+* **Action:** A is the root of an SCC. Pop everything off the stack until we hit A.
+
+**Result:** Pop C, Pop B, Pop A.
+Found SCC **{C, B, A}**.
+
+```text
+Current Node: A
+Stack: []  <-- C, B, A popped
+
+Found SCC #2: { C, B, A }
+
+```
 
 ---
 
 ### **Complexity Analysis**
 
-Here is the breakdown of the efficiency.
+**Time Complexity: O(V + E)**
 
-* **V** = Number of Vertices
-* **E** = Number of Edges
+* V = Vertices (Nodes), E = Edges.
+* We visit every node once and traverse every edge once.
 
-| Type | Complexity | Explanation |
-| --- | --- | --- |
-| **Time** | **O(E log E)** | Sorting the edges takes O(E log E). The Union-Find operations take nearly constant time, usually written as O(E * alpha(V)), which is very fast. The sorting is the bottleneck. |
-| **Space** | **O(V + E)** | We need space to store the list of edges O(E) and the parent array for Union-Find O(V). |
+```text
+  TIME SPENT
+  |
+  | [ Node Visits (V) ] + [ Edge Checks (E) ]
+  |__________________________________________
+       Linear Time (Very Fast)
+
+```
+
+**Space Complexity: O(V)**
+
+* We store the recursion stack and the ID/Low arrays for every node.
+
+```text
+  MEMORY USED
+  |
+  | [ Recursive Stack ]
+  | [ IDs Array       ]
+  | [ Low Link Array  ]
+  |____________________
+       Linear Space
+
+```
 
 ---
 
-### **Implementation**
-
-We will use a `UnionFind` helper class to manage the groups efficiently.
+### **Code Implementation**
 
 #### **Python**
 
 ```python
-class UnionFind:
-    def __init__(self, n):
-        # Initially, each node is its own parent
-        self.parent = list(range(n))
-        # Rank helps keep the tree flat during union
-        self.rank = [0] * n
+class TarjanSolver:
+    def __init__(self, graph):
+        self.graph = graph
+        self.ids = {}
+        self.low = {}
+        self.on_stack = {}
+        self.stack = []
+        self.id_counter = 0
+        self.scc_count = 0
+        self.result = []
 
-    def find(self, i):
-        # Path compression: Point directly to the root
-        if self.parent[i] != i:
-            self.parent[i] = self.find(self.parent[i])
-        return self.parent[i]
+    def find_sccs(self):
+        # Initialize
+        for node in self.graph:
+            self.ids[node] = -1
+            self.low[node] = 0
+            self.on_stack[node] = False
+        
+        # Run DFS for every unvisited node
+        for node in self.graph:
+            if self.ids[node] == -1:
+                self.dfs(node)
+        
+        return self.result
 
-    def union(self, i, j):
-        root_i = self.find(i)
-        root_j = self.find(j)
+    def dfs(self, at):
+        self.stack.append(at)
+        self.on_stack[at] = True
+        self.ids[at] = self.low[at] = self.id_counter
+        self.id_counter += 1
 
-        if root_i != root_j:
-            # Union by rank: attach smaller tree to larger tree
-            if self.rank[root_i] > self.rank[root_j]:
-                self.parent[root_j] = root_i
-            elif self.rank[root_i] < self.rank[root_j]:
-                self.parent[root_i] = root_j
-            else:
-                self.parent[root_j] = root_i
-                self.rank[root_i] += 1
-            return True # Union was successful
-        return False # Cycle detected
+        # Visit neighbors
+        for to in self.graph.get(at, []):
+            if self.ids[to] == -1:
+                # If neighbor is not visited, visit it
+                self.dfs(to)
+                # On return, propagate low link value (min logic)
+                self.low[at] = min(self.low[at], self.low[to])
+            elif self.on_stack[to]:
+                # If neighbor is on stack, it's a back-edge
+                self.low[at] = min(self.low[at], self.ids[to])
 
-def kruskals(num_vertices, edges):
-    """
-    edges: List of [source, dest, weight]
-    """
-    mst_weight = 0
-    mst_edges = []
-    
-    # Step 1: Sort edges by weight (ascending)
-    # x[2] corresponds to the weight
-    edges.sort(key=lambda x: x[2]) 
-    
-    uf = UnionFind(num_vertices)
-    
-    for u, v, w in edges:
-        # Step 2: Check if adding edge creates a cycle
-        if uf.union(u, v):
-            mst_weight += w
-            mst_edges.append([u, v, w])
-            
-    return mst_weight, mst_edges
+        # Golden Rule: If we are at the root of an SCC
+        if self.ids[at] == self.low[at]:
+            current_scc = []
+            while True:
+                node = self.stack.pop()
+                self.on_stack[node] = False
+                current_scc.append(node)
+                if node == at:
+                    break
+            self.result.append(current_scc)
+            self.scc_count += 1
 
 # Example Usage
-# Nodes: 0, 1, 2, 3
-edges_list = [
-    [0, 1, 10],
-    [0, 2, 6],
-    [0, 3, 5],
-    [1, 3, 15],
-    [2, 3, 4]
-]
-
-weight, tree = kruskals(4, edges_list)
-print("MST Weight:", weight)
-print("Edges in MST:", tree)
+graph = {
+    'A': ['B'],
+    'B': ['C', 'D'],
+    'C': ['A'],
+    'D': []
+}
+solver = TarjanSolver(graph)
+print(solver.find_sccs()) 
+# Output: [['D'], ['C', 'B', 'A']]
 
 ```
 
 #### **JavaScript**
 
 ```javascript
-class UnionFind {
-    constructor(n) {
-        this.parent = Array.from({ length: n }, (_, i) => i);
-        this.rank = new Array(n).fill(0);
+class TarjanSolver {
+    constructor(graph) {
+        this.graph = graph;
+        this.ids = {};
+        this.low = {};
+        this.onStack = {};
+        this.stack = [];
+        this.idCounter = 0;
+        this.result = [];
     }
 
-    find(i) {
-        if (this.parent[i] !== i) {
-            this.parent[i] = this.find(this.parent[i]);
-        }
-        return this.parent[i];
-    }
+    findSCCs() {
+        // Initialize keys
+        Object.keys(this.graph).forEach(node => {
+            this.ids[node] = -1;
+            this.onStack[node] = false;
+        });
 
-    union(i, j) {
-        let rootI = this.find(i);
-        let rootJ = this.find(j);
-
-        if (rootI !== rootJ) {
-            if (this.rank[rootI] > this.rank[rootJ]) {
-                this.parent[rootJ] = rootI;
-            } else if (this.rank[rootI] < this.rank[rootJ]) {
-                this.parent[rootI] = rootJ;
-            } else {
-                this.parent[rootJ] = rootI;
-                this.rank[rootI] += 1;
+        Object.keys(this.graph).forEach(node => {
+            if (this.ids[node] === -1) {
+                this.dfs(node);
             }
-            return true; // Edge added
+        });
+        return this.result;
+    }
+
+    dfs(at) {
+        this.stack.push(at);
+        this.onStack[at] = true;
+        this.ids[at] = this.low[at] = this.idCounter++;
+
+        const neighbors = this.graph[at] || [];
+        for (let to of neighbors) {
+            if (this.ids[to] === -1) {
+                this.dfs(to);
+                this.low[at] = Math.min(this.low[at], this.low[to]);
+            } else if (this.onStack[to]) {
+                this.low[at] = Math.min(this.low[at], this.ids[to]);
+            }
         }
-        return false; // Cycle detected
+
+        if (this.ids[at] === this.low[at]) {
+            const currentSCC = [];
+            let node;
+            do {
+                node = this.stack.pop();
+                this.onStack[node] = false;
+                currentSCC.push(node);
+            } while (node !== at);
+            this.result.push(currentSCC);
+        }
     }
 }
 
-function kruskals(numVertices, edges) {
-    let mstWeight = 0;
-    let mstEdges = [];
-
-    // Step 1: Sort edges by weight
-    edges.sort((a, b) => a[2] - b[2]);
-
-    const uf = new UnionFind(numVertices);
-
-    // Step 2: Iterate and build MST
-    for (let [u, v, w] of edges) {
-        if (uf.union(u, v)) {
-            mstWeight += w;
-            mstEdges.push([u, v, w]);
-        }
-    }
-
-    return { mstWeight, mstEdges };
-}
-
-// Example Usage
-const edges = [
-    [0, 1, 10], [0, 2, 6], [0, 3, 5], 
-    [1, 3, 15], [2, 3, 4]
-];
-
-const result = kruskals(4, edges);
-console.log("MST Weight:", result.mstWeight);
-console.log("MST Edges:", result.mstEdges);
-
 ```
 
 ---
 
-### **Strategy for LeetCode Problems**
+### **LeetCode Application**
 
-When you see a problem on LeetCode, use Kruskal's if you spot these clues:
+**Problem Idea:** "Critical Connections in a Network" (LeetCode 1192).
 
-1. **"Connect all points":** The problem asks to link cities, computers, or nodes.
-2. **"Minimum Cost":** You need to minimize the sum of weights (cost, distance, time).
-3. **Sparse Graphs:** Kruskal's is often easier to implement and slightly faster on graphs with fewer edges compared to vertices (Sparse Graphs).
+**The Scenario:**
+You have a network of servers. You need to find "critical connections" (bridges). A bridge is an edge that, if removed, makes some servers unable to reach others.
 
-**Mental Model for Solving:**
-Think of the problem as a "Merging Islands" scenario.
+**How to think about it using Tarjan's:**
+Tarjan's algorithm is naturally built to find cycles.
 
-* Initially, every node is its own island.
-* Bridges (edges) are available at different prices.
-* Buy the cheapest bridges first.
-* If a bridge connects two nodes that are already on the same island (via other bridges), don't buy it.
+1. If an edge is part of a cycle (an SCC), removing it usually doesn't break the graph because there is another way around the loop.
+2. If an edge is NOT part of a cycle, it is a **Bridge**.
 
-**Example Problem:** "Min Cost to Connect All Points"
-
-* **Input:** Coordinates of points.
-* **Step 1:** Calculate the Manhattan distance between every pair of points (these are your edge weights).
-* **Step 2:** Sort all these distances.
-* **Step 3:** Run Kruskal's loop.
-
----
-
-### **Comparison: Kruskal's vs. Prim's**
-
-Both algorithms solve the exact same problem, but they approach it differently.
-
-| Feature | Kruskal's Algorithm | Prim's Algorithm |
-| --- | --- | --- |
-| **Approach** | **Edge-centric:** Focuses on the edges. Sorts them and picks the best one anywhere in the graph. | **Vertex-centric:** Focuses on growing a single tree from a starting node. Grows like a mold spreading out. |
-| **Data Structure** | Uses **Union-Find** (Disjoint Set). | Uses a **Priority Queue** (Min-Heap). |
-| **Best For** | **Sparse Graphs:** (Lots of nodes, fewer edges). It is simpler to implement with an edge list. | **Dense Graphs:** (Lots of edges connecting everything). Since it doesn't need to sort *all* edges upfront, it can be faster here. |
-| **Connectivity** | Can generate a "forest" (multiple disconnected trees) if the graph is disconnected. | Only generates a single tree from the start node. |
-
-
-
-
-# Topological Sort (Kahn's Algorithm)
-
-Here is a detailed, easy-to-understand guide to Topological Sort using Kahn's Algorithm.
-
----
-
-## 1. The Problem: The "Dependency" Nightmare
-
-Imagine you are trying to bake a cake, or perhaps enroll in university courses. You cannot just do things in any random order.
-
-* **Baking:** You must mix the batter *before* you put it in the oven.
-* **College:** You must take "Intro to CS" *before* you take "Advanced Algorithms."
-
-This is the **Dependency Problem**. We have a set of tasks, and some tasks must be completed before others can start.
-
-**Topological Sort** is the algorithm that takes a jumbled list of tasks and dependencies and straightens them out into a linear order where every prerequisite comes *before* the task it enables.
-
-> **Key Rule:** This only works on **Directed Acyclic Graphs (DAGs)**.
-> * **Directed:** A leads to B (one way).
-> * **Acyclic:** No loops! If A waits for B, and B waits for A, you are stuck forever.
-> 
-> 
-
----
-
-## 2. What is Kahn's Algorithm?
-
-Kahn's Algorithm is a specific way to perform a Topological Sort. It relies on a very simple, intuitive concept called **Indegree**.
-
-* **Indegree:** The number of arrows pointing *at* a node.
-* **Meaning:** If a task has an Indegree of 0, it has **no prerequisites**. It is free to be done immediately!
-
-### The Strategy
-
-1. Find all tasks with **0 dependencies** (Indegree = 0).
-2. "Do" those tasks (add them to our sorted list).
-3. Once a task is done, remove it from the graph.
-4. Check if this removal freed up any new tasks (reduced their Indegree to 0).
-5. Repeat until the graph is empty.
-
----
-
-## 3. Visual Walkthrough
-
-Let's trace this with a simple graph representing getting dressed.
-
-**The Dependencies:**
-
-* Shirt (A) -> Tie (C)
-* Shirt (A) -> Jacket (D)
-* Pants (B) -> Belt (E)
-* Tie (C) -> Jacket (D)
-
-### Initial State
-
-Nodes: A(Shirt), B(Pants), C(Tie), D(Jacket), E(Belt)
-
-```text
-       +---(A)---+          (B)
-       |    |    |           |
-       v    |    v           v
-      (C)   |   (D)         (E)
-       |    |    ^
-       |    |    |
-       +----+----+
-
-```
-
-**Step 1: Calculate Indegrees**
-Count how many arrows point *into* each letter.
-
-* A: 0 (No arrows pointing in)
-* B: 0
-* C: 1 (From A)
-* D: 2 (From A and C)
-* E: 1 (From B)
-
-**Queue:** `[A, B]` (These have 0 indegree, ready to process)
-**Sorted List:** `[]`
-
----
-
-### Iteration 1
-
-Pop **A** from the Queue. Add to Sorted List.
-"Remove" A's arrows. This reduces the indegree of its neighbors (C and D).
-
-```text
-Processed: A
-
-            (B)
-             |
-             v
-      (C)   (D)         (E)
-       |     ^
-       |     |
-       +-----+
-
-```
-
-**Updates:**
-
-* C was 1, now **0**. (Added to Queue!)
-* D was 2, now **1**.
-* Queue is now: `[B, C]`
-* Sorted List: `[A]`
-
----
-
-### Iteration 2
-
-Pop **B** from the Queue. Add to Sorted List.
-"Remove" B's arrows. This reduces the indegree of neighbor E.
-
-```text
-Processed: B
-
-      (C)   (D)         (E)
-       |     ^
-       |     |
-       +-----+
-
-```
-
-**Updates:**
-
-* E was 1, now **0**. (Added to Queue!)
-* Queue is now: `[C, E]`
-* Sorted List: `[A, B]`
-
----
-
-### Iteration 3
-
-Pop **C** from the Queue. Add to Sorted List.
-"Remove" C's arrows. Reduces indegree of D.
-
-```text
-Processed: C
-
-            (D)         (E)
-
-```
-
-**Updates:**
-
-* D was 1, now **0**. (Added to Queue!)
-* Queue is now: `[E, D]`
-* Sorted List: `[A, B, C]`
-
----
-
-### Iteration 4 & 5
-
-Pop **E** (no neighbors).
-Pop **D** (no neighbors).
-
-**Final Sorted List:** `[A, B, C, E, D]`
-*(Note: "Shirt, Pants, Tie, Belt, Jacket" is a valid order to get dressed!)*
-
----
-
-## 4. Code Implementation
-
-Here is the logic in Python and JavaScript.
-
-### Python
+In the `dfs` function, right after you visit a neighbor `to` and return:
 
 ```python
-from collections import deque
-
-def topological_sort(num_nodes, edges):
-    # 1. Initialize Graph and Indegrees
-    graph = {i: [] for i in range(num_nodes)}
-    indegree = {i: 0 for i in range(num_nodes)}
-    
-    # 2. Build the graph
-    for src, dest in edges:
-        graph[src].append(dest)
-        indegree[dest] += 1
-        
-    # 3. Add 0-indegree nodes to queue
-    queue = deque()
-    for node in range(num_nodes):
-        if indegree[node] == 0:
-            queue.append(node)
-            
-    sorted_order = []
-    
-    # 4. Process Queue
-    while queue:
-        current = queue.popleft()
-        sorted_order.append(current)
-        
-        # Reduce indegree of neighbors
-        for neighbor in graph[current]:
-            indegree[neighbor] -= 1
-            if indegree[neighbor] == 0:
-                queue.append(neighbor)
-                
-    # Check for cycles (if sorted_order length < num_nodes)
-    if len(sorted_order) != num_nodes:
-        return [] # Cycle detected!
-        
-    return sorted_order
-
-# Example Usage
-# 0: Shirt, 1: Pants, 2: Tie, 3: Jacket, 4: Belt
-print(topological_sort(5, [[0, 2], [0, 3], [1, 4], [2, 3]]))
+self.dfs(to)
+self.low[at] = min(self.low[at], self.low[to])
+if self.low[to] > self.ids[at]:
+    # This means 'to' cannot reach back to 'at' or anything before 'at'.
+    # Therefore, the edge (at -> to) is a BRIDGE.
 
 ```
 
-### JavaScript
+### **Comparison**
 
-```javascript
-function topologicalSort(numNodes, edges) {
-    // 1. Initialize Graph and Indegrees
-    const graph = Array.from({ length: numNodes }, () => []);
-    const indegree = new Array(numNodes).fill(0);
-    
-    // 2. Build the graph
-    for (const [src, dest] of edges) {
-        graph[src].push(dest);
-        indegree[dest]++;
-    }
-    
-    // 3. Add 0-indegree nodes to queue
-    const queue = [];
-    for (let i = 0; i < numNodes; i++) {
-        if (indegree[i] === 0) queue.push(i);
-    }
-    
-    const sortedOrder = [];
-    
-    // 4. Process Queue
-    while (queue.length > 0) {
-        const current = queue.shift();
-        sortedOrder.push(current);
-        
-        for (const neighbor of graph[current]) {
-            indegree[neighbor]--;
-            if (indegree[neighbor] === 0) {
-                queue.push(neighbor);
-            }
-        }
-    }
-    
-    // Cycle check
-    return sortedOrder.length === numNodes ? sortedOrder : [];
-}
-
-```
-
----
-
-## 5. Complexity Analysis
-
-We define:
-
-* **V** = Number of Vertices (Nodes/Tasks)
-* **E** = Number of Edges (Dependencies/Arrows)
-
-### Time Complexity: O(V + E)
-
-Why? We visit every node exactly once and we travel across every edge exactly once.
-
-```text
-  Cost
-   ^
-   |        [Processing Edges]
-   |        ############### (E operations)
-   |
-   | [Building Queue]
-   | ############## (V operations)
-   +------------------------------------->
-            Total Time
-
-```
-
-### Space Complexity: O(V + E)
-
-We need to store the graph (Adjacency List) and the indegree array.
-
-```text
-  Memory
-   ^
-   | [Adjacency List]
-   | ######################### (Stores V lists + E edges)
-   |
-   | [Indegree Array]
-   | ##### (Stores V counts)
-   |
-   | [Queue]
-   | ##### (At peak, stores roughly V nodes)
-   +------------------------------------->
-            Total Space
-
-```
-
----
-
-## 6. LeetCode Application Strategy
-
-Use this thought process for problems like **LeetCode 207 (Course Schedule)** or **210 (Course Schedule II)**.
-
-**The "Is it Kahn's?" Checklist:**
-
-1. **Is there an order?** Does the problem ask for a "valid sequence," "prerequisites," or "scheduling"?
-2. **Is it directed?** Does A imply B, but B doesn't imply A?
-3. **Is cycle detection needed?** Does the problem imply failure if there's a loop (e.g., "return false if you can't finish all courses")?
-
-**Mental Framework:**
-Think of the graph as a **waterfall**.
-
-* Water flows from top (Indegree 0) to bottom.
-* Kahn's algorithm simply peels off the dry layer at the top, letting the water flow down to the next layer.
-* If you peel everything off and there are still nodes left but no "Indegree 0" nodes, you have a **pool (Cycle)** where water is stuck circling.
-
----
-
-## 7. Comparison: Kahn's vs. DFS
-
-Both solve Topological Sort, but they feel different.
-
-| Feature | Kahn's Algorithm (BFS based) | DFS Approach |
+| Feature | Tarjan's Algorithm | Kosaraju's Algorithm |
 | --- | --- | --- |
-| **Method** | **Iterative**. Peels nodes one by one. | **Recursive**. Dives deep, adds to list as it backtracks. |
-| **Direction** | Builds the list naturally: `[First -> Last]` | Builds list in reverse: `[Last -> First]`, then reverses it. |
-| **Cycle Detection** | **Very Easy**. If `result_length < V`, there is a cycle. | **Tricky**. Requires a recursion stack tracker (`visiting` vs `visited` sets). |
-| **Intuition** | "Do what I can do *now*." | "Find the end, then work backwards." |
-
-
-# Trie Data Structure
-
-Here is a detailed guide to the Trie (pronounced "try" or "tree") data structure.
-
-### **1. The Problem: Why do we need a Trie?**
-
-Imagine you are building the "Autocomplete" feature for a search engine. You have a database of 1 million words.
-
-If a user types "ap", you want to instantly suggest: "apple", "apply", "appetite".
-
-**The Naive Approach (List of Strings):**
-If you store all words in a simple list or array, you have to loop through every single word to check if it starts with "ap".
-
-* Word 1: "banana" (No)
-* Word 2: "canary" (No)
-* ...
-* Word 500,000: "apple" (Yes!)
-
-This is too slow. If you have millions of words, the search lags.
-
-**The Solution (Trie):**
-A Trie organizes words by their *characters*. Instead of checking every word, you just follow the path:
-`a` -> `p` -> `p` ...
-
-It solves the problem of **efficient prefix matching**.
-
----
-
-### **2. What is a Trie?**
-
-A Trie (often called a **Prefix Tree**) is a tree-based data structure used to store a dynamic set of strings.
-
-**Key Characteristics:**
-
-* **Nodes:** Each node represents a single character.
-* **Root:** The top node is empty.
-* **Edges:** Links connect characters to form words.
-* **End Marker:** We usually mark the end of a valid word (often with a boolean flag or a special node).
-
----
-
-### **3. How It Works: A Visual Walkthrough**
-
-Let's build a Trie containing these three words: **"CAT"**, **"CAR"**, **"DO"**.
-
-#### **Step 1: The Empty Root**
-
-We start with just a root node.
-
-```text
-      (ROOT)
-
-```
-
-#### **Step 2: Insert "CAT"**
-
-We check if 'C' exists. No? Add it. Then 'A'. Then 'T'. Mark 'T' as the end of a word (*).
-
-```text
-      (ROOT)
-        |
-       [C]
-        |
-       [A]
-        |
-       [T]* <-- "CAT" ends here
-
-```
-
-#### **Step 3: Insert "CAR"**
-
-Start at Root.
-
-* Do we have 'C'? Yes. Move there.
-* Do we have 'A'? Yes. Move there.
-* Do we have 'R'? No. Add it. Mark 'R' as end (*).
-
-```text
-      (ROOT)
-        |
-       [C]
-        |
-       [A]
-      /   \
-    [T]* [R]*
-   (CAT)  (CAR)
-
-```
-
-*Notice how "CAT" and "CAR" share the path "C-A". This saves space!*
-
-#### **Step 4: Insert "DO"**
-
-Start at Root.
-
-* Do we have 'D'? No. Add it (new branch).
-* Add 'O'. Mark as end (*).
-
-```text
-          (ROOT)
-         /      \
-       [C]      [D]
-        |        |
-       [A]      [O]*
-      /   \      ^-- "DO" ends here
-    [T]* [R]*
-
-```
-
----
-
-### **4. Time and Space Complexity**
-
-Let's look at the costs using `L` as the length of the word you are searching/inserting, and `N` as the total number of words.
-
-| Operation | Time Complexity | Explanation |
-| --- | --- | --- |
-| **Insertion** | **O(L)** | You strictly process each character of the word once. |
-| **Search** | **O(L)** | You only traverse the length of the word. Even if the DB has 10 million words, searching for "cat" only takes 3 steps! |
-| **Space** | **Variable** | In the worst case, it can be large, but it saves space when many words share prefixes (like "tele-" in telephone, telegraph, television). |
-
-**Visualization of Efficiency:**
-
-```text
-Searching for "ZOO" in a List of 1 Million Words:
-[Apple, Banana, ... ... ... ... Zoo]
-check, check, ... ... ... ... found
-Steps: 1,000,000 (O(N))
-
-Searching for "ZOO" in a Trie:
-(Root) -> [Z] -> [O] -> [O]
-Steps: 3 (O(L))
-
-```
-
----
-
-### **5. Code Implementation**
-
-Here is how you build a Trie in Python and JavaScript.
-
-#### **Python Implementation**
-
-```python
-class TrieNode:
-    def __init__(self):
-        # Dictionary to store children nodes
-        # Key: Character, Value: TrieNode
-        self.children = {}
-        # Flag to mark if a word ends at this node
-        self.is_end_of_word = False
-
-class Trie:
-    def __init__(self):
-        self.root = TrieNode()
-
-    def insert(self, word):
-        node = self.root
-        for char in word:
-            # If char not in children, create new node
-            if char not in node.children:
-                node.children[char] = TrieNode()
-            # Move to the child node
-            node = node.children[char]
-        # After loop, mark the current node as end of word
-        node.is_end_of_word = True
-
-    def search(self, word):
-        node = self.root
-        for char in word:
-            if char not in node.children:
-                return False # Path doesn't exist
-            node = node.children[char]
-        # Return True only if we are at the marked end of a word
-        return node.is_end_of_word
-
-    def starts_with(self, prefix):
-        node = self.root
-        for char in prefix:
-            if char not in node.children:
-                return False
-            node = node.children[char]
-        return True
-
-# Example Usage
-trie = Trie()
-trie.insert("apple")
-print(trie.search("apple"))   # True
-print(trie.search("app"))     # False (word not finished)
-print(trie.starts_with("app")) # True (prefix exists)
-
-```
-
-#### **JavaScript Implementation**
-
-```javascript
-class TrieNode {
-    constructor() {
-        this.children = {};
-        this.isEndOfWord = false;
-    }
-}
-
-class Trie {
-    constructor() {
-        this.root = new TrieNode();
-    }
-
-    insert(word) {
-        let node = this.root;
-        for (let char of word) {
-            if (!node.children[char]) {
-                node.children[char] = new TrieNode();
-            }
-            node = node.children[char];
-        }
-        node.isEndOfWord = true;
-    }
-
-    search(word) {
-        let node = this.root;
-        for (let char of word) {
-            if (!node.children[char]) {
-                return false;
-            }
-            node = node.children[char];
-        }
-        return node.isEndOfWord;
-    }
-
-    startsWith(prefix) {
-        let node = this.root;
-        for (let char of prefix) {
-            if (!node.children[char]) {
-                return false;
-            }
-            node = node.children[char];
-        }
-        return true;
-    }
-}
-
-```
-
----
-
-### **6. Applied Learning: LeetCode Strategy**
-
-A classic problem to apply this to is **Word Search II** (Find all words from a dictionary in a 2D board of characters).
-
-**The "Aha!" Moment:**
-If you try to search for every single word in the dictionary separately on the board, it takes forever.
-Instead, put all dictionary words into a **Trie**.
-
-**How to think about it:**
-
-1. **Preprocessing:** Build the Trie from the list of words.
-2. **Traversal:** Walk through the 2D grid (using DFS/Backtracking).
-3. **Synchronization:** As you move on the grid (e.g., you step on 'A', then 'P'), move the pointer in the Trie simultaneously.
-4. **Pruning:** If the Trie pointer says "No word starts with 'QZ'", stop searching that path on the grid immediately!
-
-**Conceptual Diagram for Grid Search:**
-
-```text
-Grid:         Trie Path Check:
-[ C ][ A ]    Start at 'C' -> Exists in Trie? Yes.
-[ T ][ R ]    Move to 'A'  -> Exists in Trie? Yes.
-              Move to 'T'  -> Exists in Trie? Yes. End of word? Yes! Found "CAT".
-              Backtrack to 'A'.
-              Move to 'R'  -> Exists in Trie? Yes. End of word? Yes! Found "CAR".
-
-```
-
----
-
-### **7. Comparison with Other Algorithms**
-
-| Feature | Trie | Hash Map (HashTable) |
-| --- | --- | --- |
-| **Search Time** | O(L) - Fast and consistent | O(L) - Theoretically fast, but collisions can slow it down. |
-| **Prefix Search** | **Excellent** (Designed for this) | **Poor** (Must scan all keys or convert to list) |
-| **Memory Usage** | Efficient if many words share prefixes. Expensive if words are very unique (lots of pointers). | Efficient, but stores full strings repeatedly. |
-| **Ordering** | Can print words in alphabetical order easily. | Unordered. |
+| **Passes Required** | **1 DFS pass** (Faster in practice) | **2 DFS passes** (Slightly slower) |
+| **Complexity** | O(V + E) | O(V + E) |
+| **Space** | O(V) | O(V) |
+| **Ease of Code** | Harder (needs low-link logic) | Easier (standard DFS logic twice) |
+| **Stack Usage** | Explicit stack handling | Implicit recursion stack |
+
+**Verdict:** Use Tarjan's if you need raw speed and are comfortable with the "Low Link" concept. Use Kosaraju's if you want something easier to memorize and code quickly during an interview.
