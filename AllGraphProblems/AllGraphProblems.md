@@ -16943,3 +16943,337 @@ In L5/L6 interviews, they rarely ask the problem in the abstract "boys and girls
 * **Goal:** Clear the maximum number of trades.
 * **L6 Twist:** "The graph is dynamic. Orders come in real-time."
 * **Solution modification:** You cannot re-run the O(M*E) algorithm every millisecond. You would need a greedy approach with a localized repair strategy (trying to fix only the local neighborhood of the new node) or a specific heuristic for online bipartite matching.
+
+# 1192. Critical Connections in a Network
+
+When designing resilient distributed systems at Google or Meta, identifying single points of failure is a foundational exercise. LeetCode 1192: "Critical Connections in a Network" is the textbook algorithmic representation of this exact real-world problem.
+
+As a senior engineer, I want you to understand exactly *why* it works intuitively. Let's break this down using a highly visual step-by-step approach, focusing purely on logical deductions and visual tracing.
+
+### 1. Problem Explanation
+
+We are given a network of servers (nodes) connected by bidirectional cables (edges). A **critical connection** is a single cable that, if cut, separates the network into two disconnected pieces. In graph theory, this is called a **bridge** or a **cut-edge**.
+
+Let's look at two simple networks:
+
+```text
+NETWORK A (Resilient)         NETWORK B (Vulnerable)
+    1 ----- 2                     1 ----- 2
+    |       |                     |
+    |       |                     |
+    0 ----- 3                     0 ----- 3
+
+Cut 0-3: Still connected!     Cut 0-3: Node 3 is isolated!
+(Path 0-1-2-3 exists)         (Edge 0-3 is a CRITICAL CONNECTION)
+
+```
+
+**The Core Intuition:**
+
+* If a cable is part of a **cycle** (a loop of connected servers), it is **never** a critical connection. Why? Because if you cut it, data can simply flow the other way around the loop.
+* Therefore, our entire goal is to **find edges that are NOT part of any cycle**.
+
+---
+
+### 2. Solution Explanation
+
+**The Top-Band Approach (Tarjan's Algorithm for Bridges):**
+We need to traverse the graph once and identify the cycles as we go. We use a Depth-First Search (DFS) and track the "time" we first discover each node.
+
+We maintain two pieces of information for every node:
+
+1. `disc` (Discovery Time): A counter showing when we first visited the node.
+2. `low` (Lowest Reachable Time): The earliest discovery time this node can reach *without going back through the immediate edge it just came from*.
+
+**The Golden Rule of Critical Connections:**
+While doing DFS from node `U` to node `V`, if `low[V]` is **strictly greater** than `disc[U]`, it means `V` has absolutely no back-route to `U` or earlier nodes. Therefore, the edge `U - V` is a critical connection!
+
+#### Detailed Visual Trace (ASCII Diagrams)
+
+Let's trace a network with 4 servers (0 to 3).
+
+```text
+The Network Graph:
+      1
+     / \
+    0---2---3
+
+```
+
+Cycles: `0-1-2`. Bridge: `2-3`.
+
+We will track our arrays. `-1` means unvisited.
+Initial State:
+`disc` = `[-1, -1, -1, -1]`
+`low`  = `[-1, -1, -1, -1]`
+Time = 1
+
+**Step 1: Start at Node 0**
+
+```text
+Graph:        Arrays:
+  1           disc: [1, -1, -1, -1]
+ /            low:  [1, -1, -1, -1]
+(0)  2---3    Time: 2
+
+```
+
+*Action:* Visit 0. We look for neighbors. Let's go to 1.
+
+**Step 2: Visit Node 1 from Node 0**
+
+```text
+Graph:        Arrays:
+ (1)          disc: [1,  2, -1, -1]
+ / \          low:  [1,  2, -1, -1]
+ 0  2---3     Time: 3
+
+```
+
+*Action:* Visit 1. Its parent is 0. Neighbor is 2. Let's go to 2.
+
+**Step 3: Visit Node 2 from Node 1**
+
+```text
+Graph:        Arrays:
+  1           disc: [1,  2,  3, -1]
+ / \          low:  [1,  2,  3, -1]
+ 0-(2)--3     Time: 4
+
+```
+
+*Action:* Visit 2. Its parent is 1. It has two neighbors: 0 and 3.
+Let's visit 3 first.
+
+**Step 4: Visit Node 3 from Node 2**
+
+```text
+Graph:        Arrays:
+  1           disc: [1,  2,  3,  4]
+ / \          low:  [1,  2,  3,  4]
+ 0  2-(3)     Time: 5
+
+```
+
+*Action:* Visit 3. Parent is 2. No other neighbors!
+*Backtrack:* We return to 2.
+*Golden Rule Check for Edge 2-3:* Is `low[3] > disc[2]`? -> Is `4 > 3`? **YES!** Edge 2-3 is a CRITICAL CONNECTION!
+
+**Step 5: Back at Node 2, Check other neighbor (Node 0)**
+
+```text
+Graph:        Arrays updating...
+  1           disc: [1,  2,  3,  4]
+ / \          low:  [1,  2,  1,  4]  <-- Node 2's low becomes 1!
+(0)-2   3     
+ ^-- BACK EDGE!
+
+```
+
+*Action:* Node 2 sees Node 0. Node 0 is already visited! This is a **Back Edge** (we found a cycle!).
+We DO NOT visit it, but we update Node 2's `low` value to Node 0's discovery time.
+`low[2] = min(low[2], disc[0])` -> `min(3, 1) = 1`.
+
+**Step 6: Backtrack to Node 1**
+
+```text
+Graph:        Arrays:
+ (1)          disc: [1,  2,  3,  4]
+ / \          low:  [1,  1,  1,  4]  <-- Node 1 pulls Node 2's low!
+ 0  2---3     
+
+```
+
+*Action:* Node 1 finishes with Node 2. It absorbs Node 2's lowest reachable time.
+`low[1] = min(low[1], low[2])` -> `min(2, 1) = 1`.
+*Golden Rule Check for Edge 1-2:* Is `low[2] > disc[1]`? -> `1 > 2`? **NO.** Not critical.
+
+**Step 7: Backtrack to Node 0**
+
+```text
+Graph:        Arrays:
+  1           disc: [1,  2,  3,  4]
+ / \          low:  [1,  1,  1,  4]  <-- Notice nodes 0,1,2 all share low=1!
+(0) 2---3     
+
+```
+
+*Action:* Node 0 finishes with Node 1.
+`low[0] = min(low[0], low[1])` -> `min(1, 1) = 1`.
+*Golden Rule Check for Edge 0-1:* Is `low[1] > disc[0]`? -> `1 > 1`? **NO.** Not critical.
+
+*Result:* The only critical edge found is `[2, 3]`.
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+```text
++-------------------------------------------------------------+
+| Complexity Derivation                                       |
++-------------------------------------------------------------+
+| [Time Complexity]                                           |
+| 1. Building the Adjacency List:  O(V + E)                   |
+|    - We iterate through E edges, placing them in V buckets. |
+| 2. DFS Traversal:                O(V + E)                   |
+|    - We visit every node exactly once: O(V)                 |
+|    - We look at every edge twice (once from each end): O(E) |
+| ----------------------------------------------------------- |
+| TOTAL TIME: O(V + E)                                        |
+|                                                             |
+| [Space Complexity]                                          |
+| 1. Adjacency List Storage:       O(V + E)                   |
+| 2. 'disc' Array:                 O(V)                       |
+| 3. 'low' Array:                  O(V)                       |
+| 4. Recursion Call Stack:         O(V) worst case (a line)   |
+| ----------------------------------------------------------- |
+| TOTAL SPACE: O(V + E)                                       |
++-------------------------------------------------------------+
+
+```
+
+*(V = number of vertices/nodes, E = number of edges/connections)*
+
+---
+
+### 4. Solution Code
+
+Here is the optimal solution in both Python and JavaScript.
+
+#### Python Implementation
+
+```python
+def criticalConnections(n: int, connections: list[list[int]]) -> list[list[int]]:
+    # Step 1: Build the graph (adjacency list)
+    graph = {i: [] for i in range(n)}
+    for u, v in connections:
+        graph[u].append(v)
+        graph[v].append(u)
+    
+    # State tracking arrays
+    # Initialize with -1 to indicate unvisited nodes
+    disc = [-1] * n
+    low = [-1] * n
+    
+    critical_edges = []
+    
+    # Python trick to wrap mutable state inside a nested function
+    # time[0] acts as a counter we can increment by reference
+    time = [0] 
+    
+    def dfs(curr, parent):
+        # Mark the discovery and lowest reachable times
+        time[0] += 1
+        disc[curr] = time[0]
+        low[curr] = time[0]
+        
+        # Explore all neighbors
+        for neighbor in graph[curr]:
+            if neighbor == parent:
+                # Don't go back through the edge we immediately came from
+                continue
+                
+            if disc[neighbor] == -1: # Unvisited neighbor
+                dfs(neighbor, curr)
+                
+                # Upon backtracking, update current node's lowest reachable
+                low[curr] = min(low[curr], low[neighbor])
+                
+                # THE GOLDEN RULE CHECK
+                if low[neighbor] > disc[curr]:
+                    critical_edges.append([curr, neighbor])
+                    
+            else: # Visited neighbor (Back Edge!)
+                # This means we found a cycle. Update lowest_reachable.
+                low[curr] = min(low[curr], disc[neighbor])
+
+    # Start DFS from node 0 
+    dfs(0, -1)
+    
+    return critical_edges
+
+```
+
+#### JavaScript Implementation
+
+```javascript
+var criticalConnections = function(n, connections) {
+    // Step 1: Build Adjacency List
+    const graph = Array.from({ length: n }, () => []);
+    for (const [u, v] of connections) {
+        graph[u].push(v);
+        graph[v].push(u);
+    }
+    
+    // Arrays to track discovery times and lowest reachable times
+    const disc = new Array(n).fill(-1);
+    const low = new Array(n).fill(-1);
+    const criticalEdges = [];
+    
+    let time = 0;
+    
+    // DFS helper function
+    const dfs = (curr, parent) => {
+        time++;
+        disc[curr] = time;
+        low[curr] = time;
+        
+        for (const neighbor of graph[curr]) {
+            // Skip the edge that leads immediately back to the parent
+            if (neighbor === parent) continue;
+            
+            if (disc[neighbor] === -1) { // If neighbor is unvisited
+                dfs(neighbor, curr);
+                
+                // Backtrack: Update lowest reachable time
+                low[curr] = Math.min(low[curr], low[neighbor]);
+                
+                // THE GOLDEN RULE CHECK
+                if (low[neighbor] > disc[curr]) {
+                    criticalEdges.push([curr, neighbor]);
+                }
+            } else { 
+                // Neighbor is already visited, this is a Back Edge (cycle found)
+                low[curr] = Math.min(low[curr], disc[neighbor]);
+            }
+        }
+    };
+    
+    // Start DFS from node 0, with -1 as dummy parent
+    dfs(0, -1);
+    
+    return criticalEdges;
+};
+
+```
+
+---
+
+### Note 1: Terminology Breakdown
+
+* **Tarjan's Bridge-Finding Algorithm:** The undirected variant of Tarjan's algorithm optimized to find **Bridges** (cut-edges) and **Articulation Points** (cut-vertices) in a single O(V + E) pass.
+* **Back-edge:** An edge that connects a node to an ancestor in the DFS tree. A back-edge is mathematical proof that a cycle exists.
+* **Bridges / Cut-edges:** The formal graph theory term for "critical connections."
+
+---
+
+### Note 2: Real-World Interview Variations
+
+#### 1. Google Variation: "Data Center Outage / Single Points of Failure"
+
+* **The Prompt:** You are given a list of data centers and cables. Identify all the *routers* (nodes) that, if they went offline, would split the data center network.
+* **The Catch:** Find critical *nodes*, not edges.
+* **The Solution (Articulation Points):** Use the exact same algorithm. An edge `U - V` implies `U` is a critical node if `low[V] >= disc[U]` (notice the greater than **or equal to**). The root node of the DFS tree is only critical if it has more than one distinct child branch.
+
+#### 2. Meta Variation: "Vulnerable Social Network Bridges"
+
+* **The Prompt:** Find all pairs of users who act as the *sole* connection between two otherwise disjoint friend groups.
+* **The Catch:** The graph might have completely disconnected components (disjoint graphs).
+* **The Solution:** Apply the standard Tarjan's algorithm, but wrap the DFS call in a `for` loop checking if `disc[i] === -1` for all nodes `0` to `n-1`, ensuring every disconnected island is fully traversed.
+
+#### 3. Bloomberg Variation: "Financial Clearing House Isolation"
+
+* **The Prompt:** If a specific transaction pathway is frozen, what is the shortest alternative route for the money, or does a freeze permanently isolate a bank?
+* **The Catch:** Two parts: identify bridges, then find alternative shortest paths if it's not a bridge.
+* **The Solution:** Use Tarjan's to pre-compute bridges. If the queried edge is in the bridge list, it's isolated. If not, temporarily remove the edge and run an unweighted BFS from source to destination to find the new shortest path distance, then restore the edge.
+
