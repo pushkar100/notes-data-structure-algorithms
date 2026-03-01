@@ -653,14 +653,21 @@ class MinHeap {
     bubbleUp(index) {
         while (index > 0) {
             let parent = Math.floor((index - 1) / 2);
-            if (this.heap[parent] <= this.heap[index]) break;
-            [this.heap[parent], this.heap[index]] = [this.heap[index], this.heap[parent]];
+            if (this.heap[parent] <= this.heap[index]) {
+                  break;
+            }
+
+            [this.heap[parent], this.heap[index]] =
+                  [this.heap[index], this.heap[parent]];
+
             index = parent;
         }
     }
 
     extractMin() {
-        if (this.heap.length === 0) return null;
+        if (this.heap.length === 0) {
+            return null;
+        }
         const min = this.heap[0];
         const last = this.heap.pop();
         if (this.heap.length > 0) {
@@ -676,11 +683,27 @@ class MinHeap {
             let left = 2 * index + 1;
             let right = 2 * index + 2;
 
-            if (left < this.heap.length && this.heap[left] < this.heap[smallest]) smallest = left;
-            if (right < this.heap.length && this.heap[right] < this.heap[smallest]) smallest = right;
+            if (
+                  left < this.heap.length &&
+                  this.heap[left] < this.heap[smallest]
+            ) {
+                  smallest = left;
+            }
+
+            if (
+                  right < this.heap.length &&
+                  this.heap[right] < this.heap[smallest]
+            ) {
+                  smallest = right;
+            }
             
-            if (smallest === index) break;
-            [this.heap[index], this.heap[smallest]] = [this.heap[smallest], this.heap[index]];
+            if (smallest === index) {
+                  break;
+            }
+
+            [this.heap[index], this.heap[smallest]] =
+                  [this.heap[smallest], this.heap[index]];
+
             index = smallest;
         }
     }
