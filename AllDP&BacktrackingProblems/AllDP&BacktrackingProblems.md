@@ -4135,233 +4135,411 @@ Companies like Google and Meta rarely ask this exact problem anymore; they ask v
 2. **The "Invalid Keys" Variant (Bloomberg):** "What if some keys are broken or certain combinations are banned? How do you modify your search?"
 3. **Keyboard Proximity (Meta):** "Instead of T9, imagine a QWERTY keyboard. If a user types 'G', they might have meant 'F' or 'H'. Generate all 'likely' words for a typed string."
 
-# 410. Split Array Largest Sum
+# 410. Split Array Largest Sum (Binary Search) - Most optimal
 
-An L5 (Senior) or L6 (Staff) engineer at Google doesn't just look for *a* solution; they look for the *most efficient* one and can explain the "why" behind the trade-offs.
-
-For "Split Array Largest Sum," while this can be solved with Dynamic Programming, a high-level engineer would immediately identify that the optimal solution is actually **Binary Search on the Answer**.
+Solving "Split Array Largest Sum" with **Binary Search** is a brilliant shift in perspective. Instead of trying to find where to "cut" the array (as we do in DP), we guess a "Max Sum" and check if it's possible to fit the array into `k` subarrays without exceeding that sum.
 
 ---
 
-## 1. Problem Explanation
+## 1. Category of Algorithm
 
-You are given an array `nums` and an integer `k`. You need to split the array into `k` non-empty continuous subarrays.
+This is **Binary Search on the Answer Space**. Instead of searching for an element in an array, we are searching for the smallest valid "Threshold Value" within a range of possible sums.
 
-**The Goal:** Minimize the largest sum among these `k` subarrays.
+## 2. Problem It Solves
 
-### The "Aha!" Moment
-
-Imagine you have a row of books with different weights. You need to divide them among 3 workers. You want to make sure the worker who gets the heaviest load carries as little as possible.
-
-**Example:**
-`nums = [7, 2, 5, 10, 8]`, `k = 2`
-
-* **Split 1:** `[7] | [2, 5, 10, 8]` -> Max sum = 25
-* **Split 2:** `[7, 2] | [5, 10, 8]` -> Max sum = 23
-* **Split 3:** `[7, 2, 5] | [10, 8]` -> Max sum = 18
-* **Split 4:** `[7, 2, 5, 10] | [8]` -> Max sum = 24
-
-The answer is **18**.
+It minimizes the maximum subarray sum when splitting an array into exactly `k` continuous pieces. This "Minimize the Maximum" pattern is a massive hint for Binary Search.
 
 ---
 
-## 2. Solution Explanation (Binary Search on Answer)
+## 3. Solution (What, Why, How)
 
-A Senior Engineer recognizes that the possible "answer" (the maximum sum) falls within a specific range:
+### The "What" (The Search Range)
 
-1. **Lower Bound (Left):** The largest single element in the array (e.g., 10). Why? Because a subarray must contain at least one element.
-2. **Upper Bound (Right):** The sum of all elements (e.g., 32). Why? Because if `k=1`, the answer is the total sum.
+The answer must fall between two values:
 
-We perform a binary search on this range `[10, 32]`. For each "middle" value, we check: *"Can we split this array into k or fewer pieces such that no piece exceeds this middle value?"*
+* **Low (Left):** The largest single element in `nums`. Any valid split must be at least this large.
+* **High (Right):** The sum of all elements in `nums`. This is the case where $k=1$.
 
-### ASCII Visualization: Binary Search Walkthrough
+### The "Why" (Monotonicity)
 
-`nums = [7, 2, 5, 10, 8]`, `k = 2`
-`Range: [10 to 32]`
+If we can split the array with a Max Sum of **15**, we can definitely do it with **20**. If we can't do it with **10**, we definitely can't do it with **5**. This "Yes/No" property allows us to discard half the search space in every step.
 
-**Step 1: Check Mid = 21**
+### The "How" (The Greedy Check)
 
-```text
-Goal: Can we fit elements into subarrays without exceeding 21?
-[7, 2, 5] (Sum 14) | [10, 8] (Sum 18)
-Count of subarrays used: 2.
-Since 2 <= k, 21 is "Possible". Try smaller.
-New Range: [10, 20]
-
-```
-
-**Step 2: Check Mid = 15**
-
-```text
-Goal: Max sum 15.
-[7, 2, 5] (Sum 14) | [10] (Sum 10) | [8] (Sum 8)
-Count of subarrays used: 3.
-Since 3 > k, 15 is "Impossible". We need a bigger limit.
-New Range: [16, 20]
-
-```
-
-**Step 3: Check Mid = 18**
-
-```text
-Goal: Max sum 18.
-[7, 2, 5] (Sum 14) | [10, 8] (Sum 18)
-Count of subarrays used: 2.
-Since 2 <= k, 18 is "Possible". Try smaller.
-New Range: [16, 17]
-
-```
+For a "Guess" (Mid), we walk through the array and keep adding numbers to a current subarray. If the sum exceeds "Mid," we must start a new subarray (increment our counter). If our counter exceeds `k`, the "Mid" was too small.
 
 ---
 
-## 3. Time and Space Complexity Analysis
+### Step-by-Step Visualization
 
-### Time Complexity (TC)
+**Example:** `nums = [7, 2, 5, 10, 8]`, `k = 2`
+
+**Step 1: Define Range**
+
+* **Left:** Max(7, 2, 5, 10, 8) = **10**
+* **Right:** Sum(7+2+5+10+8) = **32**
+
+**Step 2: First Guess (Mid = (10 + 32) / 2 = 21)**
+Check if we can split using Max Sum **21**:
 
 ```text
-Let N = number of elements in nums
-Let S = sum of all elements in nums
-Let M = maximum element in nums
-
-1. Range of Binary Search = S - M
-2. Number of steps in Binary Search = log(S - M)
-3. For each step, we iterate through the array once = O(N)
-
-Total TC = O(N * log(Sum - Max))
+[7, 2, 5] (Sum: 14) -> Add 10? (Sum: 24 > 21) -> NO. 
+Subarray 1: [7, 2, 5]
+Subarray 2: [10, 8]
+Total Subarrays used: 2. 
+Since 2 <= k, 21 is POSSIBLE. Try smaller (Right = 20).
 
 ```
 
-### Space Complexity (SC)
+**Step 3: Second Guess (Mid = (10 + 20) / 2 = 15)**
+Check if we can split using Max Sum **15**:
 
 ```text
-1. We only store a few variables (left, right, mid, current_sum, pieces).
-2. No extra arrays or recursion stacks are used in the Binary Search approach.
-
-Total SC = O(1)
+[7, 2, 5] (Sum: 14) -> Add 10? (Sum: 24 > 15) -> NO.
+Subarray 1: [7, 2, 5]
+[10] -> Add 8? (Sum: 18 > 15) -> NO.
+Subarray 2: [10]
+Subarray 3: [8]
+Total Subarrays used: 3.
+Since 3 > k, 15 is IMPOSSIBLE. Try larger (Left = 16).
 
 ```
+
+**Step 4: Third Guess (Mid = (16 + 20) / 2 = 18)**
+Check if we can split using Max Sum **18**:
+
+```text
+[7, 2, 5] (Sum: 14) -> Add 10? (Sum: 24 > 18) -> NO.
+Subarray 1: [7, 2, 5]
+[10, 8] (Sum: 18) -> Perfect.
+Subarray 2: [10, 8]
+Total Subarrays used: 2.
+Since 2 <= k, 18 is POSSIBLE. Try smaller (Right = 17).
+
+```
+
+**Result:** After more narrowing, we find **18** is the smallest possible maximum.
 
 ---
 
-## 4. Solution Code
+## 4. Time and Space Complexity
 
-### Approach A: Binary Search (The L5+ Preferred Way)
+### Time Complexity: O(n * log(S))
 
-This is significantly more efficient than DP for this specific problem.
+* `n` is the length of the array.
+* `S` is the sum of all elements in the array.
+* We perform a Binary Search over the range `(Sum - Max)`. The number of steps is `log(S)`.
+* Inside each step, we traverse the array once `O(n)`.
 
-#### Python (Binary Search)
+```text
+Binary Search Steps: log(Sum)
+        |
+        v
+[ Array Traversal: O(n) ]
+-------------------------
+Total: O(n * log(Sum))
+
+```
+
+### Space Complexity: O(1)
+
+We only store a few variables (`left`, `right`, `mid`, `current_sum`, `count`). We do not use recursion or extra arrays.
+
+---
+
+## 6. Implementations
+
+### Python Implementation
 
 ```python
-class Solution:
-    def splitArray(self, nums: list[int], k: int) -> int:
-        def can_split(max_sum):
-            # Checks if we can split nums into k or fewer subarrays 
-            # such that no subarray sum exceeds max_sum
-            count = 1
-            current_sum = 0
-            for num in nums:
-                if current_sum + num > max_sum:
-                    count += 1
-                    current_sum = num
-                else:
-                    current_sum += num
-            return count <= k
+def split_array(nums, k):
+    # The smallest possible max sum is the largest single number
+    # The largest possible max sum is the total sum of the array
+    left, right = max(nums), sum(nums)
+    answer = right
 
-        low, high = max(nums), sum(nums)
-        ans = high
+    def can_split(max_sum_threshold):
+        subarray_count = 1
+        current_sum = 0
         
-        while low <= high:
-            mid = (low + high) // 2
-            if can_split(mid):
-                ans = mid
-                high = mid - 1
+        for num in nums:
+            if current_sum + num <= max_sum_threshold:
+                current_sum += num
             else:
-                low = mid + 1
-        return ans
+                # Need a new subarray
+                subarray_count += 1
+                current_sum = num
+        
+        return subarray_count <= k
+
+    while left <= right:
+        mid = (left + right) // 2
+        
+        if can_split(mid):
+            # If possible, this could be our answer, but try even smaller
+            answer = mid
+            right = mid - 1
+        else:
+            # Too small, must increase the allowed sum
+            left = mid + 1
+            
+    return answer
+
+# Usage
+print(split_array([7, 2, 5, 10, 8], 2)) # 18
 
 ```
 
----
-
-### Approach B: Dynamic Programming (Top-Down & Bottom-Up)
-
-DP is more intuitive if you think about "where to place the dividers." We want to split `n` elements into `k` groups.
-
-#### 1. Top-Down (Recursive with Memoization)
-
-**Intuition:** "If I have `i` elements left and `j` splits left, where should I put the next split?"
-
-```python
-# Python Top-Down
-def splitArray(nums, k):
-    memo = {}
-    # n is the number of elements, k is the splits
-    def solve(idx, k_rem):
-        if k_rem == 1:
-            return sum(nums[idx:])
-        if (idx, k_rem) in memo:
-            return memo[(idx, k_rem)]
-        
-        res = float('inf')
-        cur_sum = 0
-        # Try splitting at every possible position i
-        for i in range(idx, len(nums) - k_rem + 1):
-            cur_sum += nums[i]
-            # The answer for this state is the minimum of 
-            # the maximums of current split vs remaining splits
-            res = min(res, max(cur_sum, solve(i + 1, k_rem - 1)))
-        
-        memo[(idx, k_rem)] = res
-        return res
-    return solve(0, k)
-
-```
-
-#### 2. Bottom-Up (Tabulation)
-
-**Intuition:** Build a table `dp[i][j]` which represents the min-max sum for the first `i` elements split into `j` groups.
+### JavaScript Implementation
 
 ```javascript
-// JavaScript Bottom-Up
-function splitArray(nums, k) {
-    const n = nums.length;
-    // dp[i][j] = min largest sum for first i elements with j splits
-    const dp = Array.from({ length: k + 1 }, () => Array(n + 1).fill(Infinity));
-    const prefixSum = new Array(n + 1).fill(0);
+var splitArray = function(nums, k) {
+    let left = Math.max(...nums);
+    let right = nums.reduce((a, b) => a + b, 0);
+    let answer = right;
 
-    for (let i = 0; i < n; i++) prefixSum[i + 1] = prefixSum[i] + nums[i];
+    const canSplit = (maxSumThreshold) => {
+        let subarrayCount = 1;
+        let currentSum = 0;
 
-    dp[0][0] = 0;
-    for (let j = 1; j <= k; j++) {
-        for (let i = 1; i <= n; i++) {
-            // Try all possible split points 'p'
-            for (let p = 0; p < i; p++) {
-                dp[j][i] = Math.min(dp[j][i], Math.max(dp[j - 1][p], prefixSum[i] - prefixSum[p]));
+        for (const num of nums) {
+            if (currentSum + num <= maxSumThreshold) {
+                currentSum += num;
+            } else {
+                // Current subarray full, start next one
+                subarrayCount++;
+                currentSum = num;
             }
         }
+        return subarrayCount <= k;
+    };
+
+    while (left <= right) {
+        let mid = Math.floor((left + right) / 2);
+
+        if (canSplit(mid)) {
+            answer = mid;
+            right = mid - 1; // Look for smaller valid maximum
+        } else {
+            left = mid + 1; // Increase threshold
+        }
     }
-    return dp[k][n];
-}
+
+    return answer;
+};
 
 ```
 
 ---
 
-## Technical Terms & Algorithms
+## 7. Comparison with DP Approach
 
-1. **Binary Search on Answer:** Instead of searching for an index in an array, we search for a value in a range of possible solutions. It applies here because the "possibility" of a sum is monotonic (if 20 works, 21 definitely works).
-2. **Greedy Allocation:** In the `can_split` function, we use a greedy approach to pack as many numbers as possible into a subarray before starting a new one. This works because the numbers are non-negative.
-3. **Prefix Sum:** A pre-calculated array where `prefixSum[i]` is the sum of elements from index 0 to `i-1`. It allows calculating any subarray sum in `O(1)` time.
+| Feature | DP (Top-Down) | Binary Search |
+| --- | --- | --- |
+| **Time Complexity** | O(k * n^2) | O(n * log(Sum)) |
+| **Space Complexity** | O(n * k) | O(1) |
+| **Intuitiveness** | Breaking down choices | Guessing the answer |
+| **Performance** | Slower for large N | Extremely fast |
 
 ---
 
-## Real-World / Interview Variations
+## 8. Relevant LeetCode Problems
 
-Companies often disguise this problem to test if you can map it to "Minimize the Maximum."
+This "Binary Search on Answer" technique is the exact solution for:
 
-* **Google (Shipment Loading):** "You have packages with weights and a fleet of `D` ships. You must load packages in order. What is the minimum capacity each ship needs to transport all packages within `D` days?" (Identical to Split Array).
-* **Meta (Work Distribution):** "Distribute `N` sequential tasks among `K` workers to minimize the workload of the most overworked worker."
-* **Bloomberg (Video Streaming):** "Partition a video file of `N` chunks into `K` batches for processing such that the maximum batch size is minimized to prevent server timeout."
+1. **Koko Eating Bananas (LC 875):** Find the minimum speed to eat all bananas.
+2. **Capacity To Ship Packages Within D Days (LC 1011):** Find min ship capacity.
+3. **Minimum Difficulty of a Job Schedule (LC 1335):** Can be solved this way if tasks are continuous.
+4. **Path With Minimum Effort (LC 1631):** Finding min maximum weight on a path.
+
+# 410. Split Array Largest Sum (Dynamic Programming)
+
+The **Split Array Largest Sum** problem is a classic optimization challenge. While it is often solved more efficiently using Binary Search, the **Dynamic Programming (DP)** approach is more intuitive for understanding how to explore all possible ways to partition data.
+
+---
+
+## 1. Category of Algorithm
+
+This approach falls under **Top-Down Dynamic Programming with Memoization**. It uses a recursive strategy to break the problem into sub-problems and stores results to avoid redundant calculations.
+
+## 2. Problem It Solves
+
+Given an array `nums` and an integer `k`, you must split the array into `k` non-empty continuous subarrays. The goal is to minimize the **largest sum** among these `k` subarrays.
+
+---
+
+## 3. Solution (What, Why, How)
+
+### The Logic
+
+We need to make `k-1` "cuts" in the array.
+
+* **What:** At any given index, we decide where to put the next cut.
+* **Why:** By trying every possible cut position for the first subarray, and then recursively asking the same question for the remaining `k-1` subarrays, we can find the optimal solution.
+* **How:** We keep track of our current `index` in the array and how many `subarraysLeft` we need to create.
+
+### Step-by-Step Visualization
+
+Example: `nums = [7, 2, 5]`, `k = 2`
+
+```text
+Decision Tree for solve(index=0, subarraysLeft=2):
+
+Option 1: First subarray is [7] (sum = 7)
+   -> Remaining: solve(index=1, subarraysLeft=1) 
+   -> Subarray is [2, 5] (sum = 7)
+   -> Max of this path: max(7, 7) = 7
+
+Option 2: First subarray is [7, 2] (sum = 9)
+   -> Remaining: solve(index=2, subarraysLeft=1)
+   -> Subarray is [5] (sum = 5)
+   -> Max of this path: max(9, 5) = 9
+
+Result: min(Option 1, Option 2) = 7
+
+```
+
+---
+
+## 4. Time and Space Complexity
+
+### Time Complexity: O(k * n * n)
+
+* `n` is the length of the array.
+* There are `n * k` unique states in our DP table (index * subarraysLeft).
+* For each state, we run a loop that can go up to `n` times to find the next split point.
+
+```text
+States: [ 0...n ] x [ 1...k ]  --> (n * k)
+Work per state: Loop through n elements
+Total Time: n * k * n = O(k * n^2)
+
+```
+
+### Space Complexity: O(n * k)
+
+* We store results in a memoization table/hashmap of size `n * k`.
+* The recursion stack depth is at most `n`.
+
+---
+
+## 6. Implementations
+
+### Python Implementation
+
+```python
+def split_array(nums, k):
+    memo = {}
+    
+    # Precompute prefix sums for fast subarray sum calculation
+    # sum(nums[i:j]) = prefix_sums[j] - prefix_sums[i]
+    n = len(nums)
+    prefix_sums = [0] * (n + 1)
+    for i in range(n):
+        prefix_sums[i+1] = prefix_sums[i] + nums[i]
+
+    def solve(index, subarrays_left):
+        # Base Case: If we only need 1 subarray, it must take all remaining elements
+        if subarrays_left == 1:
+            return prefix_sums[n] - prefix_sums[index]
+        
+        state = (index, subarrays_left)
+        if state in memo:
+            return memo[state]
+        
+        res = float('inf')
+        # Try splitting the first subarray at every possible position
+        # We must leave enough elements for the remaining subarrays_left
+        for i in range(index, n - subarrays_left + 1):
+            # Sum of the current first subarray
+            current_sum = prefix_sums[i + 1] - prefix_sums[index]
+            
+            # Recurse for the remaining part
+            largest_sum_remaining = solve(i + 1, subarrays_left - 1)
+            
+            # We want the 'largest sum' of this specific split
+            current_max = max(current_sum, largest_sum_remaining)
+            
+            # We want to 'minimize' that largest sum across all split options
+            res = min(res, current_max)
+            
+            # Optimization: If current_sum exceeds our best result, 
+            # further increasing current_sum won't help.
+            if current_sum >= res:
+                break
+                
+        memo[state] = res
+        return res
+
+    return solve(0, k)
+
+# Example
+print(split_array([7, 2, 5, 10, 8], 2)) # Output: 18
+
+```
+
+### JavaScript Implementation
+
+```javascript
+var splitArray = function(nums, k) {
+    const n = nums.length;
+    const memo = new Map();
+    
+    // Prefix sums to calculate subarray sums in O(1)
+    const prefixSums = new Array(n + 1).fill(0);
+    for (let i = 0; i < n; i++) {
+        prefixSums[i + 1] = prefixSums[i] + nums[i];
+    }
+
+    function solve(index, subarraysLeft) {
+        if (subarraysLeft === 1) {
+            return prefixSums[n] - prefixSums[index];
+        }
+
+        const key = `${index}-${subarraysLeft}`;
+        if (memo.has(key)) return memo.get(key);
+
+        let minLargestSum = Infinity;
+
+        for (let i = index; i <= n - subarraysLeft; i++) {
+            const currentSum = prefixSums[i + 1] - prefixSums[index];
+            const remainingMax = solve(i + 1, subarraysLeft - 1);
+
+            const currentMax = Math.max(currentSum, remainingMax);
+            minLargestSum = Math.min(minLargestSum, currentMax);
+
+            // Optimization: currentSum only grows, so if it's already 
+            // worse than minLargestSum, stop.
+            if (currentSum >= minLargestSum) break;
+        }
+
+        memo.set(key, minLargestSum);
+        return minLargestSum;
+    }
+
+    return solve(0, k);
+};
+
+```
+
+---
+
+## 7. Comparison with Other Approaches
+
+* **vs Binary Search (Optimal):** Binary Search on the answer takes **O(n * log(sum of array))**. This is significantly faster than DP's **O(k * n^2)**. However, DP is easier to adapt if the problem constraints change (e.g., if there were specific "costs" associated with each split).
+* **vs Brute Force:** Brute force explores every combination of splits, which is exponential **O(2^n)**. DP reduces this by reusing results for shared `(index, k)` states.
+
+---
+
+## 8. Relevant LeetCode Problems
+
+The "Split array/partition into K groups" pattern using Top-Down DP is common in:
+
+1. **Palindrome Partitioning II (LC 132):** Minimize cuts to make every part a palindrome.
+2. **Allocate Books (InterviewBit):** Exactly the same problem logic.
+3. **Capacity To Ship Packages Within D Days (LC 1011):** Similar partition logic.
+4. **Minimum Difficulty of a Job Schedule (LC 1335):** Very similar "split into k days" logic.
+
 
 # 221. Maximal Square
 
