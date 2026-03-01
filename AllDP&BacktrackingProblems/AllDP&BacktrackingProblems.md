@@ -3082,6 +3082,283 @@ Companies rarely ask "Jump Game" directly anymore; they use these variations:
 2. **Meta (UI/UX flow):** "Given a series of app screens and the number of permitted 'back' or 'forward' actions from each, can a user reach the checkout page from the home screen?"
 3. **Bloomberg (Liquidity/Trading):** "Given a sequence of trades and the maximum 'slippage' or move allowed from each trade, can you reach a specific target price?"
 
+# Jump Game II
+
+This is a classic problem, and you are right to ask how a senior engineer would approach it. An entry-level engineer might just try to find *any* solution that works, but a top-of-band L5 or L6 engineer at Google or Meta will immediately look for the optimal pattern.
+
+In an interview, a senior engineer will recognize that while this *can* be solved with Dynamic Programming (DP), the DP approach is sub-optimal. They will briefly explain the DP intuition to show thoroughness, but quickly pivot to the most efficient approach: a **Greedy Algorithm** modeled as an **Implicit Breadth-First Search (BFS)**.
+
+Let's break this down exactly how you would discuss it in a high-level technical interview.
+
+---
+
+### 1. Problem Explanation
+
+You are given an array of non-negative integers.
+
+* Each element in the array represents your **maximum** jump length from that specific position.
+* You start at the first index (index 0).
+* Your goal is to reach the last index using the **minimum number of jumps**.
+* The problem guarantees that it is always possible to reach the last index.
+
+**Let's look at a basic example:**
+Input array: `[2, 3, 1, 1, 4]`
+
+```text
+Indices:      0    1    2    3    4
+            +----+----+----+----+----+
+Array nums: |  2 |  3 |  1 |  1 |  4 |
+            +----+----+----+----+----+
+               ^
+               |
+             Start
+
+```
+
+From index 0, the value is `2`. This means you can jump a maximum of 2 steps. You can choose to land on index `1` or index `2`. We need to figure out which choices lead to the end in the fewest total jumps.
+
+---
+
+### 2. Solution Explanation
+
+Before jumping to the optimal solution, let's look at the DP approach, as it's the most common initial thought process.
+
+#### The Intuitive DP Approach (Sub-optimal)
+
+If you view this as a DP problem, you want to break it down into smaller subproblems.
+
+* **Top-Down (Memoization):** You start at index 0 and say, "I can jump to index 1 or 2. Let me recursively calculate the minimum jumps to reach the end from index 1, and the minimum jumps from index 2. I'll take the minimum of those two answers and add 1." You save these answers in an array to avoid recalculating them.
+* **Bottom-Up (Tabulation):** You create an array `dp` of the same length as `nums`, filled with infinity. You set `dp[0] = 0`. Then, for every index `i`, you look at all the indices you can reach from `i`, and update their `dp` values: `dp[reachable_index] = min(dp[reachable_index], dp[i] + 1)`.
+
+**Why an L5/L6 engineer abandons DP here:** The DP approach requires a nested loop. For every element, you might iterate through up to N subsequent elements. This gives a Time Complexity of O(N^2). In the real world (and in Google/Meta interviews), O(N^2) for this specific problem is too slow.
+
+#### The Optimal L5/L6 Approach: Greedy / Implicit BFS
+
+A senior engineer will realize that this problem can be solved in a single pass (O(N) time) by treating it like a Breadth-First Search (BFS) on a graph, without actually building the graph.
+
+Instead of looking at individual jumps, we look at **windows** (or "levels" in BFS terminology).
+
+* **Window 0:** The starting index.
+* **Window 1:** All indices you can reach from Window 0.
+* **Window 2:** All indices you can reach from Window 1.
+
+Every time we move to a new window, we increment our jump count. We just need to keep track of the boundaries of our current window and the farthest point we can reach for the *next* window.
+
+**Let's visualize the step-by-step Greedy execution:**
+Input: `[2, 3, 1, 1, 4]`
+
+**Variables we will track:**
+
+* `jumps`: Total jumps taken so far.
+* `current_window_end`: The farthest index we can reach with our *current* number of jumps.
+* `farthest`: The absolute farthest index we have discovered we can reach so far.
+
+**Initialization:**
+
+```text
+jumps = 0
+current_window_end = 0
+farthest = 0
+
+            +----+----+----+----+----+
+Array nums: |  2 |  3 |  1 |  1 |  4 |
+            +----+----+----+----+----+
+Indices:      0    1    2    3    4
+              ^
+              |
+      Current Window (Ends at 0)
+
+```
+
+**Iteration Step 1 (Index 0):**
+We are at index 0. The value is 2.
+Farthest we can reach is: index 0 + value 2 = index 2.
+`farthest` becomes max(0, 2) = 2.
+
+```text
+            +----+----+----+----+----+
+Array nums: |  2 |  3 |  1 |  1 |  4 |
+            +----+----+----+----+----+
+Indices:      0    1    2    3    4
+              ^         ^
+              |         |
+              i      farthest (2)
+
+```
+
+We have reached the `current_window_end` (which is 0). This means we MUST make a jump to move forward.
+
+* Increment `jumps` to 1.
+* Update `current_window_end` to our `farthest` value (2). This defines our next window.
+
+**Iteration Step 2 (Index 1):**
+We are at index 1. The value is 3.
+Farthest we can reach is: index 1 + value 3 = index 4.
+`farthest` becomes max(2, 4) = 4.
+
+```text
+            +----+----+----+----+----+
+Array nums: |  2 |  3 |  1 |  1 |  4 |
+            +----+----+----+----+----+
+Indices:      0    1    2    3    4
+                   ^              ^
+                   |              |
+                   i           farthest (4)
+                   
+Current Window is indices [1, 2]. We are inside it.
+
+```
+
+**Iteration Step 3 (Index 2):**
+We are at index 2. The value is 1.
+Farthest we can reach is: index 2 + value 1 = index 3.
+`farthest` remains max(4, 3) = 4.
+
+```text
+            +----+----+----+----+----+
+Array nums: |  2 |  3 |  1 |  1 |  4 |
+            +----+----+----+----+----+
+Indices:      0    1    2    3    4
+                        ^         ^
+                        |         |
+                        i      farthest (4)
+
+```
+
+Notice that index 2 is the `current_window_end`! We have explored all options in our current window. We MUST make another jump to enter the next window.
+
+* Increment `jumps` to 2.
+* Update `current_window_end` to `farthest` (4).
+
+**Iteration Step 4 (Index 3):**
+We are at index 3.
+Wait, our `current_window_end` is now 4, which is the last index. We don't even need to process the rest of the array because we know our current window already covers the end of the array. The loop can safely ignore the last element because we are guaranteed to reach it.
+
+Total `jumps` = 2.
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+**Time Complexity: O(N)**
+Where N is the length of the array. We iterate through the array exactly one time.
+
+```text
+Derivation Visualization (Time Complexity):
+
+Array: [2, 3, 1, 1, 4]
+Pass:   -> -> -> -> (Stop before last element)
+
+Operations per element:
+- Read value
+- Calculate max (O(1))
+- Check if i == current_window_end (O(1))
+
+Total time = N elements * O(1) operations = O(N)
+
+```
+
+**Space Complexity: O(1)**
+We only use three variables (`jumps`, `current_window_end`, `farthest`) regardless of the size of the input array. We are not allocating any new arrays or call stacks.
+
+```text
+Derivation Visualization (Space Complexity):
+
+Memory Allocation:
++----------------------+
+| jumps: Integer       | -> O(1) memory
+| window_end: Integer  | -> O(1) memory
+| farthest: Integer    | -> O(1) memory
++----------------------+
+Total Auxiliary Space = O(1)
+
+```
+
+---
+
+### 4. Solution Code
+
+Here are the optimal Greedy solutions in JavaScript and Python.
+
+**JavaScript Snippet:**
+
+```javascript
+/**
+ * Calculates the minimum number of jumps to reach the last index.
+ * We use an implicit BFS (Greedy) approach to track reachable windows.
+ */
+function jump(nums) {
+    let jumps = 0;
+    let currentWindowEnd = 0;
+    let farthestReachable = 0;
+
+    // We loop up to nums.length - 1 because we don't need to jump from the last index.
+    for (let i = 0; i < nums.length - 1; i++) {
+        // Update the farthest we can reach from the current window
+        farthestReachable = Math.max(farthestReachable, i + nums[i]);
+
+        // If we have reached the end of the current window, we must jump
+        if (i === currentWindowEnd) {
+            jumps++;
+            currentWindowEnd = farthestReachable;
+            
+            // Minor optimization: If our window covers the end, we can stop early
+            if (currentWindowEnd >= nums.length - 1) {
+                break;
+            }
+        }
+    }
+
+    return jumps;
+}
+
+```
+
+**Python Snippet:**
+
+```python
+def jump(nums):
+    """
+    Calculates the minimum number of jumps to reach the last index.
+    Uses a Greedy approach tracking the maximum reach per "jump level".
+    """
+    jumps = 0
+    current_window_end = 0
+    farthest_reachable = 0
+    
+    # Iterate through the array, stopping right before the last element
+    for i in range(len(nums) - 1):
+        # Continually track the furthest point we can reach
+        farthest_reachable = max(farthest_reachable, i + nums[i])
+        
+        # When we hit the boundary of our current jump's reach...
+        if i == current_window_end:
+            jumps += 1                        # ...we make a jump
+            current_window_end = farthest_reachable  # ...and set the new boundary
+            
+            # Optimization: break early if the new boundary reaches or passes the end
+            if current_window_end >= len(nums) - 1:
+                break
+                
+    return jumps
+
+```
+
+---
+
+### Note 1: Terminology Explained
+
+* **Greedy Algorithm:** An algorithmic paradigm that builds up a solution piece by piece, always choosing the next piece that offers the most obvious and immediate benefit. In this problem, it applies because maximizing our `farthest_reachable` at every step guarantees we cover the most ground, leading to the fewest jumps. We never have to "undo" a jump choice.
+* **Implicit BFS (Breadth-First Search):** BFS is usually used on explicit graphs (nodes and edges). "Implicit BFS" means the data isn't structured as a graph in memory, but we traverse it conceptually exactly like a graph. The "windows" we tracked perfectly map to the "levels" of a BFS tree. This helps us find the shortest path (minimum jumps) optimally.
+
+### Note 2: Real-World Interview Variations
+
+Companies like Google, Meta, and Bloomberg rarely ask "Jump Game II" verbatim anymore. They wrap the exact same logic in real-world scenarios:
+
+1. **Video Streaming / Buffering (Meta/Google):** "You are given a list of video chunks in a buffer. Each chunk at index `i` has a length `L`. You want to skip through the video to the end using the minimum number of clicks, where one click fast-forwards you anywhere within your currently buffered chunk. Find the minimum clicks."
+2. **Watering a Garden / Cell Towers (Bloomberg/Google):** *LeetCode 1326: Minimum Number of Taps to Open to Water a Garden.* "You have a 1D garden and an array of taps. Each tap covers a specific radius left and right. Find the minimum number of taps needed to cover the entire garden." (This requires an initial sorting/interval mapping step, but the core logic is identical to Jump Game II).
+3. **Network Packet Routing:** "A packet must travel through a series of routers. Each router has a maximum transmission range (number of nodes it can skip). What is the minimum number of hops for the packet to reach the destination server?"
+
 
 # 1526. Minimum Number of Increments on Subarrays to Form a Target Array
 
