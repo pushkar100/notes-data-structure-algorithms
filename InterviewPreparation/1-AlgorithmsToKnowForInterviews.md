@@ -1,4 +1,4 @@
-# Data Structure & Algorithms To Know For Interviews
+# Algorithms To Know For Interviews
 
 # Two Pointers
 
