@@ -5090,256 +5090,440 @@ This exact core algorithm is highly requested in FAANG interviews under differen
 
 # 3346. Maximum Frequency of an Element After Performing Operations I
 
-As a senior engineer, I love problems like this. On the surface, it feels like a messy array manipulation puzzle, but underneath, it’s a beautiful interval overlap problem. Let's break down Leetcode 3346 the way we would whiteboard it in a system design or advanced DSA interview.
+**This is NOT a DP problem.** Dynamic Programming relies on optimal substructure (breaking a problem into sequential, smaller subproblems). In this problem, the elements don't depend on each other sequentially, and keeping track of the "state" of operations across 10^5 elements would cause a combinatorial explosion. Because it isn't a DP problem, concepts like "Top-Down" and "Bottom-Up" don't strictly apply here.
 
-### 1. Problem Explanation
+However, you are right on the money with your intuition: **Sweep Line is absolutely one of the best ways to solve this.** Since you asked for multiple approaches, I am going to fulfill your request by providing the two absolute best approaches an L5/L6 engineer would weigh during an interview: **Approach 1: Sweep Line** and **Approach 2: Sliding Window & Binary Search**.
 
-**The Goal:**
-You are given an array of numbers (`nums`), an allowed shift range (`k`), and a cap on how many numbers you can shift (`numOperations`).
-For any number in the array, you can either:
-
-* Leave it exactly as it is (costs 0 operations).
-* Change it to *any* value within `[number - k, number + k]` (costs 1 operation).
-
-You want to find a "target number" that allows you to group the maximum number of elements together, without exceeding your `numOperations` budget.
-
-**The Mental Model:**
-Instead of thinking about adding/subtracting values from individual elements, think of every number in `nums` as projecting a "reachable zone" or "interval" on a number line.
-If `nums = [4]` and `k = 2`, the reachable zone is `[2, 6]`.
-The problem is asking: **Which coordinate on the number line has the most overlapping zones, keeping in mind we are only allowed to physically "move" a limited number of elements to that coordinate?**
+Let's break this down step-by-step.
 
 ---
 
-### 2. Solution Explanation
+### 1. Problem explanation
 
-To solve this optimally, we have to tackle a non-trivial challenge: **The Operational Limit.**
+You have an array of numbers, a budget of `numOperations`, and a range `k`.
+For any number in the array, you can spend 1 operation to change it to **any number** within `k` units of its original value.
 
-If we had infinite operations, the answer would simply be the point on the number line with the most overlapping intervals. But we don't. We have `numOperations`.
+Your goal is to pick a **Target Value**, and then use your operations to pull as many elements as possible to that Target Value, maximizing the frequency of that number.
 
-Let's say we are evaluating a target coordinate `T`.
+**The Golden Rule of the Problem:**
+If you pick a Target Value:
 
-* Let `s` be the total number of intervals that overlap at `T`. (These are all the numbers that *can* reach `T`).
-* Let `cnt[T]` be the count of numbers in `nums` that are *already exactly* `T`.
+1. Some elements are **already** equal to the Target. You get these for free! (0 operations used).
+2. Some elements are **within reach** (distance <= k). You can spend 1 operation per element to change them, up to your `numOperations` limit.
+3. Some elements are **out of reach** (distance > k). You can't use them at all.
 
-To make all `s` numbers equal to `T`, we don't need to change the ones that are already `T`. We only need to change the others.
-The number of operations required would be `s - cnt[T]`.
+Let's visualize this with an example.
+`nums = [1, 4, 5]`, `k = 1`, `numOperations = 2`
 
-If we have enough operations (`numOperations >= s - cnt[T]`), we can successfully bring all `s` elements to `T`.
-If we *don't* have enough operations, we can only bring `numOperations` elements to `T`, plus the elements that are already there (`cnt[T]`).
+Each number can stretch left by 1, and right by 1.
 
-**The Core Formula:**
-For any target coordinate `T`, the maximum frequency we can achieve is:
-`Max Frequency at T = min(s, cnt[T] + numOperations)`
+You are absolutely right. Good catch.
 
-#### Example Walkthrough & Visualization
+I completely botched the arithmetic for the net events at point 3 and point 4 in that previous diagram. I had the end of the first interval and the start of the second interval mismatched, which threw off the running sum calculation.
 
-Let's trace `nums = [1, 4, 5]`, `k = 1`, `numOperations = 2`
+When you are tracing a Sweep Line, getting those boundary events exactly right is the entire core of the algorithm. Let's fix that immediately.
 
-**Step 1: Map the reachable intervals**
+Here is the accurate, corrected trace for `nums = [1, 4, 5]` and `k = 1`.
 
-* 1 reaches `[0, 2]`
-* 4 reaches `[3, 5]`
-* 5 reaches `[4, 6]`
+### Sweep Line Explanation
+
+For every number `x`, the reachable interval is inclusive: `[x - k, x + k]`.
+
+* An interval **starts** at `x - k` (adds +1 to overlap).
+* An interval **ends** at `x + k + 1` (subtracts -1 from overlap).
+
+Let's look at the exact intervals:
+
+* `nums[0] = 1`: Reachable range is `[0, 2]`. Events: Start at **0** (+1), End at **3** (-1).
+* `nums[1] = 4`: Reachable range is `[3, 5]`. Events: Start at **3** (+1), End at **6** (-1).
+* `nums[2] = 5`: Reachable range is `[4, 6]`. Events: Start at **4** (+1), End at **7** (-1).
 
 ```text
-Target values on number line:
-     0   1   2   3   4   5   6   7
-1:  [================]
-4:                  [================]
-5:                      [================]
+=========================================================
+                     SWEEP LINE EVENTS
+=========================================================
+nums = [1, 4, 5], k = 1
+
+Number Line:       0   1   2   3   4   5   6   7
+---------------------------------------------------------
+Interval for 1:  [+1]-------->[-1]
+                 (start 0)    (end 3)
+
+Interval for 4:              [+1]-------->[-1]
+                             (start 3)    (end 6)
+
+Interval for 5:                  [+1]-------->[-1]
+                                 (start 4)    (end 7)
+---------------------------------------------------------
+Net Event:        +1   0   0   0  +1   0  -1  -1
+Running Sum:       1   1   1   1   2   2   1   0
+(Total Overlap)
 
 ```
 
-**Step 2: Calculate overlaps (s) and original frequencies (cnt)**
+Notice what happens exactly at **Point 3**:
 
-```text
-         0   1   2   3   4   5   6
------------------------------------
-Num 1:   +---+---+
-Num 4:               +---+---+
-Num 5:                   +---+---+
------------------------------------
-Total s: 1   1   1   1   2   2   1
+* The interval for `1` is no longer active at 3, so we process its end event: **-1**.
+* The interval for `4` becomes active at 3, so we process its start event: **+1**.
+* The Net Event at Point 3 is `-1 + 1 = 0`.
+* The Running Sum (total overlap) at Point 3 remains **1**. (Only the number 4 can reach point 3).
 
-Original cnt array:
-cnt[1]=1, cnt[4]=1, cnt[5]=1, all others 0.
+Notice what happens exactly at **Point 4**:
 
-```
+* The interval for `4` is still active (no event).
+* The interval for `5` becomes active at 4, so we process its start event: **+1**.
+* The Net Event at Point 4 is **+1**.
+* The Running Sum (total overlap) at Point 4 becomes `1 + 1 = ` **2**. (Both the numbers 4 and 5 can reach point 4).
 
-**Step 3: Apply the Formula across critical points**
-We only need to evaluate the boundaries of these intervals and the original numbers themselves. We use a **Sweep Line / Difference Array** to track `s` as we move from left to right.
+At point 4, our running overlap is 2. The number 4 is already at point 4 (1 free element), and the number 5 needs 1 operation. If `numOperations` is at least 1, our max frequency here is 2.
 
-* At **T = 1**: `s = 1`, `cnt[1] = 1`. `min(1, 1 + 2)` = **1**
-* At **T = 4**: `s = 2` (4 and 5 overlap), `cnt[4] = 1`. `min(2, 1 + 2)` = **2**
-* At **T = 5**: `s = 2` (4 and 5 overlap), `cnt[5] = 1`. `min(2, 1 + 2)` = **2**
+If we choose `4` as our Target Value:
 
-The maximum frequency is **2**.
+* `1` can only reach up to `2`. (Cannot reach 4)
+* `4` is already `4`. (Free! 0 operations)
+* `5` can reach `4`. (Costs 1 operation)
+
+Total frequency at Target `4` = 1 (free) + 1 (transformed) = 2.
 
 ---
 
-### 3. Time and Space Complexity Analysis
+### 2. Solution explanation
 
-Since we are only tracking the start, the end, and the exact positions of the numbers, we generate at most 3 events per number in our input array.
+We have two incredibly elegant ways to solve this.
+
+#### Approach 1: The Sweep Line Algorithm
+
+Imagine scanning a vertical line from left to right across the number line to see how many intervals overlap at any given point.
+
+For every number `x`, its reachable interval is `[x - k, x + k]`.
+We can represent this as "Events" on a timeline:
+
+* At `x - k`, an interval **starts** (+1 to overlap).
+* At `x + k + 1`, an interval **ends** (-1 to overlap).
+
+If we sort these events and keep a running sum, we instantly know exactly how many elements can reach any point `P`.
+The maximum frequency at point `P` is:
+`min( Total Overlap at P , Elements already equal to P + numOperations )`
+
+**"If we sort these events and keep a running sum, we instantly know exactly how many elements can reach any point P."**
+
+Imagine you are walking along the number line from left to right.
+Every time you hit a `+1` event, you step *onto* a new rug. Every time you hit a `-1` event, you step *off* a rug.
+
+If you sort the events by their position on the number line, you are guaranteed to process them in the correct left-to-right order. The "Running Sum" is just you counting: *"How many rugs am I currently standing on at this exact position P?"*
+
+Because each "rug" represents a number's reachable range (`x - k` to `x + k`), the number of rugs you are standing on is exactly the number of elements in the array that can physically be transformed into `P`.
+
+At `P = 4`, you are standing on 2 rugs. This means exactly 2 numbers from the original array can physically reach the number 4.
+
+**"The maximum frequency at point P is: `min( Total Overlap at P , Elements already equal to P + numOperations )`"**
+
+This is the core logic that prevents us from cheating. We have two separate limitations, and our final answer is bottlenecked by whichever limitation is stricter (hence the `min()` function).
+
+Let's define the terms in the formula:
+
+* **Total Overlap at P:** The number of "rugs" we are standing on. The total physical amount of numbers that can reach `P`.
+* **Elements already equal to P:** Numbers in our array that are exactly `P` right now. These cost **0 operations** to turn into `P`. We get them for free!
+* **numOperations:** Our budget to change *other* numbers into `P`.
+
+When we add `(Elements already equal to P) + (numOperations)`, we are calculating: *"What is the absolute maximum number of elements I can legally afford to have at P, regardless of how many can physically reach it?"*
+
+Let's look at the two scenarios that prove why the `min()` function is necessary.
+
+**Scenario A: You are bottlenecked by Physics (Overlap)**
+
+* Array: `[4, 5]`
+* `k = 1`
+* Target `P = 4`
+* `numOperations = 100` (Huge budget!)
 
 ```text
-Time Complexity Derivation:
-[ Array of N elements ]  --> Generate 3 events per element
-                                    |
-                                    v
-                       [ Hash Map with <= 3N keys ]
-                                    |
-                                    v
-               [ Extract keys and Sort: O(K * log K) ]
-               (where K is at most 3N, so O(N * log N))
-                                    |
-                                    v
-                [ Iterate through sorted keys: O(N) ]
-                                    |
-                                    v
-                     TOTAL TIME COMPLEXITY: O(N * log N)
+==============================================================
+ SCENARIO A: UNLIMITED BUDGET, LIMITED OVERLAP
+==============================================================
+At P = 4:
+- Elements already equal to 4: 1 (the number 4)
+- Other numbers that can reach 4: 1 (the number 5)
+- Total Overlap at 4: 2
+
+Formula:
+max_frequency = min( Total Overlap , Free Elements + Budget )
+max_frequency = min(       2       ,       1       +   100  )
+max_frequency = min( 2, 101 )
+max_frequency = 2
+==============================================================
 
 ```
 
+*Why it works:* Even though we have 100 operations to spend, there are physically only 2 numbers in the entire array that can reach `P = 4`. We cannot magically invent 99 more numbers. The physical overlap restricts us.
+
+**Scenario B: You are bottlenecked by your Budget (Operations)**
+
+* Array: `[1, 2, 3, 4, 5, 6, 7]`
+* `k = 5` (Everything can reach everywhere)
+* Target `P = 4`
+* `numOperations = 2` (Tiny budget!)
+
 ```text
-Space Complexity Derivation:
-[ Original Array N ]
-        |
-        +---> [ cnt Map: stores at most N distinct elements ] -> O(N)
-        |
-        +---> [ diff Map: stores at most 3N distinct events ] -> O(N)
-                                                                 |
-                                                                 v
-                                                    TOTAL SPACE COMPLEXITY: O(N)
+==============================================================
+ SCENARIO B: UNLIMITED OVERLAP, LIMITED BUDGET
+==============================================================
+At P = 4:
+- Elements already equal to 4: 1 (the number 4)
+- Other numbers that can reach 4: 6 (all the others)
+- Total Overlap at 4: 7
+
+Formula:
+max_frequency = min( Total Overlap , Free Elements + Budget )
+max_frequency = min(       7       ,       1       +    2   )
+max_frequency = min( 7, 3 )
+max_frequency = 3
+==============================================================
+
+```
+
+*Why it works:* 7 numbers can physically reach `P = 4`. But transforming them costs 1 operation each. We get one `4` for free, and we only have the budget to pull in 2 extra numbers. Therefore, the absolute maximum frequency we can achieve at `P = 4` is `1 + 2 = 3`. Our budget restricts us.
+
+
+* The Sweep Line (`Running Sum`) answers the question: *"How many elements are close enough?"*
+* The Formula (`min(...)`) answers the question: *"Of the ones that are close enough, how many can I actually afford?"*
+
+#### Approach 2: Sliding Window + Binary Search
+
+An L6 engineer might realize there's an even simpler mathematical truth here.
+There are only two scenarios for the best Target Value:
+
+**Case A: The target IS an existing number in the array.**
+If we pick an existing number `nums[i]`, we just need to know how many elements fall in the range `[nums[i] - k, nums[i] + k]`. Because the array is sorted, we can use Binary Search to find the left and right boundaries of this range instantly.
+
+**Case B: The target is NOT in the array.**
+If the target isn't in the array, we get **zero** free elements. Every single element we transform costs 1 operation. Therefore, our frequency can NEVER exceed `numOperations`. We just need to find the maximum number of elements that fit inside ANY window of size `2 * k`. We can use a standard Sliding Window to find this!
+
+```text
+==================================================
+           SLIDING WINDOW VISUALIZATION
+==================================================
+Looking for max elements in any window of size 2k.
+nums = [5, 11, 20, 20], k = 5 (Window size = 10)
+
+Window [5, 15]  --> Covers [5, 11]       (Length = 2)
+Window [11, 21] --> Covers [11, 20, 20]  (Length = 3)
+
+Max elements in ANY window of size 10 is 3. 
+If we pick a target not in the array, we can transform 
+at most min(3, numOperations).
 
 ```
 
 ---
 
-### 4. Solution Code
+### 3. Time and Space complexity analysis
 
-Here is the implementation in both Python and JavaScript using the optimal Difference Array / Line Sweep approach.
+```text
++-------------------------------------------------------------+
+| TIME & SPACE COMPLEXITY DERIVATION                          |
++-------------------------------------------------------------+
+| APPROACH 1: Sweep Line                                      |
+| -> Create events map: O(N)                                  |
+| -> Sort unique event keys: O(N log N)                       |
+| -> Sweep through keys: O(N)                                 |
+| TOTAL TIME: O(N log N)                                      |
+| SPACE: O(N) for Hash Maps tracking frequencies and events   |
++-------------------------------------------------------------+
+| APPROACH 2: Sliding Window + Binary Search                  |
+| -> Sort array: O(N log N)                                   |
+| -> Sliding Window (Case B): O(N)                            |
+| -> Binary Search (Case A): O(N) loops * O(log N) search     |
+| TOTAL TIME: O(N log N)                                      |
+| SPACE: O(N) for counting frequencies                        |
++-------------------------------------------------------------+
 
-**Python**
+```
+
+---
+
+### 4. Solution Code (Javascript and Python snippets)
+
+Here are both approaches, fully commented and production-ready.
+
+#### Python Code
 
 ```python
-from collections import defaultdict
+from typing import List
+from collections import defaultdict, Counter
+import bisect
 
 class Solution:
-    def maxFrequency(self, nums: list[int], k: int, numOperations: int) -> int:
-        cnt = defaultdict(int)
-        diff = defaultdict(int)
+    # ---------------------------------------------------------
+    # APPROACH 1: Sweep Line
+    # ---------------------------------------------------------
+    def maxFrequencySweepLine(self, nums: List[int], k: int, numOperations: int) -> int:
+        events = defaultdict(int)
+        freq = Counter(nums)
         
-        for x in nums:
-            cnt[x] += 1
-            
-            # 1. Ensure the original number is evaluated as an event point
-            diff[x] += 0          
-            
-            # 2. Start of the reachable interval
-            diff[x - k] += 1      
-            
-            # 3. End of the reachable interval (exclusive boundary)
-            diff[x + k + 1] -= 1  
-            
-        max_freq = 0
-        current_overlap = 0
-        
-        # Sort keys to perform the Line Sweep from left to right
-        for target in sorted(diff.keys()):
-            current_overlap += diff[target]
-            
-            # Apply our core formula: 
-            # We are bounded by the total overlapping intervals at 'target'
-            # OR the amount we can legally shift + what is already there.
-            achievable = min(current_overlap, cnt[target] + numOperations)
-            
-            if achievable > max_freq:
-                max_freq = achievable
+        for num in nums:
+            # Mark the start and end of the reachable interval
+            events[num - k] += 1
+            events[num + k + 1] -= 1
+            # Ensure the exact number itself is registered as an event point to be checked
+            if num not in events:
+                events[num] = 0
                 
+        running_overlap = 0
+        max_freq = 0
+        
+        # Sort the critical points and sweep across the number line
+        for pos in sorted(events.keys()):
+            running_overlap += events[pos]
+            
+            # max_freq is bounded by overlap, and how many ops we can afford over our free elements
+            current_freq = min(running_overlap, freq[pos] + numOperations)
+            max_freq = max(max_freq, current_freq)
+            
+        return max_freq
+
+    # ---------------------------------------------------------
+    # APPROACH 2: Sliding Window + Binary Search
+    # ---------------------------------------------------------
+    def maxFrequencySlidingWindow(self, nums: List[int], k: int, numOperations: int) -> int:
+        nums.sort()
+        freq = Counter(nums)
+        n = len(nums)
+        max_freq = 0
+        
+        # CASE B: Target is NOT an existing array element.
+        # Find the maximum number of elements packed into ANY window of size 2*k
+        left = 0
+        max_window_len = 0
+        for right in range(n):
+            while nums[right] - nums[left] > 2 * k:
+                left += 1
+            max_window_len = max(max_window_len, right - left + 1)
+        
+        # If we pick a target not in nums, we get NO free elements.
+        max_freq = min(max_window_len, numOperations)
+        
+        # CASE A: Target IS an existing array element.
+        for num in freq:
+            # Find how many elements can physically reach 'num'
+            l_idx = bisect.bisect_left(nums, num - k)
+            r_idx = bisect.bisect_right(nums, num + k)
+            total_reachable = r_idx - l_idx
+            
+            current_freq = min(total_reachable, freq[num] + numOperations)
+            max_freq = max(max_freq, current_freq)
+            
         return max_freq
 
 ```
 
-**JavaScript**
+#### Javascript Code
 
 ```javascript
-/**
- * @param {number[]} nums
- * @param {number} k
- * @param {number} numOperations
- * @return {number}
- */
-var maxFrequency = function(nums, k, numOperations) {
-    const cnt = new Map();
-    const diff = new Map();
+// ---------------------------------------------------------
+// APPROACH 1: Sweep Line
+// ---------------------------------------------------------
+function maxFrequencySweepLine(nums, k, numOperations) {
+    let events = new Map();
+    let freq = new Map();
     
-    for (let i = 0; i < nums.length; i++) {
-        const x = nums[i];
+    for (let num of nums) {
+        freq.set(num, (freq.get(num) || 0) + 1);
         
-        // Track original frequencies
-        cnt.set(x, (cnt.get(x) || 0) + 1);
+        events.set(num - k, (events.get(num - k) || 0) + 1);
+        events.set(num + k + 1, (events.get(num + k + 1) || 0) - 1);
         
-        // Ensure exact element is a critical point in our sweep
-        if (!diff.has(x)) diff.set(x, 0);
-        
-        // Mark the start of the interval (inclusive)
-        const start = x - k;
-        diff.set(start, (diff.get(start) || 0) + 1);
-        
-        // Mark the end of the interval (exclusive)
-        const end = x + k + 1;
-        diff.set(end, (diff.get(end) || 0) - 1);
-    }
-    
-    // Extract and sort the keys for sweeping
-    const criticalPoints = Array.from(diff.keys()).sort((a, b) => a - b);
-    
-    let maxFreq = 0;
-    let currentOverlap = 0;
-    
-    for (let i = 0; i < criticalPoints.length; i++) {
-        const target = criticalPoints[i];
-        
-        // Keep a running sum of overlapping intervals
-        currentOverlap += diff.get(target);
-        
-        const existingCount = cnt.get(target) || 0;
-        
-        // Calculate max frequency based on operations budget
-        const achievable = Math.min(currentOverlap, existingCount + numOperations);
-        
-        if (achievable > maxFreq) {
-            maxFreq = achievable;
+        if (!events.has(num)) {
+            events.set(num, 0);
         }
     }
     
+    // Sort keys numerically
+    let sortedPositions = Array.from(events.keys()).sort((a, b) => a - b);
+    let runningOverlap = 0;
+    let maxFreq = 0;
+    
+    for (let pos of sortedPositions) {
+        runningOverlap += events.get(pos);
+        let countPos = freq.get(pos) || 0;
+        let currentFreq = Math.min(runningOverlap, countPos + numOperations);
+        maxFreq = Math.max(maxFreq, currentFreq);
+    }
+    
     return maxFreq;
-};
+}
+
+// ---------------------------------------------------------
+// APPROACH 2: Sliding Window + Binary Search
+// ---------------------------------------------------------
+function maxFrequencySlidingWindow(nums, k, numOperations) {
+    nums.sort((a, b) => a - b);
+    let freq = new Map();
+    for (let num of nums) {
+        freq.set(num, (freq.get(num) || 0) + 1);
+    }
+    
+    let n = nums.length;
+    let maxFreq = 0;
+    
+    // CASE B: Target is NOT an existing array element
+    let left = 0;
+    let maxWindowLen = 0;
+    for (let right = 0; right < n; right++) {
+        while (nums[right] - nums[left] > 2 * k) {
+            left++;
+        }
+        maxWindowLen = Math.max(maxWindowLen, right - left + 1);
+    }
+    maxFreq = Math.min(maxWindowLen, numOperations);
+    
+    // Binary Search Helpers
+    const bisectLeft = (arr, target) => {
+        let l = 0, r = arr.length;
+        while (l < r) {
+            let mid = Math.floor((l + r) / 2);
+            if (arr[mid] < target) l = mid + 1;
+            else r = mid;
+        }
+        return l;
+    };
+    const bisectRight = (arr, target) => {
+        let l = 0, r = arr.length;
+        while (l < r) {
+            let mid = Math.floor((l + r) / 2);
+            if (arr[mid] <= target) l = mid + 1;
+            else r = mid;
+        }
+        return l;
+    };
+
+    // CASE A: Target IS an existing array element
+    for (let [num, count] of freq.entries()) {
+        let lIdx = bisectLeft(nums, num - k);
+        let rIdx = bisectRight(nums, num + k);
+        let totalReachable = rIdx - lIdx;
+        
+        let currentFreq = Math.min(totalReachable, count + numOperations);
+        maxFreq = Math.max(maxFreq, currentFreq);
+    }
+    
+    return maxFreq;
+}
 
 ```
 
 ---
 
-### Concept Notes & Interview Variations
+### Concept Definitions
 
-**Note 1: Line Sweep / Difference Array**
+* **Sweep Line Algorithm:** A geometric algorithmic technique where a conceptual line is "swept" across a space (in this case, a 1D number line) to track overlapping intervals efficiently. It converts a problem of comparing intervals into a problem of sorting points, drastically reducing time complexity.
+* **Sliding Window:** A technique that involves creating a "window" (a sub-array) that slides over the underlying data to continuously process localized sets of data, preventing unnecessary nested loops.
 
-* **What it is:** A technique where instead of updating every single point inside an interval `[A, B]`, you only record a `+1` at the start `A` and a `-1` right after the end `B + 1`. Later, iterating through these records with a running sum recreates the exact state at any point.
-* **Why it helps:** It reduces the time to apply an interval from `O(Length of Interval)` down to `O(1)`. This turns a potential `O(N * M)` brute force algorithm into a clean `O(N * log N)` operation.
+### Real World / Interview Variations
 
-**Note 2: Real-World & FAANG Variations**
-In senior interviews, you won't always see "arrays and integers." Here is how this identical logic is mapped to real-world system design and coding prompts at top tech companies:
-
-* **Google (Server/Bandwidth Allocation):** You have `N` microservices. Each service can comfortably handle traffic within a specific `[min_rpm, max_rpm]` window without scaling up. You are allowed to aggressively throttle (change the baseline) of up to `numOperations` services. The question asks: "What single traffic threshold `T` maximizes the number of stable services?"
-* *Solution:* Treat the `[min_rpm, max_rpm]` as your `k` intervals. Apply the exact same Difference Array logic to find the peak stable threshold.
-
-
-* **Meta (Trending Topic Clustering):** You are given a massive log of social media post timestamps. Any posts made within `K` minutes of each other can be grouped under a single "trending event." You are allowed to synthetically backdate/forward-date `M` posts. Find the highest volume of posts you can cluster into a single minute.
-* *Solution:* Timestamps are `nums`. The grouping window is `k`. The backdating limit is `numOperations`. The sweep line efficiently processes millions of logs by only looking at the start/end boundaries of their valid windows.
-
-
-* **Bloomberg (Trade Execution Matching):** Buyers have a target price but will accept a spread of `+-K` dollars. You have a budget to cover the spread penalties for up to `B` buyers. Which price point matches the highest volume of buyers?
-* *Solution:* Apply the Line Sweep to price points instead of indices. `s` becomes the total liquidity available at that price, and `cnt[x] + B` represents your budget cap for finalizing the trades.
+* **Google** often asks this exact logic wrapped in a "Server Load Balancing" or "Temperature Control" scenario: "You have N servers operating at different temperatures. You can adjust up to `M` servers by `K` degrees. Find the maximum number of servers you can sync to the exact same temperature."
+* **Meta (Facebook)** frames this around user locations: "You have users located along a highway. Users are willing to travel `K` miles. You have `numOperations` free bus tickets to give out. What is the maximum number of people you can gather at a single coordinate?"
+* **Bloomberg** loves to ask this in a FinTech wrapper: "You have a list of stock bids. Traders are willing to negotiate their bid by `$K`. You have a budget to subsidize `numOperations` trades. Maximize the number of matches at a single price."
 
 
 # 84. Largest Rectangle in Histogram
@@ -13080,439 +13264,3 @@ var medianSlidingWindow = function(nums, k) {
 * *Scenario:* Stock prices are coming in fast. You need the median price for the last 100 ticks to filter out "noise" or outliers.
 * *Solution:* Because Bloomberg cares about speed, they might ask for a **Multiset** or **Balanced BST** approach if your language supports it (like C++ `std::multiset`), as it handles the sliding window removal naturally in O(log k) without the "Lazy" complexity.
 
-# BETTER EXPLANATION: 3346. Maximum Frequency of an Element After Performing Operations I
-
-**This is NOT a DP problem.** Dynamic Programming relies on optimal substructure (breaking a problem into sequential, smaller subproblems). In this problem, the elements don't depend on each other sequentially, and keeping track of the "state" of operations across 10^5 elements would cause a combinatorial explosion. Because it isn't a DP problem, concepts like "Top-Down" and "Bottom-Up" don't strictly apply here.
-
-However, you are right on the money with your intuition: **Sweep Line is absolutely one of the best ways to solve this.** Since you asked for multiple approaches, I am going to fulfill your request by providing the two absolute best approaches an L5/L6 engineer would weigh during an interview: **Approach 1: Sweep Line** and **Approach 2: Sliding Window & Binary Search**.
-
-Let's break this down step-by-step.
-
----
-
-### 1. Problem explanation
-
-You have an array of numbers, a budget of `numOperations`, and a range `k`.
-For any number in the array, you can spend 1 operation to change it to **any number** within `k` units of its original value.
-
-Your goal is to pick a **Target Value**, and then use your operations to pull as many elements as possible to that Target Value, maximizing the frequency of that number.
-
-**The Golden Rule of the Problem:**
-If you pick a Target Value:
-
-1. Some elements are **already** equal to the Target. You get these for free! (0 operations used).
-2. Some elements are **within reach** (distance <= k). You can spend 1 operation per element to change them, up to your `numOperations` limit.
-3. Some elements are **out of reach** (distance > k). You can't use them at all.
-
-Let's visualize this with an example.
-`nums = [1, 4, 5]`, `k = 1`, `numOperations = 2`
-
-Each number can stretch left by 1, and right by 1.
-
-You are absolutely right. Good catch.
-
-I completely botched the arithmetic for the net events at point 3 and point 4 in that previous diagram. I had the end of the first interval and the start of the second interval mismatched, which threw off the running sum calculation.
-
-When you are tracing a Sweep Line, getting those boundary events exactly right is the entire core of the algorithm. Let's fix that immediately.
-
-Here is the accurate, corrected trace for `nums = [1, 4, 5]` and `k = 1`.
-
-### Sweep Line Explanation
-
-For every number `x`, the reachable interval is inclusive: `[x - k, x + k]`.
-
-* An interval **starts** at `x - k` (adds +1 to overlap).
-* An interval **ends** at `x + k + 1` (subtracts -1 from overlap).
-
-Let's look at the exact intervals:
-
-* `nums[0] = 1`: Reachable range is `[0, 2]`. Events: Start at **0** (+1), End at **3** (-1).
-* `nums[1] = 4`: Reachable range is `[3, 5]`. Events: Start at **3** (+1), End at **6** (-1).
-* `nums[2] = 5`: Reachable range is `[4, 6]`. Events: Start at **4** (+1), End at **7** (-1).
-
-```text
-=========================================================
-                     SWEEP LINE EVENTS
-=========================================================
-nums = [1, 4, 5], k = 1
-
-Number Line:       0   1   2   3   4   5   6   7
----------------------------------------------------------
-Interval for 1:  [+1]-------->[-1]
-                 (start 0)    (end 3)
-
-Interval for 4:              [+1]-------->[-1]
-                             (start 3)    (end 6)
-
-Interval for 5:                  [+1]-------->[-1]
-                                 (start 4)    (end 7)
----------------------------------------------------------
-Net Event:        +1   0   0   0  +1   0  -1  -1
-Running Sum:       1   1   1   1   2   2   1   0
-(Total Overlap)
-
-```
-
-Notice what happens exactly at **Point 3**:
-
-* The interval for `1` is no longer active at 3, so we process its end event: **-1**.
-* The interval for `4` becomes active at 3, so we process its start event: **+1**.
-* The Net Event at Point 3 is `-1 + 1 = 0`.
-* The Running Sum (total overlap) at Point 3 remains **1**. (Only the number 4 can reach point 3).
-
-Notice what happens exactly at **Point 4**:
-
-* The interval for `4` is still active (no event).
-* The interval for `5` becomes active at 4, so we process its start event: **+1**.
-* The Net Event at Point 4 is **+1**.
-* The Running Sum (total overlap) at Point 4 becomes `1 + 1 = ` **2**. (Both the numbers 4 and 5 can reach point 4).
-
-At point 4, our running overlap is 2. The number 4 is already at point 4 (1 free element), and the number 5 needs 1 operation. If `numOperations` is at least 1, our max frequency here is 2.
-
-If we choose `4` as our Target Value:
-
-* `1` can only reach up to `2`. (Cannot reach 4)
-* `4` is already `4`. (Free! 0 operations)
-* `5` can reach `4`. (Costs 1 operation)
-
-Total frequency at Target `4` = 1 (free) + 1 (transformed) = 2.
-
----
-
-### 2. Solution explanation
-
-We have two incredibly elegant ways to solve this.
-
-#### Approach 1: The Sweep Line Algorithm
-
-Imagine scanning a vertical line from left to right across the number line to see how many intervals overlap at any given point.
-
-For every number `x`, its reachable interval is `[x - k, x + k]`.
-We can represent this as "Events" on a timeline:
-
-* At `x - k`, an interval **starts** (+1 to overlap).
-* At `x + k + 1`, an interval **ends** (-1 to overlap).
-
-If we sort these events and keep a running sum, we instantly know exactly how many elements can reach any point `P`.
-The maximum frequency at point `P` is:
-`min( Total Overlap at P , Elements already equal to P + numOperations )`
-
-**"If we sort these events and keep a running sum, we instantly know exactly how many elements can reach any point P."**
-
-Imagine you are walking along the number line from left to right.
-Every time you hit a `+1` event, you step *onto* a new rug. Every time you hit a `-1` event, you step *off* a rug.
-
-If you sort the events by their position on the number line, you are guaranteed to process them in the correct left-to-right order. The "Running Sum" is just you counting: *"How many rugs am I currently standing on at this exact position P?"*
-
-Because each "rug" represents a number's reachable range (`x - k` to `x + k`), the number of rugs you are standing on is exactly the number of elements in the array that can physically be transformed into `P`.
-
-At `P = 4`, you are standing on 2 rugs. This means exactly 2 numbers from the original array can physically reach the number 4.
-
-**"The maximum frequency at point P is: `min( Total Overlap at P , Elements already equal to P + numOperations )`"**
-
-This is the core logic that prevents us from cheating. We have two separate limitations, and our final answer is bottlenecked by whichever limitation is stricter (hence the `min()` function).
-
-Let's define the terms in the formula:
-
-* **Total Overlap at P:** The number of "rugs" we are standing on. The total physical amount of numbers that can reach `P`.
-* **Elements already equal to P:** Numbers in our array that are exactly `P` right now. These cost **0 operations** to turn into `P`. We get them for free!
-* **numOperations:** Our budget to change *other* numbers into `P`.
-
-When we add `(Elements already equal to P) + (numOperations)`, we are calculating: *"What is the absolute maximum number of elements I can legally afford to have at P, regardless of how many can physically reach it?"*
-
-Let's look at the two scenarios that prove why the `min()` function is necessary.
-
-**Scenario A: You are bottlenecked by Physics (Overlap)**
-
-* Array: `[4, 5]`
-* `k = 1`
-* Target `P = 4`
-* `numOperations = 100` (Huge budget!)
-
-```text
-==============================================================
- SCENARIO A: UNLIMITED BUDGET, LIMITED OVERLAP
-==============================================================
-At P = 4:
-- Elements already equal to 4: 1 (the number 4)
-- Other numbers that can reach 4: 1 (the number 5)
-- Total Overlap at 4: 2
-
-Formula:
-max_frequency = min( Total Overlap , Free Elements + Budget )
-max_frequency = min(       2       ,       1       +   100  )
-max_frequency = min( 2, 101 )
-max_frequency = 2
-==============================================================
-
-```
-
-*Why it works:* Even though we have 100 operations to spend, there are physically only 2 numbers in the entire array that can reach `P = 4`. We cannot magically invent 99 more numbers. The physical overlap restricts us.
-
-**Scenario B: You are bottlenecked by your Budget (Operations)**
-
-* Array: `[1, 2, 3, 4, 5, 6, 7]`
-* `k = 5` (Everything can reach everywhere)
-* Target `P = 4`
-* `numOperations = 2` (Tiny budget!)
-
-```text
-==============================================================
- SCENARIO B: UNLIMITED OVERLAP, LIMITED BUDGET
-==============================================================
-At P = 4:
-- Elements already equal to 4: 1 (the number 4)
-- Other numbers that can reach 4: 6 (all the others)
-- Total Overlap at 4: 7
-
-Formula:
-max_frequency = min( Total Overlap , Free Elements + Budget )
-max_frequency = min(       7       ,       1       +    2   )
-max_frequency = min( 7, 3 )
-max_frequency = 3
-==============================================================
-
-```
-
-*Why it works:* 7 numbers can physically reach `P = 4`. But transforming them costs 1 operation each. We get one `4` for free, and we only have the budget to pull in 2 extra numbers. Therefore, the absolute maximum frequency we can achieve at `P = 4` is `1 + 2 = 3`. Our budget restricts us.
-
-
-* The Sweep Line (`Running Sum`) answers the question: *"How many elements are close enough?"*
-* The Formula (`min(...)`) answers the question: *"Of the ones that are close enough, how many can I actually afford?"*
-
-#### Approach 2: Sliding Window + Binary Search
-
-An L6 engineer might realize there's an even simpler mathematical truth here.
-There are only two scenarios for the best Target Value:
-
-**Case A: The target IS an existing number in the array.**
-If we pick an existing number `nums[i]`, we just need to know how many elements fall in the range `[nums[i] - k, nums[i] + k]`. Because the array is sorted, we can use Binary Search to find the left and right boundaries of this range instantly.
-
-**Case B: The target is NOT in the array.**
-If the target isn't in the array, we get **zero** free elements. Every single element we transform costs 1 operation. Therefore, our frequency can NEVER exceed `numOperations`. We just need to find the maximum number of elements that fit inside ANY window of size `2 * k`. We can use a standard Sliding Window to find this!
-
-```text
-==================================================
-           SLIDING WINDOW VISUALIZATION
-==================================================
-Looking for max elements in any window of size 2k.
-nums = [5, 11, 20, 20], k = 5 (Window size = 10)
-
-Window [5, 15]  --> Covers [5, 11]       (Length = 2)
-Window [11, 21] --> Covers [11, 20, 20]  (Length = 3)
-
-Max elements in ANY window of size 10 is 3. 
-If we pick a target not in the array, we can transform 
-at most min(3, numOperations).
-
-```
-
----
-
-### 3. Time and Space complexity analysis
-
-```text
-+-------------------------------------------------------------+
-| TIME & SPACE COMPLEXITY DERIVATION                          |
-+-------------------------------------------------------------+
-| APPROACH 1: Sweep Line                                      |
-| -> Create events map: O(N)                                  |
-| -> Sort unique event keys: O(N log N)                       |
-| -> Sweep through keys: O(N)                                 |
-| TOTAL TIME: O(N log N)                                      |
-| SPACE: O(N) for Hash Maps tracking frequencies and events   |
-+-------------------------------------------------------------+
-| APPROACH 2: Sliding Window + Binary Search                  |
-| -> Sort array: O(N log N)                                   |
-| -> Sliding Window (Case B): O(N)                            |
-| -> Binary Search (Case A): O(N) loops * O(log N) search     |
-| TOTAL TIME: O(N log N)                                      |
-| SPACE: O(N) for counting frequencies                        |
-+-------------------------------------------------------------+
-
-```
-
----
-
-### 4. Solution Code (Javascript and Python snippets)
-
-Here are both approaches, fully commented and production-ready.
-
-#### Python Code
-
-```python
-from typing import List
-from collections import defaultdict, Counter
-import bisect
-
-class Solution:
-    # ---------------------------------------------------------
-    # APPROACH 1: Sweep Line
-    # ---------------------------------------------------------
-    def maxFrequencySweepLine(self, nums: List[int], k: int, numOperations: int) -> int:
-        events = defaultdict(int)
-        freq = Counter(nums)
-        
-        for num in nums:
-            # Mark the start and end of the reachable interval
-            events[num - k] += 1
-            events[num + k + 1] -= 1
-            # Ensure the exact number itself is registered as an event point to be checked
-            if num not in events:
-                events[num] = 0
-                
-        running_overlap = 0
-        max_freq = 0
-        
-        # Sort the critical points and sweep across the number line
-        for pos in sorted(events.keys()):
-            running_overlap += events[pos]
-            
-            # max_freq is bounded by overlap, and how many ops we can afford over our free elements
-            current_freq = min(running_overlap, freq[pos] + numOperations)
-            max_freq = max(max_freq, current_freq)
-            
-        return max_freq
-
-    # ---------------------------------------------------------
-    # APPROACH 2: Sliding Window + Binary Search
-    # ---------------------------------------------------------
-    def maxFrequencySlidingWindow(self, nums: List[int], k: int, numOperations: int) -> int:
-        nums.sort()
-        freq = Counter(nums)
-        n = len(nums)
-        max_freq = 0
-        
-        # CASE B: Target is NOT an existing array element.
-        # Find the maximum number of elements packed into ANY window of size 2*k
-        left = 0
-        max_window_len = 0
-        for right in range(n):
-            while nums[right] - nums[left] > 2 * k:
-                left += 1
-            max_window_len = max(max_window_len, right - left + 1)
-        
-        # If we pick a target not in nums, we get NO free elements.
-        max_freq = min(max_window_len, numOperations)
-        
-        # CASE A: Target IS an existing array element.
-        for num in freq:
-            # Find how many elements can physically reach 'num'
-            l_idx = bisect.bisect_left(nums, num - k)
-            r_idx = bisect.bisect_right(nums, num + k)
-            total_reachable = r_idx - l_idx
-            
-            current_freq = min(total_reachable, freq[num] + numOperations)
-            max_freq = max(max_freq, current_freq)
-            
-        return max_freq
-
-```
-
-#### Javascript Code
-
-```javascript
-// ---------------------------------------------------------
-// APPROACH 1: Sweep Line
-// ---------------------------------------------------------
-function maxFrequencySweepLine(nums, k, numOperations) {
-    let events = new Map();
-    let freq = new Map();
-    
-    for (let num of nums) {
-        freq.set(num, (freq.get(num) || 0) + 1);
-        
-        events.set(num - k, (events.get(num - k) || 0) + 1);
-        events.set(num + k + 1, (events.get(num + k + 1) || 0) - 1);
-        
-        if (!events.has(num)) {
-            events.set(num, 0);
-        }
-    }
-    
-    // Sort keys numerically
-    let sortedPositions = Array.from(events.keys()).sort((a, b) => a - b);
-    let runningOverlap = 0;
-    let maxFreq = 0;
-    
-    for (let pos of sortedPositions) {
-        runningOverlap += events.get(pos);
-        let countPos = freq.get(pos) || 0;
-        let currentFreq = Math.min(runningOverlap, countPos + numOperations);
-        maxFreq = Math.max(maxFreq, currentFreq);
-    }
-    
-    return maxFreq;
-}
-
-// ---------------------------------------------------------
-// APPROACH 2: Sliding Window + Binary Search
-// ---------------------------------------------------------
-function maxFrequencySlidingWindow(nums, k, numOperations) {
-    nums.sort((a, b) => a - b);
-    let freq = new Map();
-    for (let num of nums) {
-        freq.set(num, (freq.get(num) || 0) + 1);
-    }
-    
-    let n = nums.length;
-    let maxFreq = 0;
-    
-    // CASE B: Target is NOT an existing array element
-    let left = 0;
-    let maxWindowLen = 0;
-    for (let right = 0; right < n; right++) {
-        while (nums[right] - nums[left] > 2 * k) {
-            left++;
-        }
-        maxWindowLen = Math.max(maxWindowLen, right - left + 1);
-    }
-    maxFreq = Math.min(maxWindowLen, numOperations);
-    
-    // Binary Search Helpers
-    const bisectLeft = (arr, target) => {
-        let l = 0, r = arr.length;
-        while (l < r) {
-            let mid = Math.floor((l + r) / 2);
-            if (arr[mid] < target) l = mid + 1;
-            else r = mid;
-        }
-        return l;
-    };
-    const bisectRight = (arr, target) => {
-        let l = 0, r = arr.length;
-        while (l < r) {
-            let mid = Math.floor((l + r) / 2);
-            if (arr[mid] <= target) l = mid + 1;
-            else r = mid;
-        }
-        return l;
-    };
-
-    // CASE A: Target IS an existing array element
-    for (let [num, count] of freq.entries()) {
-        let lIdx = bisectLeft(nums, num - k);
-        let rIdx = bisectRight(nums, num + k);
-        let totalReachable = rIdx - lIdx;
-        
-        let currentFreq = Math.min(totalReachable, count + numOperations);
-        maxFreq = Math.max(maxFreq, currentFreq);
-    }
-    
-    return maxFreq;
-}
-
-```
-
----
-
-### Concept Definitions
-
-* **Sweep Line Algorithm:** A geometric algorithmic technique where a conceptual line is "swept" across a space (in this case, a 1D number line) to track overlapping intervals efficiently. It converts a problem of comparing intervals into a problem of sorting points, drastically reducing time complexity.
-* **Sliding Window:** A technique that involves creating a "window" (a sub-array) that slides over the underlying data to continuously process localized sets of data, preventing unnecessary nested loops.
-
-### Real World / Interview Variations
-
-* **Google** often asks this exact logic wrapped in a "Server Load Balancing" or "Temperature Control" scenario: "You have N servers operating at different temperatures. You can adjust up to `M` servers by `K` degrees. Find the maximum number of servers you can sync to the exact same temperature."
-* **Meta (Facebook)** frames this around user locations: "You have users located along a highway. Users are willing to travel `K` miles. You have `numOperations` free bus tickets to give out. What is the maximum number of people you can gather at a single coordinate?"
-* **Bloomberg** loves to ask this in a FinTech wrapper: "You have a list of stock bids. Traders are willing to negotiate their bid by `$K`. You have a budget to subsidize `numOperations` trades. Maximize the number of matches at a single price."
