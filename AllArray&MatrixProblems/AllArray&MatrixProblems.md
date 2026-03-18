@@ -5117,14 +5117,6 @@ Let's visualize this with an example.
 
 Each number can stretch left by 1, and right by 1.
 
-You are absolutely right. Good catch.
-
-I completely botched the arithmetic for the net events at point 3 and point 4 in that previous diagram. I had the end of the first interval and the start of the second interval mismatched, which threw off the running sum calculation.
-
-When you are tracing a Sweep Line, getting those boundary events exactly right is the entire core of the algorithm. Let's fix that immediately.
-
-Here is the accurate, corrected trace for `nums = [1, 4, 5]` and `k = 1`.
-
 ### Sweep Line Explanation
 
 For every number `x`, the reachable interval is inclusive: `[x - k, x + k]`.
