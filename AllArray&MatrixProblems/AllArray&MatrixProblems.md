@@ -9903,249 +9903,313 @@ Google, Meta, and Bloomberg rarely ask "The Candy Problem" verbatim anymore. Ins
 
 # 4. Median of Two Sorted Arrays
 
-This is a classic "Hard" problem that tests your ability to handle edge cases and binary search logic. At a Senior (L5) or Staff (L6) level, the expectation is not just to find the answer, but to handle the "off-by-one" errors gracefully and explain the logarithmic intuition clearly.
+### 1. Problem Explanation
+
+**The Core Concept: What is a Median?**
+In a single sorted array, the median is the middle value. Its fundamental property is that it divides the array into two equal halves:
+* Everything in the **left half** is smaller than or equal to everything in the **right half**.
+* If the length is odd, the median is the exact middle element.
+* If the length is even, the median is the average of the two middle elements.
+
+**The Twist: Two Arrays**
+We are given two sorted arrays, `nums1` (length m) and `nums2` (length n). We need to find the median as if these two arrays were merged into one giant sorted array. 
+* **Naive thought:** Just merge them! 
+* **The Catch:** Merging takes O(m + n) time. The prompt demands an O(log(m + n)) time complexity. Whenever you see a logarithmic time constraint on sorted arrays, your brain should immediately yell: **Binary Search**.
+
+
 
 ---
 
-## 1. Problem Explanation
+### 2. Solution Explanation
 
-We have two sorted arrays, `nums1` and `nums2`. We need to find the median of the combined sorted array.
+To achieve O(log(min(m, n))) time, we bypass merging entirely. Instead, we use binary search to find a **"partition"** (a line drawn through the arrays) that perfectly splits the combined elements into a valid left half and right half.
 
-**The Catch:** The required time complexity is O(log (m+n)). This means we **cannot** simply merge the arrays and pick the middle element, as that would take O(m+n) time.
+Let's look at the invariants. We want to find a split in `nums1` and a split in `nums2` such that:
+1.  **Length requirement:** The total number of elements on the left side equals the total number of elements on the right side (or left has one extra if the total is odd).
+2.  **Value requirement:** Every element on the left side is <= every element on the right side.
 
-### What is a Median?
+Because the arrays are already sorted, we know `left_nums1 <= right_nums1` and `left_nums2 <= right_nums2`. 
+The only things we need to cross-check are:
+* Is the biggest element on the left of `nums1` <= the smallest element on the right of `nums2`?
+* Is the biggest element on the left of `nums2` <= the smallest element on the right of `nums1`?
 
-If the total number of elements is **odd**, the median is the middle element.
-If the total number of elements is **even**, the median is the average of the two middle elements.
+If yes, we found the perfect partition!
 
-**Example 1 (Odd Total):**
-`nums1 = [1, 3]`, `nums2 = [2]`
-Merged: `[1, 2, 3]` -> Median = 2
+#### ASCII Walkthrough
 
-**Example 2 (Even Total):**
-`nums1 = [1, 2]`, `nums2 = [3, 4]`
-Merged: `[1, 2, 3, 4]` -> Median = (2 + 3) / 2 = 2.5
+Let's take an example:
+Array A (length 5): [1, 3, 8, 9, 15]
+Array B (length 6): [7, 11, 18, 19, 21, 25]
+
+Total length = 11 (Odd). We need (11 + 1) / 2 = 6 elements in our combined Left Half.
+We will binary search on the **smaller** array (Array A) to minimize the search space.
+
+**Step 1: Initial Binary Search on A**
+* `low = 0`, `high = 5`
+* `partitionA = (0 + 5) / 2 = 2` (This means we take 2 elements from A)
+* `partitionB = 6 - 2 = 4` (Since we need 6 total on the left, we take 4 from B)
+
+```text
+       Left Half            |         Right Half
+Array A:   1    3           |    8    9   15
+Array B:   7   11   18   19 |   21   25
+
+Variables at the partition line:
+maxLeftA  = 3    |  minRightA = 8
+maxLeftB  = 19   |  minRightB = 21
+
+Check cross-conditions:
+1. Is maxLeftA (3) <= minRightB (21)?  --> YES.
+2. Is maxLeftB (19) <= minRightA (8)?  --> NO. (19 is greater than 8)
+```
+*Analysis:* `maxLeftB` is too big. This means our partition in B is too far to the right. To fix this, we need fewer elements from B, which means we must take *more* elements from A. We move our binary search in A to the right.
+
+**Step 2: Move Right in A**
+* `low = partitionA + 1 = 3`, `high = 5`
+* `partitionA = (3 + 5) / 2 = 4` (Take 4 elements from A)
+* `partitionB = 6 - 4 = 2` (Take 2 elements from B)
+
+```text
+       Left Half            |         Right Half
+Array A:   1    3    8    9 |   15
+Array B:   7   11           |   18   19   21   25
+
+Variables at the partition line:
+maxLeftA  = 9    |  minRightA = 15
+maxLeftB  = 11   |  minRightB = 18
+
+Check cross-conditions:
+1. Is maxLeftA (9) <= minRightB (18)?  --> YES.
+2. Is maxLeftB (11) <= minRightA (15)? --> YES.
+```
+*Analysis:* Perfect! Both cross-conditions are met. We have successfully split the combined logical array without ever merging it. 
+
+*Calculating the Median:*
+Because the total number of elements (11) is odd, the median is simply the largest element on the left side.
+`Median = max(maxLeftA, maxLeftB) = max(9, 11) = 11`.
 
 ---
 
-## 2. Solution Explanation: The "Partition" Strategy
+### 3. Time and Space Complexity Analysis
 
-A top-tier engineer views this as a **Partitioning Problem**.
-
-Imagine cutting both arrays into two halves: a **Left Half** and a **Right Half**.
-If we find a point where:
-
-1. The total number of elements in the combined Left Half equals the total in the combined Right Half.
-2. Every element in the Left Half is less than or equal to every element in the Right Half.
-
-...then the median must be at the boundary of these halves.
-
-### Visualizing the Partition
-
-Let `A = [1, 3, 8, 9, 15]` and `B = [7, 11, 18, 19]`.
-Total elements = 9. We want 5 elements in the "Left" side (since (9+1)/2 = 5).
+**Time Complexity: O(log(min(m, n)))**
 
 ```text
-Array A:  1  3  8  |  9  15    (Partition at index 3)
-Array B:  7  11    |  18 19    (Partition at index 2)
-          ---------  ---------
-Left side: 1, 3, 8, 7, 11 (Size 5)
-Right side: 9, 15, 18, 19 (Size 4)
+DERIVATION:
+We only perform Binary Search on the smaller array.
+Let m = length of shorter array.
+Let n = length of longer array.
 
+Search Space:
+Step 1: Search space is m.
+Step 2: Search space is m/2.
+Step 3: Search space is m/4.
+...
+Step k: Search space is 1.
+
+Number of steps k = log2(m).
+Since m is the minimum of the two lengths, Time Complexity is O(log(min(m, n))).
 ```
 
-**The Check:**
-To ensure the partition is correct, we check the cross-edges:
-
-* Is `8 <= 18`? (A_left <= B_right) -> Yes.
-* Is `11 <= 9`? (B_left <= A_right) -> **No!**
-
-Since `11` is greater than `9`, our partition in `A` is too far to the left (we need larger numbers from `A` in the left half to push smaller numbers from `B` out). We adjust using **Binary Search**.
-
-### The Binary Search Logic
-
-We only perform binary search on the **smaller** array to minimize work. Let's call the smaller array `A` and the larger `B`.
+**Space Complexity: O(1)**
 
 ```text
-STEP-BY-STEP SEARCH:
-1. Pick a mid-point in smaller array A (index i).
-2. Calculate corresponding index in B (index j) so that:
-   i + j = (TotalSize + 1) / 2
-3. Check boundaries:
-   - A_left = A[i-1], A_right = A[i]
-   - B_left = B[j-1], B_right = B[j]
-4. If A_left <= B_right AND B_left <= A_right: 
-      FOUND IT!
-   Else if A_left > B_right:
-      Move partition in A to the left (too many big numbers from A).
-   Else:
-      Move partition in A to the right (too few numbers from A).
+DERIVATION:
+Memory used:
+- low pointer (integer)
+- high pointer (integer)
+- partitionA (integer)
+- partitionB (integer)
+- maxLeftA, minRightA, maxLeftB, minRightB (integers)
 
-```
-
----
-
-## 3. Complexity Analysis
-
-### Time Complexity (TC)
-
-We perform a binary search on the smaller of the two arrays. If the sizes are `m` and `n`:
-
-```text
-TC DERIVATION:
-Length of Array 1 = m
-Length of Array 2 = n
-Binary search is performed on min(m, n)
-Each step of Binary Search cuts the search space in half.
-Total steps = log(min(m, n))
-
-TC = O(log(min(m, n)))
-
-```
-
-### Space Complexity (SC)
-
-We do not create any new arrays or use recursion that adds to the stack significantly.
-
-```text
-SC DERIVATION:
-Input storage = O(m + n) [Not counted in auxiliary space]
-Variable storage (i, j, left, right pointers) = O(1)
-No recursive calls used.
-
-SC = O(1)
-
+No extra arrays or recursive stacks are created. 
+Therefore, Space Complexity is strictly O(1) constant time.
 ```
 
 ---
 
-## 4. Solution Code
+### 4. Solution Code
 
-### Implementation (Optimized Partitioning)
+Here are both the sub-optimal (acceptable as a warm-up/brute force) and the optimal solutions in Python and JavaScript.
 
-This solution handles the edge cases where the partition falls at the very beginning or end of an array using "Infinity" markers.
-
-#### Python Snippet
+#### Python Solutions
 
 ```python
-def findMedianSortedArrays(nums1, nums2):
-    # Ensure nums1 is the smaller array to optimize Binary Search
-    A, B = nums1, nums2
-    if len(A) > len(B):
-        A, B = B, A
-        
-    total = len(A) + len(B)
-    half = (total + 1) // 2
+# --- SUB-OPTIMAL (Merge Approach) ---
+# Time: O(m+n), Space: O(1) if we don't store the array, just count up to the middle.
+def findMedianSortedArrays_naive(nums1, nums2):
+    m, n = len(nums1), len(nums2)
+    total_len = m + n
+    mid = total_len // 2
     
-    left, right = 0, len(A)
+    p1, p2 = 0, 0
+    current, previous = 0, 0
     
-    while left <= right:
-        # i is the partition index for A
-        i = (left + right) // 2
-        # j is the partition index for B
-        j = half - i
-        
-        # Determine values at the boundaries, handle out-of-bounds with infinity
-        A_left = A[i - 1] if i > 0 else float("-infinity")
-        A_right = A[i] if i < len(A) else float("infinity")
-        B_left = B[j - 1] if j > 0 else float("-infinity")
-        B_right = B[j] if j < len(B) else float("infinity")
-        
-        # Correct partition found
-        if A_left <= B_right and B_left <= A_right:
-            # Odd total: Median is the max of the left side
-            if total % 2:
-                return max(A_left, B_left)
-            # Even total: Average of max(left) and min(right)
-            return (max(A_left, B_left) + min(A_right, B_right)) / 2
-        
-        # Partition index i is too large
-        elif A_left > B_right:
-            right = i - 1
-        # Partition index i is too small
+    for _ in range(mid + 1):
+        previous = current
+        # If nums1 is exhausted, or nums2 has a smaller element
+        if p1 == m:
+            current = nums2[p2]
+            p2 += 1
+        elif p2 == n:
+            current = nums1[p1]
+            p1 += 1
+        elif nums1[p1] < nums2[p2]:
+            current = nums1[p1]
+            p1 += 1
         else:
-            left = i + 1
+            current = nums2[p2]
+            p2 += 1
+            
+    if total_len % 2 == 0:
+        return (previous + current) / 2.0
+    else:
+        return float(current)
 
+
+# --- OPTIMAL (Binary Search Approach) ---
+# Time: O(log(min(m,n))), Space: O(1)
+def findMedianSortedArrays(nums1, nums2):
+    # Always ensure nums1 is the smaller array to optimize the search space
+    if len(nums1) > len(nums2):
+        nums1, nums2 = nums2, nums1
+        
+    m, n = len(nums1), len(nums2)
+    low, high = 0, m
+    
+    while low <= high:
+        # Partitioning indices
+        partitionA = (low + high) // 2
+        partitionB = (m + n + 1) // 2 - partitionA
+        
+        # Edge cases: If partition is at the extreme ends, use infinity
+        maxLeftA = float('-inf') if partitionA == 0 else nums1[partitionA - 1]
+        minRightA = float('inf') if partitionA == m else nums1[partitionA]
+        
+        maxLeftB = float('-inf') if partitionB == 0 else nums2[partitionB - 1]
+        minRightB = float('inf') if partitionB == n else nums2[partitionB]
+        
+        # Check if the partition is correct
+        if maxLeftA <= minRightB and maxLeftB <= minRightA:
+            # We found the perfect split!
+            if (m + n) % 2 == 0:
+                return (max(maxLeftA, maxLeftB) + min(minRightA, minRightB)) / 2.0
+            else:
+                return float(max(maxLeftA, maxLeftB))
+        
+        # If we are too far right in A, move left
+        elif maxLeftA > minRightB:
+            high = partitionA - 1
+            
+        # If we are too far left in A, move right
+        else:
+            low = partitionA + 1
+            
+    raise ValueError("Input arrays are not sorted properly.")
 ```
 
-#### JavaScript Snippet
+#### JavaScript Solutions
 
 ```javascript
-/**
- * @param {number[]} nums1
- * @param {number[]} nums2
- * @return {number}
- */
-var findMedianSortedArrays = function(nums1, nums2) {
-    let A = nums1;
-    let B = nums2;
-
-    // We want to binary search on the smaller array
-    if (A.length > B.length) {
-        [A, B] = [B, A];
-    }
-
-    const total = A.length + B.length;
-    const half = Math.floor((total + 1) / 2);
-
-    let left = 0;
-    let right = A.length;
-
-    while (left <= right) {
-        // i and j represent the number of elements contributed to the left half
-        let i = Math.floor((left + right) / 2);
-        let j = half - i;
-
-        // Get elements around the partition
-        let A_left = i > 0 ? A[i - 1] : -Infinity;
-        let A_right = i < A.length ? A[i] : Infinity;
-        let B_left = j > 0 ? B[j - 1] : -Infinity;
-        let B_right = j < B.length ? B[j] : Infinity;
-
-        // Check if partition is valid
-        if (A_left <= B_right && B_left <= A_right) {
-            if (total % 2 !== 0) {
-                return Math.max(A_left, B_left);
-            }
-            return (Math.max(A_left, B_left) + Math.min(A_right, B_right)) / 2;
-        } 
-        // Binary search adjustment
-        else if (A_left > B_right) {
-            right = i - 1;
+// --- SUB-OPTIMAL (Merge Approach) ---
+// Time: O(m+n), Space: O(1)
+var findMedianSortedArraysNaive = function(nums1, nums2) {
+    let m = nums1.length, n = nums2.length;
+    let totalLen = m + n;
+    let mid = Math.floor(totalLen / 2);
+    
+    let p1 = 0, p2 = 0;
+    let current = 0, previous = 0;
+    
+    for (let i = 0; i <= mid; i++) {
+        previous = current;
+        if (p1 === m) {
+            current = nums2[p2++];
+        } else if (p2 === n) {
+            current = nums1[p1++];
+        } else if (nums1[p1] < nums2[p2]) {
+            current = nums1[p1++];
         } else {
-            left = i + 1;
+            current = nums2[p2++];
         }
+    }
+    
+    if (totalLen % 2 === 0) {
+        return (previous + current) / 2.0;
+    } else {
+        return current;
     }
 };
 
+// --- OPTIMAL (Binary Search Approach) ---
+// Time: O(log(min(m,n))), Space: O(1)
+var findMedianSortedArrays = function(nums1, nums2) {
+    // Ensure nums1 is the smaller array
+    if (nums1.length > nums2.length) {
+        return findMedianSortedArrays(nums2, nums1);
+    }
+    
+    let m = nums1.length;
+    let n = nums2.length;
+    let low = 0;
+    let high = m;
+    
+    while (low <= high) {
+        let partitionA = Math.floor((low + high) / 2);
+        let partitionB = Math.floor((m + n + 1) / 2) - partitionA;
+        
+        // Handle edges using Infinity
+        let maxLeftA = partitionA === 0 ? -Infinity : nums1[partitionA - 1];
+        let minRightA = partitionA === m ? Infinity : nums1[partitionA];
+        
+        let maxLeftB = partitionB === 0 ? -Infinity : nums2[partitionB - 1];
+        let minRightB = partitionB === n ? Infinity : nums2[partitionB];
+        
+        if (maxLeftA <= minRightB && maxLeftB <= minRightA) {
+            // Correct partition found
+            if ((m + n) % 2 === 0) {
+                return (Math.max(maxLeftA, maxLeftB) + Math.min(minRightA, minRightB)) / 2.0;
+            } else {
+                return Math.max(maxLeftA, maxLeftB);
+            }
+        } else if (maxLeftA > minRightB) {
+            // Move left in nums1
+            high = partitionA - 1;
+        } else {
+            // Move right in nums1
+            low = partitionA + 1;
+        }
+    }
+    
+    throw new Error("Arrays are not sorted.");
+};
 ```
 
 ---
 
-## New Terms & Techniques
+### Glossary of Terms Used
 
-* **Binary Search on Partition:** Usually, binary search finds a value. Here, it finds a "cut" point. This is a powerful technique for problems involving "finding the k-th element" in multiple sorted structures.
-* **Virtual Padding (Infinity):** By using `+Infinity` and `-Infinity`, we avoid messy `if-else` chains for when a partition is at the very start or end of an array.
+* **Binary Search:** A search algorithm that finds the position of a target within a sorted array by repeatedly dividing the search interval in half. It is critical here because it reduces a linear search O(N) down to a logarithmic one O(log N).
+* **Partitioning:** The act of drawing a logical boundary through a dataset to separate it into distinct groups (in this case, a 'left' half containing smaller numbers and a 'right' half containing larger numbers).
+* **Invariants:** Conditions or rules that must remain true throughout the execution of an algorithm for it to be correct (e.g., "The left half must always have exactly (m+n+1)/2 elements").
 
 ---
 
-## Real-World Interview Variations
+### Real-World Interview Variations (Google, Meta, Bloomberg)
 
-Companies like **Google** and **Meta** rarely ask the raw "Median" question anymore. Instead, they use these variations:
+Interviews at top tech companies rarely ask this question completely raw anymore. They disguise it as system design or domain-specific problems.
 
-1. **Find the K-th Smallest Element in Two Sorted Arrays:**
-* *Context:* Imagine merging two massive logs and finding the 1000th error.
-* *Solution:* Use the same partition logic, but instead of the "halfway" point, use `k`. If `i + j = k`, you've found it.
+**1. Meta: "Find the K-th Smallest Element in Two Sorted Arrays"**
+* **The Variation:** Instead of finding the exact median (which is just the (m+n)/2 smallest element), you are given an integer `k` and asked to find the `k`-th smallest element.
+* **How to solve:** The logic remains exactly the same, but instead of the left half needing `(m + n + 1) / 2` elements, your left half needs exactly `k` elements. You partition such that `partitionA + partitionB = k`. The rest of the binary search cross-checks are identical. The answer will be `max(maxLeftA, maxLeftB)`.
 
+**2. Google: "Median of elements distributed across two different servers"**
+* **The Variation:** A distributed systems flavor. Server A has a massive sorted array on its disk, and Server B has another. You cannot load both into memory on a single machine. Network calls are expensive.
+* **How to solve:** You implement the exact same binary search, but `partitionA` and `partitionB` become network requests. You ask Server A: "Give me the value at index X" and Server B: "Give me the value at index Y". By doing binary search, you restrict your total network calls to exactly O(log(min(m,n))), preventing network saturation.
 
-2. **Median of M Sorted Arrays:**
-* *Context:* Frequently asked at **Bloomberg**. Finding a median across many data streams.
-* *Solution:* Since `M` is larger, we use a **Min-Heap**. Push the first element of each array into the heap. Extract the minimum `(total_size / 2)` times. TC becomes O(K log M), where K is the median position.
-
-
-3. **Find the Intersection of Two Sorted Arrays in Log Time:**
-* *Context:* Search engine indexing (Meta).
-* *Solution:* If one array is much smaller, iterate through the small one and binary search for its elements in the large one.
+**3. Bloomberg: "Sliding Window Median of two distinct financial tick streams"**
+* **The Variation:** Bloomberg loves financial data streams. You might be asked to find the median of the last N ticks from Stream A and the last M ticks from Stream B at any given second.
+* **How to solve:** While the static snapshot calculation is the exact binary search above, doing this continuously implies the arrays are updating. For a sliding window over streams, you would typically pivot away from this algorithm entirely and maintain two Heaps (a Max-Heap for the lower half, a Min-Heap for the upper half) to allow for O(log N) insertions and removals as time ticks forward, yielding an O(1) median retrieval.
 
 # 918. Maximum Sum Circular Subarray
 
@@ -11008,241 +11072,226 @@ var canCompleteCircuit = function(gas, cost) {
 
 # 3634. Minimum Removals to Balance Array
 
-To solve this problem like a top-tier engineer, we need to move past "guessing" and focus on **identifying the core constraint.** In competitive programming and high-level interviews, this problem is about finding the "Global Maximum" by looking at "Local Properties."
+To solve this problem like a top-tier engineer, we first recognize that "removing elements" is a distraction. A better way to think about it is: **"What is the largest subset of numbers I can keep that satisfies the balance condition?"**
+
+Once we find the maximum number of elements we can keep, the minimum removals is simply: `Total Elements - Maximum Kept`.
 
 ---
 
 ## 1. Problem Explanation
 
-The goal is to balance an array. An array is "balanced" if the sum of elements at even indices is equal to the sum of elements at odd indices. You are allowed to remove elements to achieve this. We want to find the **minimum** number of removals.
+The condition for a "balanced" array is:
+**Max Element <= k * Min Element**
 
-**The Crucial Insight:**
-Minimizing removals is mathematically identical to **maximizing the length of the resulting balanced subsequence.**
+Imagine you have a bag of numbers. To make the bag balanced, the "big boss" (Max) cannot be more than `k` times larger than the "little guy" (Min).
 
-### The "Shift" Phenomenon
+### Why Sorting is the Key
+If the array is unsorted, finding the min and max for every possible subset is a nightmare. But if we **sort** the array, any "balanced" subset will be a **contiguous window** (a sub-segment) of that sorted array.
 
-When you remove an element at index `i`, every element to the right of `i` shifts one position to the left.
+```text
+Example: nums = [1, 10, 2, 4, 7], k = 2
 
-* An element previously at an **even** index `i+1` moves to an **odd** index `i`.
-* An element previously at an **odd** index `i+2` moves to an **even** index `i+1`.
+1. SORT IT: [1, 2, 4, 7, 10]
 
-### Visualization of the Shift
-
-Imagine an array: `[A, B, C, D, E]`
-Indices: `0(e), 1(o), 2(e), 3(o), 4(e)`
-
-If we remove `B` (index 1):
-The new array is: `[A, C, D, E]`
-New Indices: `0(e), 1(o), 2(e), 3(o)`
-
-* `C` was even (2), now it is odd (1).
-* `D` was odd (3), now it is even (2).
-* `E` was even (4), now it is odd (3).
+2. CHECK WINDOWS:
+   [1, 2] -> Max(2) <= 2 * Min(1)? Yes. (Size 2)
+   [2, 4] -> Max(4) <= 2 * Min(2)? Yes. (Size 2)
+   [4, 7] -> Max(7) <= 2 * Min(4)? Yes (7 <= 8). (Size 2)
+   [1, 2, 4] -> Max(4) <= 2 * Min(1)? No (4 > 2).
+   [2, 4, 7] -> Max(7) <= 2 * Min(2)? No (7 > 4).
+```
 
 ---
 
-## 2. Solution Explanation
+## 2. Solution Explanation: The Sliding Window (Two Pointers)
 
-An L6 engineer would recognize this as a **Dynamic Programming (DP)** problem or a **Prefix/Suffix Sum** problem. Since we want to find a subsequence where `EvenSum == OddSum`, let's define what that looks like after a "split point."
+Since we want the **longest** valid window in a sorted array, we use two pointers: `left` and `right`.
 
-If we decide that the *only* element we remove is at index `i`:
+### The "Accordion" Logic
+1.  **Expand:** Move the `right` pointer to include a new number. This number is our new potential "Max".
+2.  **Contract:** If the new "Max" (at `right`) is greater than `k * Min` (at `left`), the window is broken. Move the `left` pointer forward until the condition is met again.
+3.  **Record:** At each step, the size of the window is `right - left + 1`. Keep track of the maximum size seen.
 
-1. Elements to the **left** of `i` keep their original even/odd status.
-2. Elements to the **right** of `i` swap their even/odd status.
-
-### The Balancing Equation
-
-For a split at index `i`, the condition for balance is:
-`(Even Sum Left + Odd Sum Right) == (Odd Sum Left + Even Sum Right)`
-
-### ASCII Visualization: The Split Strategy
+### ASCII Walkthrough
+`nums = [1, 2, 5, 8, 10, 12], k = 2`
 
 ```text
-Original Array: [ 1,  2,  3,  4,  5,  6 ]
-Indices:          0   1   2   3   4   5
-Parity:           E   O   E   O   E   O
+Step 1: right = 0, left = 0
+[ (1), 2, 5, 8, 10, 12 ]
+Max: 1, Min: 1. 1 <= 2*1? YES. MaxSize = 1
 
-If we remove index 2 (value '3'):
-Left side (unchanged):  [ 1, 2 ]  -> Even: {1}, Odd: {2}
-Right side (swapped):   [ 4, 5, 6 ]
-   Original Parity:      O  E  O
-   New Parity:           E  O  E
+Step 2: right = 1, left = 0
+[ (1, 2), 5, 8, 10, 12 ]
+Max: 2, Min: 1. 2 <= 2*1? YES. MaxSize = 2
 
-Total Even Sum = (Left Even: 1) + (Right Original Odd: 4 + 6) = 11
-Total Odd Sum  = (Left Odd: 2)  + (Right Original Even: 5)     = 7
-11 != 7 (Not balanced)
+Step 3: right = 2, left = 0
+[ (1, 2, 5), 8, 10, 12 ]
+Max: 5, Min: 1. 5 <= 2*1? NO! (5 > 2)
+-> Move left to 1: [ 2, 5 ] -> Max: 5, Min: 2. 5 <= 2*2? NO! (5 > 4)
+-> Move left to 2: [ 5 ]    -> Max: 5, Min: 5. 5 <= 2*5? YES.
+MaxSize stays 2.
 
+Step 4: right = 3, left = 2
+[ 1, 2, (5, 8), 10, 12 ]
+Max: 8, Min: 5. 8 <= 2*5? YES. MaxSize = 2
+
+Step 5: right = 4, left = 2
+[ 1, 2, (5, 8, 10), 12 ]
+Max: 10, Min: 5. 10 <= 2*5? YES. MaxSize = 3 (WINNER!)
+
+Step 6: right = 5, left = 2
+[ 1, 2, (5, 8, 10, 12) ]
+Max: 12, Min: 5. 12 <= 2*5? NO!
+-> Move left to 3: [ 8, 10, 12 ] -> Max: 12, Min: 8. 12 <= 16? YES.
+MaxSize stays 3.
+
+RESULT: Total(6) - MaxSize(3) = 3 Removals.
 ```
-
-### The Linear Scan Algorithm
-
-1. Pre-calculate the total sum of even-indexed elements (`total_even`) and odd-indexed elements (`total_odd`).
-2. Iterate through the array, keeping track of the `current_even` and `current_odd` sums seen so far (prefix sums).
-3. For each element at index `i`, calculate what the sums *would* be if `i` were removed:
-* `NewEvenSum = current_even + (total_odd - current_odd_including_i)`
-* `NewOddSum = current_odd + (total_even - current_even_including_i)`
-
-
-4. If `NewEvenSum == NewOddSum`, index `i` is a "fair" index.
 
 ---
 
-## 3. Complexity Analysis
+## 3. Time and Space Complexity Analysis
 
-### Time Complexity (TC)
 
-We traverse the array twice: once to get total sums and once to check each index.
 
 ```text
-Step 1: Initial Sum Loop (0 to N)    --> O(N)
-Step 2: Balance Check Loop (0 to N) --> O(N)
---------------------------------------------
-Total Time Complexity               --> O(N)
+TIME COMPLEXITY: O(n log n)
++-----------------------------------------------------------+
+| Operation             | Complexity | Reason               |
++-----------------------------------------------------------+
+| 1. Sorting            | O(n log n) | QuickSort/MergeSort  |
+| 2. Sliding Window     | O(n)       | Each pointer moves n |
++-----------------------------------------------------------+
+| Total                 | O(n log n)                        |
++-----------------------------------------------------------+
 
-```
-
-### Space Complexity (SC)
-
-We only store a few integer variables (totals and current counters).
-
-```text
-Variables: total_even, total_odd, 
-           curr_even, curr_odd, count
---------------------------------------------
-Total Space Complexity              --> O(1)
-
+SPACE COMPLEXITY: O(1) or O(n)
++-----------------------------------------------------------+
+| Component             | Complexity | Note                 |
++-----------------------------------------------------------+
+| In-place Sort         | O(1)       | Depends on language  |
+| Two Pointers          | O(1)       | Just integers        |
+| Sort recursion stack  | O(log n)   | Average case         |
++-----------------------------------------------------------+
+| Total                 | O(1) to O(n) based on sort        |
++-----------------------------------------------------------+
 ```
 
 ---
 
 ## 4. Solution Code
 
-### Python Implementation
+### Optimized Solution: Sliding Window (O(n log n))
 
+#### Python
 ```python
-def solve_minimum_removals(nums):
-    # Total sums for even and odd positions
-    total_even = 0
-    total_odd = 0
+def minRemovals(nums, k):
+    # Sort the array so that the min/max of any window 
+    # are just the first and last elements.
+    nums.sort()
     
-    for i in range(len(nums)):
-        if i % 2 == 0:
-            total_even += nums[i]
-        else:
-            total_odd += nums[i]
-            
-    curr_even = 0
-    curr_odd = 0
-    fair_indices_count = 0
+    n = len(nums)
+    left = 0
+    max_kept = 0
     
-    for i in range(len(nums)):
-        # If we remove nums[i], the right side's parity flips.
-        # We calculate the potential even/odd sums without creating a new array.
-        
-        if i % 2 == 0:
-            # Current element is even. 
-            # New Even = Even prefix + Odd suffix
-            new_even = curr_even + (total_odd - curr_odd)
-            # New Odd = Odd prefix + Even suffix (minus current element)
-            new_odd = curr_odd + (total_even - curr_even - nums[i])
-        else:
-            # Current element is odd.
-            # New Even = Even prefix + Odd suffix (minus current element)
-            new_even = curr_even + (total_odd - curr_odd - nums[i])
-            # New Odd = Odd prefix + Even suffix
-            new_odd = curr_odd + (total_even - curr_even)
+    # 'right' expands our window
+    for right in range(n):
+        # While the window is 'unbalanced' (Max > k * Min)
+        # shrink the window from the left.
+        while nums[right] > nums[left] * k:
+            left += 1
             
-        if new_even == new_odd:
-            fair_indices_count += 1
+        # The window [left...right] is now balanced.
+        # Calculate how many elements we are keeping.
+        current_window_size = right - left + 1
+        if current_window_size > max_kept:
+            max_kept = current_window_size
             
-        # Update prefix sums for the next iteration
-        if i % 2 == 0:
-            curr_even += nums[i]
-        else:
-            curr_odd += nums[i]
-            
-    # The problem asks for minimum removals. 
-    # If we found 'fair' indices where removing 1 element balances it, 
-    # the answer is 1. If the array is already balanced, 0.
-    # Note: Leetcode 3634 specifically asks for the count of "fair" indices
-    # often referred to as "Ways to make a fair array".
-    return fair_indices_count
-
-
+    # Removals = Total - Max we could keep
+    return n - max_kept
 ```
 
-### JavaScript Implementation
-
+#### JavaScript
 ```javascript
-/**
- * Calculates the number of indices that, when removed, result in a balanced array.
- * @param {number[]} nums
- * @return {number}
- */
-function waysToMakeFair(nums) {
-    let totalEven = 0;
-    let totalOdd = 0;
-
-    // Phase 1: Calculate total sums for even and odd indices
-    for (let i = 0; i < nums.length; i++) {
-        if (i % 2 === 0) totalEven += nums[i];
-        else totalOdd += nums[i];
-    }
-
-    let currEven = 0;
-    let currOdd = 0;
-    let count = 0;
-
-    // Phase 2: Linear scan to check each potential removal
-    for (let i = 0; i < nums.length; i++) {
-        let newEven, newOdd;
-
-        if (i % 2 === 0) {
-            // Logic: Everything after 'i' shifts. 
-            // Old Odd indices become Even. Old Even indices become Odd.
-            newEven = currEven + (totalOdd - currOdd);
-            newOdd = currOdd + (totalEven - currEven - nums[i]);
-        } else {
-            newEven = currEven + (totalOdd - currOdd - nums[i]);
-            newOdd = currOdd + (totalEven - currEven);
+function minRemovals(nums, k) {
+    // In JS, sort() defaults to string comparison. 
+    // We MUST provide a numeric comparator.
+    nums.sort((a, b) => a - b);
+    
+    const n = nums.length;
+    let left = 0;
+    let maxKept = 0;
+    
+    // right pointer slides forward one by one
+    for (let right = 0; right < n; right++) {
+        // Condition: Max (nums[right]) must be <= k * Min (nums[left])
+        // If not, increment left until it is.
+        while (nums[right] > nums[left] * k) {
+            left++;
         }
-
-        if (newEven === newOdd) {
-            count++;
+        
+        // Window size is simply the distance between pointers
+        let currentSize = right - left + 1;
+        if (currentSize > maxKept) {
+            maxKept = currentSize;
         }
-
-        // Update prefix sums for next element
-        if (i % 2 === 0) currEven += nums[i];
-        else currOdd += nums[i];
     }
-
-    return count;
+    
+    return n - maxKept;
 }
-
 ```
 
 ---
 
-## 5. Key Terms & Interview Context
+### Alternative Solution: Binary Search (O(n log n))
+In an interview, if you finish the sliding window quickly, an L6 might ask: "Can you solve this by iterating through each number as a potential 'Min' and finding the largest 'Max' using binary search?"
 
-### New Terms
+#### Python (Binary Search)
+```python
+import bisect
 
-* **Prefix Sums:** A technique where you pre-calculate the sum of elements up to a certain point. It allows "range sum" queries in O(1) time. Here, we used it to calculate the "Suffix Sum" (Total - Prefix).
-* **Parity:** A fancy word for whether a number is even or odd. This problem is essentially a "Parity Tracking" problem.
+def minRemovalsBS(nums, k):
+    nums.sort()
+    n = len(nums)
+    max_kept = 0
+    
+    for i in range(n):
+        # Treat nums[i] as the 'Minimum' of our balanced array.
+        # The largest allowed 'Maximum' is nums[i] * k.
+        target = nums[i] * k
+        
+        # Find the rightmost index where value <= target
+        # bisect_right finds the first index > target
+        idx = bisect.bisect_right(nums, target)
+        
+        # Elements kept: from index i to idx-1
+        current_size = idx - i
+        max_kept = max(max_kept, current_size)
+        
+    return n - max_kept
+```
 
-### Real-World / Interview Variants
+---
 
-1. **Google (Site Reliability Engineering):** "You have a stream of server logs. If removing one log entry makes the total error count in even minutes equal to odd minutes, identify that log."
-* *Solution:* Use the same prefix sum approach, but handle it as a sliding window if the stream is too large for memory.
+## Note 1: Terms Used
+* **Sliding Window:** A technique to track a subset of data using two pointers. It helps avoid "Double Loops" (O(n^2)) by ensuring each pointer only travels the length of the array once.
+* **Contiguous Sub-segment:** Since the array is sorted, any valid balanced subset must be a continuous block. If `[2, 10]` is balanced, any number between 2 and 10 is *guaranteed* to be balanced with them.
 
+---
 
-2. **Meta (Product Engineer):** "A UI feed has alternating ad and post blocks. If a user hides one post, how do we efficiently recalculate if the remaining layout is symmetrical?"
-* *Solution:* Since layouts are often updated, use a **Segment Tree** to allow O(log N) updates and O(log N) symmetry checks instead of the O(N) scan.
+## Note 2: Real World / Interview Variations
 
+### 1. Google: "Server Load Balancing"
+**Scenario:** You have servers with different capacities. A cluster is "stable" if the most powerful server is no more than `k` times the weakest. How many servers must you shut down to stabilize?
+**Solution:** This is identical to our problem. Sorting the capacities allows you to find the largest stable cluster.
 
-3. **Bloomberg (Financial Systems):** "Given a sequence of transactions, find a 'pivot' transaction that, if canceled, balances the credit/debit totals of the alternating periods."
-* *Solution:* Standard prefix sum (as shown above) because financial records are usually processed in linear batches.
+### 2. Meta: "Video Quality Bitrates"
+**Scenario:** A user is watching a multi-angle stream. To prevent buffering, the highest bitrate stream cannot exceed `k` times the lowest bitrate stream. Given available bitrates, what's the minimum number of streams to disable?
+**Solution:** Same logic. The "bitrates" are the array, and the "disabling" is the removal.
 
+### 3. Bloomberg: "Stock Price Volatility"
+**Scenario:** A trader wants to analyze a "Low Volatility" period. A period is low-volatility if the high price is within `X%` of the low price. Find the longest such period in a dataset.
+**Solution:** Here, the condition is slightly different (e.g., `Max <= Min * 1.10`), but the sliding window on sorted prices remains the optimal approach.
 
 # 904. Fruit Into Baskets
 
@@ -12972,213 +13021,228 @@ class MyCalendar {
 
 # 480. Sliding Window Median
 
-This is a classic "Hard" LeetCode problem that separates L5 (Senior) from L6 (Staff) engineers. An L5 focuses on the most efficient standard data structures, while an L6 might discuss the trade-offs of using a Fenwick Tree or a Skip List for even better performance in specific real-world scenarios.
-
----
+This is a fantastic and notoriously tricky problem. I can tell you exactly how a top-of-the-band engineer at a major tech company approaches this. 
 
 ## 1. Problem Explanation
 
-The goal is to find the **median** of every sliding window of size `k` in an array of numbers.
+Imagine a window of size `k` moving across an array from left to right. At each step, you need to find the "median" of the numbers inside that window.
 
-* **Window:** A sub-array of length `k` that moves from left to right.
-* **Median:** 
-    * If `k` is odd: The middle element after sorting.
-    * If `k` is even: The average of the two middle elements after sorting.
+* **If k is odd:** The median is the exact middle number when the window is sorted.
+* **If k is even:** The median is the average of the two middle numbers when the window is sorted.
 
 
 
-### The Challenge
-
-A naive solution would sort the window every time it slides. Sorting takes `k * log(k)` time. If the array has `n` elements, the total time would be `n * k * log(k)`. For large arrays, this is too slow. We need a way to add one number and remove one number while keeping the "middle" easily accessible.
+**Why is this hard?**
+Arrays are great for random access, but terrible for inserting or deleting elements in the middle while maintaining a sorted order. If you sort the window at every single step, the time it takes skyrockets as the array gets larger. 
 
 ---
 
-## 2. Solution Explanation: The Two-Heap Pattern
+## 2. Solution Explanation: Two Heaps + Lazy Deletion
 
-To solve this efficiently, we use two "Heaps" (Priority Queues). This is the gold standard for "Median" problems.
+To solve this efficiently, we use a **Two-Heap (Dual-Heap)** architecture. 
 
-1. **Max-Heap (Left Side):** Stores the smaller half of the numbers. The largest number of this half is at the top.
-2. **Min-Heap (Right Side):** Stores the larger half of the numbers. The smallest number of this half is at the top.
+Think of breaking the sorted window exactly in half:
+1.  **Small Half (Max-Heap):** Stores the smaller half of the numbers. The "top" of this heap is the *largest* number in the small half.
+2.  **Large Half (Min-Heap):** Stores the larger half of the numbers. The "top" of this heap is the *smallest* number in the large half.
 
-### Why this works
 
-By keeping these two heaps balanced, the median is always either at the top of the heaps (if `k` is odd) or the average of both tops (if `k` is even).
 
-### The "Lazy Removal" Trick
+If we balance these heaps so they are roughly the same size, the median is always right at the top of the heaps! We never have to search for it.
 
-In many languages (like Python or JS), heaps don't support removing a specific element efficiently (they only support removing the top). Since our sliding window moves, we need to remove the element that just left the window.
-**Solution:** We keep a hash map of "elements to be deleted." We only remove them from the heap when they happen to reach the top.
+**The Twist: Lazy Deletion**
+Heaps are fantastic for finding the min or max, but they are *terrible* at finding and deleting an arbitrary element (like the number falling out of the left side of our sliding window). 
+Instead of wasting time searching the heap to delete the outgoing number, we use a hash map to simply "mark" it as deleted. We only actually remove it from the heap if it happens to bubble up to the very top. This is called **Lazy Deletion**.
 
-### ASCII Visualization of the Process
+### ASCII Walkthrough
 
-Let's use `nums = [1, 3, -1, -3, 5, 3]` and `k = 3`.
+Let's trace: `nums = [1, 3, -1, -3, 5]`, `k = 3`
 
-**Step 1: First Window [1, 3, -1]**
-Sorted: [-1, 1, 3] -> Median is 1.
+**Step 1: Initialize the first window [1, 3, -1]**
+We push these into our heaps and balance them.
+```text
+Window: [1, 3, -1] -> Sorted: [-1, 1, 3]
 
-```
-   Left (Max-Heap)      Right (Min-Heap)
-   [ 1, -1 ]            [ 3 ]
-     ^ top                ^ top
+Small Half (Max-Heap)       Large Half (Min-Heap)
+    [ 1 ]                       [ 3 ]
+   /
+[-1]
 
-```
+Size: 2                     Size: 1
+Top: 1                      Top: 3
 
-**Step 2: Slide to [3, -1, -3] (Remove 1, Add -3)**
-
-1. Add -3: It goes to the Left Heap.
-2. Remove 1: 1 is at the top of Left Heap, so we pop it.
-3. Balance: Ensure Left and Right size difference is no more than 1.
-
-```
-   Left (Max-Heap)      Right (Min-Heap)
-   [ -1, -3 ]           [ 3 ]
-     ^ top                ^ top
-Sorted: [-3, -1, 3] -> Median is -1.
-
+Median (k=3, odd) = Top of Small Half = 1.0
 ```
 
-**Step 3: Slide to [-1, -3, 5] (Remove 3, Add 5)**
+**Step 2: Slide the window -> [3, -1, -3]**
+* **Outgoing (leaving window):** `1`. We add `1` to our "Delayed Removals" hash map. `delayed = {1: 1}`. 
+* **Incoming (entering window):** `-3`. Since `-3` <= Top of Small Half (1), we put it in the Small Half.
+* **Balance Check:** `1` is still technically in our heap, throwing off our size count. We track a `balance` variable to fix this. 
 
-1. Add 5: It goes to the Right Heap.
-2. Remove 3: 3 is at the top of Right Heap, so we pop it.
+```text
+1. Add -3 to Small Half:
+Small Half (Max-Heap)       Large Half (Min-Heap)
+    [ 1 ] <--(marked!)          [ 3 ]
+   /     \
+[-1]     [-3]
 
+2. Rebalance:
+Wait, '1' is at the top of the Small Half, AND it's in our delayed map!
+*LAZY DELETION TRIGGERED!* We pop '1' out of the heap and decrement its count in the map.
+
+Cleaned Small Half:
+   [-1]                         [ 3 ]
+   /
+[-3]
+
+Median = Top of Small Half = -1.0
 ```
-   Left (Max-Heap)      Right (Min-Heap)
-   [ -1, -3 ]           [ 5 ]
-     ^ top                ^ top
-Sorted: [-3, -1, 5] -> Median is -1.
 
+**Step 3: Slide the window -> [-1, -3, 5]**
+* **Outgoing:** `3`. `delayed = {3: 1}`.
+* **Incoming:** `5`. Since `5` > Top of Small Half (-1), we put it in the Large Half.
+
+```text
+1. Add 5 to Large Half:
+Small Half (Max-Heap)       Large Half (Min-Heap)
+   [-1]                         [ 3 ] <--(marked!)
+   /                             /
+[-3]                           [ 5 ]
+
+2. Rebalance & Clean:
+'3' is at the top of the Large Half, AND it's in our delayed map!
+*LAZY DELETION TRIGGERED!* We pop '3'.
+
+Cleaned Large Half:
+   [-1]                         [ 5 ]
+   /
+[-3]
+
+Median = Top of Small Half = -1.0
 ```
 
 ---
 
 ## 3. Time and Space Complexity Analysis
 
-We will derive the complexity based on the operations per element `n` in the array.
+```text
+====================================================================
+TIME COMPLEXITY: O(N * log K)
+====================================================================
+Phase                | Complexity    | Why?
+--------------------------------------------------------------------
+1. Initializing      | O(K * log K)  | Inserting first K elements
+2. Sliding Window    | O(N)          | Loop runs N - K times
+   a. Heap Push      | O(log K)      | Inserting incoming element
+   b. Hash Map       | O(1)          | Marking outgoing element
+   c. Lazy Deletion  | O(log K)* | *Amortized time to pop 
+--------------------------------------------------------------------
+TOTAL TIME           | O(N * log K)  | Dominant scaling factor
+====================================================================
 
-### Time Complexity (TC)
-
+====================================================================
+SPACE COMPLEXITY: O(N)
+====================================================================
+Component            | Complexity    | Why?
+--------------------------------------------------------------------
+1. Heaps             | O(K)          | Max size of active elements
+2. Hash Map          | O(N)          | Worst case, lots of delayed 
+3. Output Array      | O(N - K)      | Storing the results
+--------------------------------------------------------------------
+TOTAL SPACE          | O(N)          | Bounded by total elements
+====================================================================
 ```
-Total Elements: n
-Operations per slide:
-  1. Add new element to Heap:    log(k)
-  2. Remove old element (Lazy):  log(k) (at most)
-  3. Rebalance Heaps:            log(k)
----------------------------------------
-Total TC: O(n * log(k))
-
-```
-
-### Space Complexity (SC)
-
-```
-1. Max-Heap:       Stores ~k/2 elements
-2. Min-Heap:       Stores ~k/2 elements
-3. Hash Map:       Stores up to n elements (for lazy removal)
----------------------------------------
-Total SC: O(n)
-
-```
-
-*Note: In a "perfect" implementation where we remove elements immediately, SC would be O(k).*
 
 ---
 
 ## 4. Solution Code
 
-### Python Implementation
-
-This uses the `heapq` library and a `dict` for lazy removals.
+### Python Implementation (Optimized Dual-Heap)
 
 ```python
 import heapq
 
 class Solution:
     def medianSlidingWindow(self, nums, k):
-        small_max_heap = [] # Stores smaller half (negative for max-heap behavior)
-        large_min_heap = [] # Stores larger half
-        delayed_removals = {} # dict for lazy removal
+        # Python's heapq is a Min-Heap by default.
+        # To make a Max-Heap for the small_half, we invert the numbers (multiply by -1).
+        small_half = [] 
+        large_half = [] 
+        delayed_removals = {}
+        result = []
         
-        # Helper to clean up the tops of heaps if they should have been deleted
-        def prune(heap, is_max_heap):
+        # Helper function to remove elements from the top of the heap 
+        # if they are marked for deletion in our hash map.
+        def prune(heap, is_small_half):
             while heap:
-                val = -heap[0] if is_max_heap else heap[0]
-                if delayed_removals.get(val, 0) > 0:
+                # Get the actual value (invert back if it's the small half)
+                val = -heap[0] if is_small_half else heap[0]
+                if val in delayed_removals and delayed_removals[val] > 0:
                     delayed_removals[val] -= 1
                     heapq.heappop(heap)
                 else:
                     break
 
-        # Initial balance
-        small_size = 0
-        large_size = 0
-        
-        # Add a number and keep sizes balanced
-        def add_num(num):
-            nonlocal small_size, large_size
-            if not small_max_heap or num <= -small_max_heap[0]:
-                heapq.heappush(small_max_heap, -num)
-                small_size += 1
-            else:
-                heapq.heappush(large_min_heap, num)
-                large_size += 1
-            rebalance()
-
-        def remove_num(num):
-            nonlocal small_size, large_size
-            delayed_removals[num] = delayed_removals.get(num, 0) + 1
-            if num <= -small_max_heap[0]:
-                small_size -= 1
-                if num == -small_max_heap[0]:
-                    prune(small_max_heap, True)
-            else:
-                large_size -= 1
-                if num == large_min_heap[0]:
-                    prune(large_min_heap, False)
-            rebalance()
-
-        def rebalance():
-            nonlocal small_size, large_size
-            # small can have at most 1 more than large
-            if small_size > large_size + 1:
-                heapq.heappush(large_min_heap, -heapq.heappop(small_max_heap))
-                small_size -= 1
-                large_size += 1
-                prune(small_max_heap, True)
-            elif small_size < large_size:
-                heapq.heappush(small_max_heap, -heapq.heappop(large_min_heap))
-                small_size += 1
-                large_size -= 1
-                prune(large_min_heap, False)
-
-        result = []
-        # Process first window
+        # Step 1: Initialize the first window
         for i in range(k):
-            add_num(nums[i])
-        
-        # Get first median
-        if k % 2 == 1:
-            result.append(float(-small_max_heap[0]))
-        else:
-            result.append((-small_max_heap[0] + large_min_heap[0]) / 2.0)
+            heapq.heappush(small_half, -nums[i])
             
-        # Process rest
-        for i in range(k, len(nums)):
-            add_num(nums[i])
-            remove_num(nums[i-k])
+        # Move the largest k//2 elements to the large_half to balance them
+        for _ in range(k // 2):
+            heapq.heappush(large_half, -heapq.heappop(small_half))
             
+        # Helper function to calculate current median
+        def get_median():
             if k % 2 == 1:
-                result.append(float(-small_max_heap[0]))
+                return float(-small_half[0])
             else:
-                result.append((-small_max_heap[0] + large_min_heap[0]) / 2.0)
-                
-        return result
+                return (-small_half[0] + large_half[0]) / 2.0
 
+        # Record the median of the very first window
+        result.append(get_median())
+
+        # Step 2: Slide the window
+        for i in range(k, len(nums)):
+            outgoing = nums[i - k]
+            incoming = nums[i]
+            
+            # Balance represents how shifted our heaps are from the ideal state.
+            # < 0 means small_half needs more elements. > 0 means large_half needs more.
+            balance = 0 
+            
+            # 1. Mark the outgoing element for deletion
+            delayed_removals[outgoing] = delayed_removals.get(outgoing, 0) + 1
+            if outgoing <= -small_half[0]:
+                balance -= 1 # We "removed" from small half
+            else:
+                balance += 1 # We "removed" from large half
+                
+            # 2. Add the incoming element
+            if small_half and incoming <= -small_half[0]:
+                balance += 1
+                heapq.heappush(small_half, -incoming)
+            else:
+                balance -= 1
+                heapq.heappush(large_half, incoming)
+                
+            # 3. Rebalance the heaps if the active element counts are skewed
+            if balance < 0:
+                heapq.heappush(small_half, -heapq.heappop(large_half))
+                balance += 1
+            if balance > 0:
+                heapq.heappush(large_half, -heapq.heappop(small_half))
+                balance -= 1
+                
+            # 4. Prune the tops of the heaps
+            prune(small_half, True)
+            prune(large_half, False)
+            
+            # 5. Record the new median
+            result.append(get_median())
+            
+        return result
 ```
 
-### JavaScript Implementation
-
-JavaScript doesn't have a built-in Heap, so in an interview, you'd likely use a `Sorted Array` (with binary search insertion) if the interviewer allows O(k) removals, or implement a basic `PriorityQueue`. Below is the optimized "Sorted Array" approach which is common in JS interviews for this specific problem.
+### JavaScript Implementation (Optimized Dual-Heap)
 
 ```javascript
 /**
@@ -13187,72 +13251,176 @@ JavaScript doesn't have a built-in Heap, so in an interview, you'd likely use a 
  * @return {number[]}
  */
 var medianSlidingWindow = function(nums, k) {
-    let window = [];
-    let result = [];
-    
-    // Binary search to find the correct index for insertion
-    const binarySearch = (arr, target) => {
-        let left = 0, right = arr.length;
-        while (left < right) {
-            let mid = Math.floor((left + right) / 2);
-            if (arr[mid] < target) left = mid + 1;
-            else right = mid;
+    // Using LeetCode's built-in @datastructures-js/priority-queue
+    const small = new MaxPriorityQueue(); 
+    const large = new MinPriorityQueue();
+    const deleted = new Map();
+    const result = [];
+
+    // Helper: Removes deleted elements if they float to the top
+    const prune = (heap) => {
+        while (!heap.isEmpty()) {
+            const val = heap.front().element;
+            if (deleted.get(val) > 0) {
+                deleted.set(val, deleted.get(val) - 1);
+                heap.dequeue();
+            } else {
+                break; // Top is valid
+            }
         }
-        return left;
     };
 
-    for (let i = 0; i < nums.length; i++) {
-        // Find position and insert new number
-        let insertIdx = binarySearch(window, nums[i]);
-        window.splice(insertIdx, 0, nums[i]);
+    // Step 1: Initialize the first window
+    for (let i = 0; i < k; i++) small.enqueue(nums[i]);
+    for (let i = 0; i < Math.floor(k / 2); i++) large.enqueue(small.dequeue().element);
 
-        // If window is too large, remove the element that fell out
-        if (window.length > k) {
-            let removeVal = nums[i - k];
-            let removeIdx = binarySearch(window, removeVal);
-            window.splice(removeIdx, 1);
+    // Step 2: Slide the window
+    for (let i = k; i <= nums.length; i++) {
+        
+        // Phase A: Record current median
+        const median = k % 2 === 1 
+            ? small.front().element 
+            : (small.front().element + large.front().element) / 2;
+        result.push(median);
+
+        if (i === nums.length) break;
+
+        // Phase B: Mark Outgoing, Add Incoming
+        const outNum = nums[i - k];
+        const inNum = nums[i];
+        
+        deleted.set(outNum, (deleted.get(outNum) || 0) + 1);
+        
+        // Track size discrepancy
+        let balance = outNum <= small.front().element ? -1 : 1;
+
+        // Route incoming number
+        if (!small.isEmpty() && inNum <= small.front().element) {
+            small.enqueue(inNum);
+            balance++;
+        } else {
+            large.enqueue(inNum);
+            balance--;
         }
 
-        // Calculate median once window reaches size k
-        if (window.length === k) {
-            let median;
-            if (k % 2 === 1) {
-                median = window[Math.floor(k / 2)];
-            } else {
-                median = (window[k / 2 - 1] + window[k / 2]) / 2;
-            }
-            result.push(median);
-        }
+        // Phase C: Rebalance Heaps
+        if (balance < 0) small.enqueue(large.dequeue().element);
+        else if (balance > 0) large.enqueue(small.dequeue().element);
+
+        // Phase D: Clean Tops
+        prune(small);
+        prune(large);
     }
+
     return result;
 };
-
 ```
 
+## 1. The Core Problem: Why Do We Need Lazy Deletion?
+
+The entire reason we use heaps for this problem is speed. We want to find the median in `O(1)` time and insert/remove numbers in `O(log k)` time.
+
+However, standard Heaps (Priority Queues) have a massive blind spot: **They only know what is at the very top.**
+* **Insert:** Fast. `O(log k)`
+* **View Top:** Very fast. `O(1)`
+* **Remove Top:** Fast. `O(log k)`
+* **Find and Remove a random element in the middle:** Terrible. `O(k)`
+
+When our sliding window moves forward, the number falling out the back of the window could be *anywhere* inside our heap. It might be at the top, but it's much more likely buried somewhere in the middle or bottom.
+
+If we force the heap to search for that specific number and delete it every single time the window moves, our time complexity degrades to `O(n * k)`. We lose all the performance benefits of using a heap in the first place.
+
+**The Insight:** We actually *don't care* if "dead" numbers are buried deep inside the heap. Why? Because we only ever look at the **top** of the heap to calculate the median. As long as the top element is valid, the median is correct. We only need to delete a dead number if it bubbles up to the top and blocks our view.
+
 ---
 
-## 5. New Terms and Concepts
+## 2. The `deleted` Set: The "Hit List"
 
-* **Priority Queue / Heap:** A data structure where you can always access the "most important" (smallest or largest) element in constant time O(1), and adding new elements takes logarithmic time O(log n).
-* **Lazy Removal:** Instead of searching through a complex structure to delete a specific item (which is slow), we "mark" it for deletion and only actually delete it when it becomes relevant (at the top).
-* **Rebalancing:** The process of moving elements between the two heaps to ensure one side doesn't get significantly larger than the other, keeping the "center" accurate.
+Since we cannot delete the outgoing number immediately, we need a way to remember that it is "dead." 
+
+The `deleted` variable (a Hash Map / Dictionary) acts as a ledger of debts. When a number leaves the sliding window, we don't touch the heap. Instead, we add that number to the `deleted` map.
+
+**Why a Map and not just a normal Set?**
+Because arrays can have duplicate numbers (e.g., `[2, 2, 2, 5]`). If the number `2` leaves the window, we need to know *how many* `2`s are supposed to be dead. 
+* `deleted = { 2: 1 }` means "The next time you see a 2 at the top of the heap, kill it, and reduce this debt to 0."
 
 ---
 
-## 6. Real-World / Interview Variations
+## 3. The `prune()` Function: The Enforcer
 
-**1. Google: "Server Latency Monitoring"**
+The `prune()` function is our cleanup crew. We call it right before we calculate the median to ensure the top of the heap is trustworthy.
 
-* *Scenario:* You are monitoring a stream of request latencies. You need to report the 95th percentile (not just median) for the last 1 hour.
-* *Solution:* Instead of two equal heaps, you maintain two heaps with a 95/5 ratio. The "Small" heap holds 95% of data, and "Large" holds 5%. The top of the Small heap is your 95th percentile.
+It does one simple job: It looks at the top element of the heap and checks the `deleted` ledger. 
+* If the top element is on the hit list (value > 0), `prune()` pops it off the heap and subtracts 1 from the ledger. 
+* It repeats this in a `while` loop until it sees a valid, "alive" number at the top.
 
-**2. Meta: "Social Feed Engagement"**
+### ASCII Visualization of Pruning
 
-* *Scenario:* Given a stream of "likes" per post over time, find the median popularity of posts in a moving 24-hour window.
-* *Solution:* This is the exact Sliding Window Median problem. They often look for how you handle "stale" data (Lazy Removal).
+Imagine a window sliding, and the numbers `7` and `4` have fallen out of the window. They are still physically in our Max-Heap, but they are marked in our ledger.
 
-**3. Bloomberg: "Financial Tick Data"**
+`deleted = { 7: 1, 4: 1 }`
 
-* *Scenario:* Stock prices are coming in fast. You need the median price for the last 100 ticks to filter out "noise" or outliers.
-* *Solution:* Because Bloomberg cares about speed, they might ask for a **Multiset** or **Balanced BST** approach if your language supports it (like C++ `std::multiset`), as it handles the sliding window removal naturally in O(log k) without the "Lazy" complexity.
+**Step 1: The current state of the Small Half (Max-Heap)**
+```text
+        [ 9 ]  <-- Top of Heap (Valid!)
+       /     \
+    [ 7 ]   [ 8 ]  <-- 7 is dead, but it's buried. 
+   /    \                 We do nothing.
+ [4]    [2]        <-- 4 is dead, but buried.
+```
+*Result:* We call `prune()`. It sees `9` at the top. `9` is not in the ledger. `prune()` does nothing. The median is correctly calculated using `9`.
 
+**Step 2: The window moves. '9' leaves the window and is marked dead. '2' also leaves.**
+`deleted = { 7: 1, 4: 1, 9: 1, 2: 1 }`
+
+```text
+        [ 9 ]  <-- Top of Heap (DEAD!)
+       /     \
+    [ 7 ]   [ 8 ]  
+   /    \                 
+ [4]    [2]        
+```
+*Result:* We call `prune()`. 
+1.  `prune` sees `9`. It's on the ledger! Pop it. `deleted[9]` becomes 0.
+2.  The heap automatically reorganizes. Let's say `8` becomes the new top.
+
+**Step 3: Heap reorganizes after popping 9**
+```text
+        [ 8 ]  <-- Top of Heap (Valid!)
+       /     \
+    [ 7 ]   [ 2 ]  
+   /                    
+ [4]            
+```
+*Result:* `prune` checks the new top, `8`. It is not on the ledger. `prune()` stops. The median is correctly calculated using `8`. The dead numbers `7` and `4` and `2` are still harmlessly floating inside, waiting for their turn to reach the top.
+
+---
+
+## Summary
+
+* **Standard Deletion:** "Find this specific person in a crowd of 10,000 and remove them right now." (Very slow).
+* **Lazy Deletion (`deleted` + `prune`):** "Put their name on a list. If they ever try to step up to the front of the line, bounce them out." (Extremely fast).
+
+---
+
+## Note 1: Terminology Breakdown
+* **Lazy Deletion:** A technique where you log an intent to delete an item (using a hash map or boolean flag) rather than paying the computational cost to delete it immediately. It applies here because finding an arbitrary element in a heap takes `O(K)` time, which defeats the purpose of using a heap.
+* **Dual-Heap (Two-Heap) Pattern:** Using a Max-Heap and Min-Heap in tandem to process a stream of numbers. By balancing the sizes of the heaps, you keep the middle of the dataset instantly accessible at the top of the heaps `O(1)`.
+
+---
+
+## Note 2: Real World & Interview Variations
+
+Here is how top companies adapt this pattern to test you on system design and logic:
+
+1.  **Google - Distributed Latency Monitor (The "P99" Problem)**
+    * *The Problem:* Instead of the 50th percentile (Median), calculate the 99th percentile (P99) latency of a sliding window of the last 10,000 server requests.
+    * *The Solution:* Use the exact same Dual-Heap architecture, but change the balancing logic. Instead of keeping the sizes equal (50/50), maintain the `small_half` heap at 99% of the total size, and the `large_half` at 1%. The top of the `large_half` will be your P99 threshold.
+
+2.  **Meta - Feed Engagement Anomaly Detection**
+    * *The Problem:* Given an ongoing stream of user engagement scores on a post, trigger an alert if the current hour's score dips below 50% of the rolling median of the past 24 hours.
+    * *The Solution:* This tests your ability to wrap the Sliding Window Median algorithm into a larger class structure. You maintain the rolling median using the Dual-Heap, and at each hour tick, you do a simple `O(1)` comparison: `if current_score < (get_median() * 0.5): trigger_alert()`.
+
+3.  **Bloomberg - Rolling Financial Ticks (Data Smoothing)**
+    * *The Problem:* Financial tick data has massive noise spikes. Write a filter that outputs a stream of prices where every price is replaced by the median of the last 60 ticks. 
+    * *The Solution:* Identical to this LeetCode problem, but framed as a continuous stream rather than a static array. You would build a class with an `add_tick(price)` method that handles the push/pop logic, returning the smoothed median in `O(log K)` time to keep the trading engine fast.
