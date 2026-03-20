@@ -13424,3 +13424,4300 @@ Here is how top companies adapt this pattern to test you on system design and lo
 3.  **Bloomberg - Rolling Financial Ticks (Data Smoothing)**
     * *The Problem:* Financial tick data has massive noise spikes. Write a filter that outputs a stream of prices where every price is replaced by the median of the last 60 ticks. 
     * *The Solution:* Identical to this LeetCode problem, but framed as a continuous stream rather than a static array. You would build a class with an `add_tick(price)` method that handles the push/pop logic, returning the smoothed median in `O(log K)` time to keep the trading engine fast.
+
+# 302. Smallest Rectangle Enclosing Black Pixels
+
+I see many strong candidates read "connected components" or "matrix" and immediately jump to Depth-First Search (DFS) or Breadth-First Search (BFS). It is a completely natural instinct, but it hits a wall when you read the constraint: **less than O(mn) runtime complexity**. 
+
+Let's break down how a Senior/Staff engineer approaches this, moving from the intuitive trap to the optimal solution. 
+
+---
+
+### 1. Problem Explanation
+
+Imagine a white canvas (represented by `0`s) with a single blob of black ink (represented by `1`s) spilled on it. 
+
+You are given:
+* The matrix itself.
+* The exact `(x, y)` coordinates of *one* specific drop of that black ink.
+
+**The Goal:** Draw the smallest possible bounding box (rectangle) around the entire ink blob and calculate the area of that box.
+
+**The Catch:** You cannot look at every single pixel. If the canvas is 10,000 by 10,000 pixels, and the ink blob takes up the entire canvas, a standard DFS will visit 100,000,000 pixels, resulting in an O(m * n) time complexity. We need to be faster.
+
+
+
+---
+
+### 2. Solution Explanation
+
+**The "Why" behind the optimal approach:**
+Why is DFS slow here? Because DFS visits the *interior* of the black blob. If the blob is huge, you waste time looking at the middle of it when you only care about the edges. 
+
+To beat O(m * n), we need a strategy that *skips* the middle and only hunts for the boundaries: the top-most `1`, bottom-most `1`, left-most `1`, and right-most `1`.
+
+**The "How": Binary Search on Matrix Projections**
+Because the black pixels are connected, if you "squash" or project the matrix horizontally or vertically, the `1`s will form a single, unbroken solid line.
+
+Let's look at an ASCII visualization. Suppose we are given the starting pixel `x=0, y=2` (which is a `1`).
+
+```text
+Matrix (m=4, n=6):
+      0 1 2 3 4 5  <- Columns (y)
+    +-------------
+  0 | 0 0 1 0 0 0  <- (x=0, y=2) is here
+  1 | 0 1 1 1 0 0
+  2 | 0 1 1 1 1 0
+  3 | 0 0 0 0 0 0
+
+Squash Vertically (Project to Columns):
+Do we see a '1' in this column?
+Col 0: No  (F)
+Col 1: Yes (T)
+Col 2: Yes (T) <- Starting y is here
+Col 3: Yes (T)
+Col 4: Yes (T)
+Col 5: No  (F)
+
+Resulting 1D Array of Columns: [F, T, T, T, T, F]
+```
+
+Notice something amazing? Look at the columns to the *left* of our starting `y=2`. 
+The array is `[F, T, T]`. This is perfectly sorted for Binary Search! 
+Look at the columns to the *right* of our starting `y=2`. 
+The array is `[T, T, T, F]`. This is also perfectly sorted!
+
+Instead of checking every column, we can use **Binary Search** to find the exact boundary where `F` turns into `T` (the left edge) and where `T` turns into `F` (the right edge).
+
+**End-to-End Walkthrough (Finding the Left Boundary):**
+We want to find the first column that has a `1`.
+Search space: `left = 0`, `right = y` (which is 2).
+
+```text
+Step 1:
+left = 0, right = 2.
+mid = (0 + 2) / 2 = 1.
+We check Column 1. Does Column 1 have any '1's?
+Looking at Col 1: (0, 1, 1, 0)... Yes, it does!
+Because it has a '1', the true left boundary might be this column, or it might be further left.
+We move our right pointer: right = mid = 1.
+
+Step 2:
+left = 0, right = 1.
+mid = (0 + 1) / 2 = 0.
+We check Column 0. Does Column 0 have any '1's?
+Looking at Col 0: (0, 0, 0, 0)... No, it doesn't.
+Because it's all '0's, the left boundary MUST be to the right of this column.
+We move our left pointer: left = mid + 1 = 1.
+
+Step 3:
+left = 1, right = 1.
+Loop terminates. The left boundary is Column 1.
+```
+We repeat this exact logic 4 times:
+1. Binary search columns `[0, y]` for the left boundary.
+2. Binary search columns `[y+1, n-1]` for the right boundary.
+3. Binary search rows `[0, x]` for the top boundary.
+4. Binary search rows `[x+1, m-1]` for the bottom boundary.
+
+The area is simply `(bottom - top) * (right - left)`.
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+**Time Complexity: O(m * log n + n * log m)**
+
+Here is the ASCII derivation of why this is the case:
+
+```text
+Finding Left/Right Boundaries (Searching Columns):
+[================ n columns ================]
+Search space halves each time: log2(n) steps.
+BUT, at every step, we must check if a column has a '1'.
+Checking a column means looking at 'm' rows.
+ 
+Step 1: check mid col -> costs O(m) operations
+Step 2: check mid col -> costs O(m) operations
+... happens log(n) times.
+Total for Columns = m + m + m ... (log n times) = O(m * log n)
+
+Finding Top/Bottom Boundaries (Searching Rows):
+[================ m rows ================]
+Search space halves each time: log2(m) steps.
+At every step, checking a row means looking at 'n' columns.
+
+Step 1: check mid row -> costs O(n) operations
+Step 2: check mid row -> costs O(n) operations
+... happens log(m) times.
+Total for Rows = n + n + n ... (log m times) = O(n * log m)
+
+Total Time = O(m * log n + n * log m)
+```
+This strictly passes the `< O(m * n)` requirement!
+
+**Space Complexity: O(1)**
+We only store a few integer pointers (`left`, `right`, `top`, `bottom`, `mid`). We do not build any auxiliary matrices or recursion stacks.
+
+---
+
+### 4. Solution Code
+
+I'll provide two solutions in both Python and JavaScript. 
+1. **The BFS Fallback (O(m * n))**: Great to code up quickly in an interview if you blank on the optimal solution, to guarantee you have *working code* on the board.
+2. **The Optimal Binary Search**: The L5/L6 target solution.
+
+#### Python Snippets
+
+```python
+# ==========================================
+# OPTIMAL SOLUTION (Binary Search)
+# ==========================================
+class Solution:
+    def minArea(self, image: list[list[str]], x: int, y: int) -> int:
+        if not image or not image[0]:
+            return 0
+            
+        m, n = len(image), len(image[0])
+        
+        # Helper to check if a column has any '1's
+        def has_black_in_col(mid_col):
+            for row in range(m):
+                if image[row][mid_col] == '1':
+                    return True
+            return False
+
+        # Helper to check if a row has any '1's
+        def has_black_in_row(mid_row):
+            for col in range(n):
+                if image[mid_row][col] == '1':
+                    return True
+            return False
+
+        # Find boundaries using binary search
+        def search_boundary(low, high, is_horizontal, search_min):
+            while low < high:
+                mid = (low + high) // 2
+                
+                if is_horizontal:
+                    has_black = has_black_in_col(mid)
+                else:
+                    has_black = has_black_in_row(mid)
+                    
+                if has_black == search_min:
+                    # If we are looking for the minimum boundary (top/left) 
+                    # and we found a '1', the boundary could be this mid or earlier.
+                    # If we are looking for max (bottom/right) and found '0',
+                    # the boundary must be before this mid.
+                    high = mid
+                else:
+                    low = mid + 1
+            return low
+
+        # 1. Find Left (search cols from 0 to y)
+        left = search_boundary(0, y, is_horizontal=True, search_min=True)
+        # 2. Find Right (search cols from y + 1 to n)
+        # Note: high is n, not n-1, because right acts as an exclusive bound in calculating area
+        right = search_boundary(y + 1, n, is_horizontal=True, search_min=False)
+        # 3. Find Top (search rows from 0 to x)
+        top = search_boundary(0, x, is_horizontal=False, search_min=True)
+        # 4. Find Bottom (search rows from x + 1 to m)
+        bottom = search_boundary(x + 1, m, is_horizontal=False, search_min=False)
+
+        return (right - left) * (bottom - top)
+
+# ==========================================
+# FALLBACK SOLUTION (BFS - O(m * n))
+# ==========================================
+from collections import deque
+
+class SolutionBFS:
+    def minArea(self, image: list[list[str]], x: int, y: int) -> int:
+        if not image or not image[0]: return 0
+        
+        m, n = len(image), len(image[0])
+        min_row, max_row = x, x
+        min_col, max_col = y, y
+        
+        queue = deque([(x, y)])
+        visited = set([(x, y)])
+        
+        directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+        
+        while queue:
+            curr_x, curr_y = queue.popleft()
+            
+            # Update boundaries
+            min_row = min(min_row, curr_x)
+            max_row = max(max_row, curr_x)
+            min_col = min(min_col, curr_y)
+            max_col = max(max_col, curr_y)
+            
+            for dx, dy in directions:
+                nx, ny = curr_x + dx, curr_y + dy
+                
+                if 0 <= nx < m and 0 <= ny < n and image[nx][ny] == '1':
+                    if (nx, ny) not in visited:
+                        visited.add((nx, ny))
+                        queue.append((nx, ny))
+                        
+        # Area = (max_row - min_row + 1) * (max_col - min_col + 1)
+        return (max_row - min_row + 1) * (max_col - min_col + 1)
+```
+
+#### JavaScript Snippets
+
+```javascript
+// ==========================================
+// OPTIMAL SOLUTION (Binary Search)
+// ==========================================
+/**
+ * @param {character[][]} image
+ * @param {number} x
+ * @param {number} y
+ * @return {number}
+ */
+var minArea = function(image, x, y) {
+    if (!image || image.length === 0) return 0;
+    
+    const m = image.length;
+    const n = image[0].length;
+    
+    const hasBlackInCol = (midCol) => {
+        for (let row = 0; row < m; row++) {
+            if (image[row][midCol] === '1') return true;
+        }
+        return false;
+    };
+    
+    const hasBlackInRow = (midRow) => {
+        for (let col = 0; col < n; col++) {
+            if (image[midRow][col] === '1') return true;
+        }
+        return false;
+    };
+    
+    const searchBoundary = (low, high, isHorizontal, searchMin) => {
+        while (low < high) {
+            const mid = Math.floor((low + high) / 2);
+            let hasBlack = isHorizontal ? hasBlackInCol(mid) : hasBlackInRow(mid);
+            
+            if (hasBlack === searchMin) {
+                high = mid;
+            } else {
+                low = mid + 1;
+            }
+        }
+        return low;
+    };
+    
+    const left = searchBoundary(0, y, true, true);
+    const right = searchBoundary(y + 1, n, true, false);
+    const top = searchBoundary(0, x, false, true);
+    const bottom = searchBoundary(x + 1, m, false, false);
+    
+    return (right - left) * (bottom - top);
+};
+
+// ==========================================
+// FALLBACK SOLUTION (BFS - O(m * n))
+// ==========================================
+var minAreaBFS = function(image, x, y) {
+    if (!image || image.length === 0) return 0;
+    
+    const m = image.length;
+    const n = image[0].length;
+    
+    let minRow = x, maxRow = x;
+    let minCol = y, maxCol = y;
+    
+    const queue = [[x, y]];
+    // Using a 2D boolean array is faster than a Set for JS coordinates
+    const visited = Array.from({length: m}, () => Array(n).fill(false));
+    visited[x][y] = true;
+    
+    const dirs = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+    
+    while (queue.length > 0) {
+        const [cx, cy] = queue.shift();
+        
+        minRow = Math.min(minRow, cx);
+        maxRow = Math.max(maxRow, cx);
+        minCol = Math.min(minCol, cy);
+        maxCol = Math.max(maxCol, cy);
+        
+        for (let [dx, dy] of dirs) {
+            const nx = cx + dx;
+            const ny = cy + dy;
+            
+            if (nx >= 0 && nx < m && ny >= 0 && ny < n && image[nx][ny] === '1' && !visited[nx][ny]) {
+                visited[nx][ny] = true;
+                queue.push([nx, ny]);
+            }
+        }
+    }
+    
+    return (maxRow - minRow + 1) * (maxCol - minCol + 1);
+};
+```
+
+---
+
+### Note 1: Terminology
+
+The technique we used here is called **Binary Search on a Predicate** or **Binary Search on Projections**. 
+* **Why it helps:** Normally, binary search looks for a specific number in a sorted array. Here, we aren't looking for a number; we are testing a *condition* (a predicate), such as "Does this entire column contain at least one black pixel?". 
+* **How it applies:** Because the shape is contiguous, the truth values of our predicate naturally form a sorted boolean array (e.g., `[False, False, True, True, True]`). Whenever you have a monotonic condition (a bunch of falses followed by a bunch of trues), you can use binary search to find the tipping point.
+
+### Note 2: Indirect / Real-World Interview Variations
+
+Big Tech rarely asks Leetcode questions verbatim anymore. Here is how this core concept is disguised:
+
+**1. Google / Waymo: The Autonomous Driving Radar Problem**
+* **The Prompt:** "You have a 2D grid representing LiDAR data. '0' is empty space, '1' is a vehicle. Assuming one vehicle is present and contiguous, and we know one coordinate of the vehicle, find its bounding box to feed into our object classification model efficiently."
+* **The Solution:** This is an exact 1-to-1 mapping to our binary search optimal solution. In an interview, I would frame the algorithm exactly as above, but use Waymo terminology (LiDAR grid instead of canvas, vehicle instead of ink blob).
+
+**2. Meta: The Image Auto-Cropper**
+* **The Prompt:** "We have a massive image representing a user's uploaded photo. We want to auto-crop it to the main subject. The background has been masked out as '0's and the subject as '1's. How do you find the crop boundaries?"
+* **The Solution:** Again, the same solution. However, Meta interviewers will often add a follow-up: *"What if there are MULTIPLE disconnected subjects (e.g., two people standing apart)?"*
+    * **Follow-up Solution:** The Binary Search projection trick *breaks* if the blobs are disconnected, because the projected 1D array might look like `[False, True, False, True]`, destroying our monotonic property. For multiple disconnected subjects, you MUST fall back to BFS/DFS (connected component labeling) to find the bounding box of each distinct object, taking O(m * n) time. 
+
+**3. Bloomberg: Terminal Window Bounds**
+* **The Prompt:** "In the Bloomberg Terminal, UI elements are rendered on a massive character grid. A single window is a contiguous block of characters. Given a mouse click coordinate inside a window, find the minimum terminal rendering box we need to redraw."
+* **The Solution:** Same Binary Search approach. A great optimization to mention here is that UI windows often have solid borders. If the matrix is too large, instead of checking the whole column inside the binary search, you might be able to implement an exponential search (jumping boundaries by powers of 2: 1, 2, 4, 8) to find the edges even faster if the UI window is very small compared to the massive screen grid.
+
+# 963. Minimum Area Rectangle II
+
+This is a brilliant computational geometry problem. When dealing with geometric shapes on a 2D plane, the brute-force approach (checking every possible combination of 4 points) is `O(N^4)`. For an L5/L6 level candidate, the expectation is to recognize geometric invariants—properties of a shape that never change, no matter how you rotate it—to drastically reduce that search space.
+
+Let's break this down end-to-end.
+
+---
+
+### 1. Problem Explanation
+
+You are given an array of points on a 2D coordinate grid. 
+**The Goal:** Find the area of the *smallest* rectangle you can form using any 4 of these points.
+**The Catch:** Unlike "Minimum Area Rectangle I" where rectangles are perfectly aligned with the x and y axes, these rectangles can be **tilted or rotated** at any angle.
+
+
+
+Here is a visual difference:
+
+```text
+Axis-Aligned Rectangle (Easy):       Rotated Rectangle (Hard):
+    P1 ----------- P2                        P2
+    |              |                       /    \
+    |              |                     /        \
+    |              |                   P1          P3
+    P4 ----------- P3                    \        /
+                                           \    /
+                                             P4
+```
+
+Because the rectangle can be tilted, you cannot simply look for matching `x` or `y` coordinates. We need a mathematically sound way to ask: *"Do these 4 points form a perfect rectangle?"*
+
+---
+
+### 2. Solution Explanation
+
+There are two excellent ways to solve this. The first is intuitive but a bit slower. The second uses a brilliant geometric trick that Senior engineers look for.
+
+#### Approach 1: The "3-Point Right Angle" Method (Fallback / Intuitive)
+A rectangle is just a shape with four 90-degree (right) angles. 
+If we pick *any three points* (let's call them P1, P2, P3), we can check if they form a right angle at P1. 
+
+How? By checking if their vectors are orthogonal (perpendicular). Two vectors are perpendicular if their **Dot Product is zero**. 
+
+If they form a right angle, we know exactly where the 4th point (P4) *must* be located to complete the rectangle. We just calculate P4's coordinates and check if it exists in our original list of points.
+
+```text
+Step 1: Pick 3 points. Check if Angle(P2, P1, P3) is 90 degrees.
+       P2
+       |
+       |  <-- Vector 1 (P1 to P2)
+       |
+       P1 ----------- P3
+           Vector 2
+          (P1 to P3)
+
+Step 2: If Dot Product == 0, calculate P4.
+        P4 = P2 + P3 - P1 (Vector addition)
+        Check if P4 is in our given Set of points!
+```
+
+#### Approach 2: The "Diagonal Invariant" Method (Optimal L5/L6)
+This is the top-tier solution. What is a universal truth about *every* rectangle, no matter how it is rotated?
+**The diagonals of a rectangle always have the exact same length AND they intersect exactly at their midpoints.**
+
+```text
+          P2
+        /    \
+      /   M    \   <-- M is the midpoint. 
+    P1          P3     Length of (P1 to P3) == Length of (P2 to P4)
+      \        /       Midpoint of (P1 to P3) == Midpoint of (P2 to P4)
+        \    /
+          P4
+```
+
+Instead of looking for 4 points, we just look at **pairs of 2 points**. 
+Every pair of points forms a line segment. For every pair, we calculate:
+1. The distance (length) between them.
+2. The exact midpoint `(x, y)` between them.
+
+We group all pairs by their `[length, midpoint_x, midpoint_y]`. 
+If two *different* pairs of points share the exact same length and the exact same midpoint, congratulations—those two line segments are the diagonals of a perfect rectangle!
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+Let's look at the complexity using the optimal Diagonal Method. Let `N` be the number of points.
+
+```text
+TIME COMPLEXITY DERIVATION: O(N^2)
+
+[ Start with N points ]
+          |
+          V
+[ Iterate over all combinations of 2 points to form diagonals ]
+          |
+          V
+How many pairs are there? "N choose 2", which is N * (N - 1) / 2.
+This gives us O(N^2) total pairs.
+          |
+          V
+[ For each pair: Calculate distance and midpoint -> O(1) math operations ]
+          |
+          V
+[ Store pair in a Hash Map based on "Distance + Midpoint" string -> O(1) amortized ]
+          |
+          V
+Total Time = O(N^2) pairs * O(1) operations = O(N^2) Time Complexity.
+```
+
+```text
+SPACE COMPLEXITY DERIVATION: O(N^2)
+
+[ Hash Map Data Structure ]
+Key: "Length_MidX_MidY"
+Value: List of point pairs ( [ [p1, p2], [p3, p4] ... ] )
+          |
+          V
+In the worst case, every single pair of points goes into the hash map.
+We have O(N^2) pairs.
+          |
+          V
+Total Space = O(N^2) Space Complexity to store all pairs.
+```
+
+*Note: The 3-Point Fallback method takes O(N^3) time because it iterates over 3 points, but only O(N) space to store the initial points in a Set.*
+
+---
+
+### 4. Solution Code
+
+Here are both solutions in Python and JavaScript.
+
+#### Python Snippets
+
+```python
+import math
+from collections import defaultdict
+
+# ==========================================
+# OPTIMAL SOLUTION (Diagonal Invariant - O(N^2))
+# ==========================================
+class Solution:
+    def minAreaFreeRect(self, points: list[list[int]]) -> float:
+        # Map signature: (distance_squared, center_x, center_y) -> list of pairs of points
+        # We use distance_squared to avoid floating point precision issues with math.sqrt
+        diagonals = defaultdict(list)
+        
+        # 1. Iterate over all pairs of points
+        for i in range(len(points)):
+            for j in range(i + 1, len(points)):
+                x1, y1 = points[i]
+                x2, y2 = points[j]
+                
+                # Calculate invariant 1: Length squared
+                dist_sq = (x1 - x2)**2 + (y1 - y2)**2
+                
+                # Calculate invariant 2: Midpoint coordinates
+                # We can just use the sum (x1+x2) instead of dividing by 2 to avoid floats
+                center_x = (x1 + x2) / 2.0
+                center_y = (y1 + y2) / 2.0
+                
+                # Group pairs by these invariants
+                diagonals[(dist_sq, center_x, center_y)].append((points[i], points[j]))
+                
+        min_area = float('inf')
+        
+        # 2. Find rectangles and calculate area
+        for key, pairs in diagonals.items():
+            # If we have 2 or more pairs with the same length/midpoint, they form rectangle(s)
+            if len(pairs) > 1:
+                # Compare all pairs that share this diagonal property
+                for i in range(len(pairs)):
+                    for j in range(i + 1, len(pairs)):
+                        p1, p2 = pairs[i] # Diagonal 1
+                        p3, p4 = pairs[j] # Diagonal 2
+                        
+                        # Area = width * height. 
+                        # We can find width and height by measuring the distance between 
+                        # an endpoint of Diagonal 1 (p1) and the endpoints of Diagonal 2 (p3, p4)
+                        width_sq = (p1[0] - p3[0])**2 + (p1[1] - p3[1])**2
+                        height_sq = (p1[0] - p4[0])**2 + (p1[1] - p4[1])**2
+                        
+                        area = math.sqrt(width_sq * height_sq)
+                        min_area = min(min_area, area)
+                        
+        return min_area if min_area != float('inf') else 0.0
+
+# ==========================================
+# FALLBACK SOLUTION (3-Point Right Angle - O(N^3))
+# ==========================================
+class SolutionFallback:
+    def minAreaFreeRect(self, points: list[list[int]]) -> float:
+        # Put all points in a set for O(1) lookups
+        point_set = {(x, y) for x, y in points}
+        min_area = float('inf')
+        n = len(points)
+        
+        for i in range(n):
+            for j in range(n):
+                for k in range(n):
+                    if i == j or i == k or j == k:
+                        continue
+                        
+                    p1, p2, p3 = points[i], points[j], points[k]
+                    
+                    # Create vectors P1->P2 and P1->P3
+                    v1_x, v1_y = p2[0] - p1[0], p2[1] - p1[1]
+                    v2_x, v2_y = p3[0] - p1[0], p3[1] - p1[1]
+                    
+                    # Dot product == 0 means 90 degree angle
+                    if (v1_x * v2_x) + (v1_y * v2_y) == 0:
+                        # Expected 4th point: P4 = P2 + P3 - P1
+                        p4_x = p2[0] + p3[0] - p1[0]
+                        p4_y = p2[1] + p3[1] - p1[1]
+                        
+                        if (p4_x, p4_y) in point_set:
+                            # Rectangle found!
+                            area = math.sqrt(v1_x**2 + v1_y**2) * math.sqrt(v2_x**2 + v2_y**2)
+                            min_area = min(min_area, area)
+                            
+        return min_area if min_area != float('inf') else 0.0
+```
+
+#### JavaScript Snippets
+
+```javascript
+// ==========================================
+// OPTIMAL SOLUTION (Diagonal Invariant - O(N^2))
+// ==========================================
+/**
+ * @param {number[][]} points
+ * @return {number}
+ */
+var minAreaFreeRect = function(points) {
+    const diagonals = new Map();
+    const n = points.length;
+    
+    // 1. Group pairs by their diagonal properties
+    for (let i = 0; i < n; i++) {
+        for (let j = i + 1; j < n; j++) {
+            const [x1, y1] = points[i];
+            const [x2, y2] = points[j];
+            
+            const distSq = (x1 - x2) ** 2 + (y1 - y2) ** 2;
+            const centerX = (x1 + x2) / 2;
+            const centerY = (y1 + y2) / 2;
+            
+            // Create a unique string key for the map
+            const key = `${distSq}_${centerX}_${centerY}`;
+            
+            if (!diagonals.has(key)) {
+                diagonals.set(key, []);
+            }
+            diagonals.get(key).push([points[i], points[j]]);
+        }
+    }
+    
+    let minArea = Infinity;
+    
+    // 2. Find rectangles from matching diagonals
+    for (const [key, pairs] of diagonals.entries()) {
+        if (pairs.length > 1) {
+            for (let i = 0; i < pairs.length; i++) {
+                for (let j = i + 1; j < pairs.length; j++) {
+                    const p1 = pairs[i][0];
+                    const p3 = pairs[j][0];
+                    const p4 = pairs[j][1];
+                    
+                    const widthSq = (p1[0] - p3[0]) ** 2 + (p1[1] - p3[1]) ** 2;
+                    const heightSq = (p1[0] - p4[0]) ** 2 + (p1[1] - p4[1]) ** 2;
+                    
+                    const area = Math.sqrt(widthSq * heightSq);
+                    minArea = Math.min(minArea, area);
+                }
+            }
+        }
+    }
+    
+    return minArea === Infinity ? 0 : minArea;
+};
+
+// ==========================================
+// FALLBACK SOLUTION (3-Point Right Angle - O(N^3))
+// ==========================================
+var minAreaFreeRectFallback = function(points) {
+    const pointSet = new Set();
+    for (const [x, y] of points) {
+        pointSet.add(`${x},${y}`);
+    }
+    
+    let minArea = Infinity;
+    const n = points.length;
+    
+    for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n; j++) {
+            for (let k = 0; k < n; k++) {
+                if (i === j || i === k || j === k) continue;
+                
+                const p1 = points[i], p2 = points[j], p3 = points[k];
+                
+                const v1x = p2[0] - p1[0], v1y = p2[1] - p1[1];
+                const v2x = p3[0] - p1[0], v2y = p3[1] - p1[1];
+                
+                // Dot product == 0
+                if ((v1x * v2x) + (v1y * v2y) === 0) {
+                    const p4x = p2[0] + p3[0] - p1[0];
+                    const p4y = p2[1] + p3[1] - p1[1];
+                    
+                    if (pointSet.has(`${p4x},${p4y}`)) {
+                        const area = Math.sqrt(v1x**2 + v1y**2) * Math.sqrt(v2x**2 + v2y**2);
+                        minArea = Math.min(minArea, area);
+                    }
+                }
+            }
+        }
+    }
+    
+    return minArea === Infinity ? 0 : minArea;
+};
+```
+
+---
+
+### Note 1: Terminology
+
+* **Geometric Invariant:** A property of a geometric object that remains unchanged after operations like rotation, translation, or scaling. We used this concept to avoid figuring out rotation angles; no matter how tilted the rectangle is, its diagonals always share a midpoint and length.
+* **Vector Dot Product / Orthogonality Check:** A mathematical way to check the angle between two lines (vectors). If `(x1 * x2) + (y1 * y2) == 0`, the lines intersect at exactly 90 degrees. This is incredibly useful in computational geometry for verifying shapes without using costly trigonometric functions like `sine` or `cosine`.
+
+### Note 2: Indirect / Real-World Interview Variations
+
+Because LC 963 is highly specific, big tech companies frame it as system design or real-world geometry problems:
+
+**1. Google / Waymo: LiDAR Object Tracking**
+* **The Prompt:** "We have 3D LiDAR point cloud data projected onto a 2D plane representing a parking lot. Cars appear as clusters of points. Given a set of boundary points for a cluster, how do we find the minimal rectangular bounding box (which might be parked at a tilted angle) to classify the car's footprint?"
+* **The Solution:** This is a slightly more advanced version called the *Rotating Calipers* algorithm (used on a convex hull), but interviewers often simplify it to a finite set of points to test exactly the logic above. You would use the Diagonal or Dot Product approach to find all possible rigid vehicle outlines.
+
+**2. Meta / Oculus: VR Hitbox Detection**
+* **The Prompt:** "In a 2D projection of a VR scene, players can place rectangular boundary markers that are rotated freely. Given a stream of coordinate clicks, how do we efficiently detect if four clicks form a valid rotated 'safe zone' marker?"
+* **The Solution:** You would implement the exact `O(N^2)` Hash Map approach. Since the coordinates are a stream, every time a new click (point) comes in, you pair it with all existing points, calculate the diagonal invariant, and check the Hash Map to see if a matching diagonal already exists.
+
+**3. Bloomberg: Financial Chart Annotation**
+* **The Prompt:** "Traders draw custom trend channels (which are just tilted rectangles) on scatter-plot stock charts. Given a dataset of user-clicked coordinates on the chart, identify the smallest valid trend channel they attempted to draw."
+* **The Solution:** Exact same algorithm. In a Bloomberg interview, emphasize handling floating-point inaccuracies. Since screen coordinates or stock prices can be decimals, comparing exact lengths and midpoints can fail due to precision errors. You would need to explain how to use an `epsilon` (a very small threshold like `0.00001`) when checking if lengths or midpoints are "equal".
+
+# 283. Move Zeroes
+
+This is a classic problem, and you are right to ask how a Senior/Staff engineer (L5/L6) views it. At a junior level, the goal is simply to make the code work. At the L5/L6 level, the focus shifts to **minimizing array writes** (which are expensive at the hardware/cache level) and understanding the fundamental algorithm class this belongs to (array partitioning).
+
+Let's break down how to tackle this cleanly, efficiently, and intuitively.
+
+---
+
+### 1. Problem Explanation
+
+Imagine a row of boxes. Some boxes have items in them (represented by non-zero numbers like `1`, `3`, `12`), and some boxes are completely empty (represented by `0`).
+
+**The Goal:** You want to slide all the items to the front of the row, keeping them in their original order, so that all the empty boxes (the `0`s) are pushed to the very end.
+
+**The Constraints:** * You must do this **in-place**. This means you cannot just build a brand-new row of boxes in memory, move the items there, and return it. You must rearrange the existing boxes.
+* You should try to minimize the number of operations.
+
+
+
+---
+
+### 2. Solution Explanation
+
+**The "Why" behind the optimal approach:**
+If we can't create a second array, we have to use the existing array to store our progress. 
+A naive approach might be to see a zero, delete it, and append it to the end. But in an array, deleting and shifting elements takes O(N) time, making the whole process O(N * N) time. That is too slow.
+
+To do this in one pass, we need **Two Pointers**.
+Think of one pointer as the "Explorer" and the other as the "Anchor".
+* **Explorer (right pointer):** Runs ahead to look at every single box. It is searching for items (non-zero numbers).
+* **Anchor (left pointer):** Stands at the exact spot where the *next* item needs to be placed.
+
+**The "How" (The Swap Strategy):**
+Every time the Explorer finds an item (a non-zero), it tosses it to the Anchor. The Anchor catches it, puts it in its box, and takes one step forward to prepare for the next item. If the Explorer finds an empty box (a `0`), it just ignores it and keeps walking. 
+
+By using a **swap** instead of just overwriting, we guarantee that the `0`s are naturally pushed to the back as the non-zeros are pulled to the front!
+
+**End-to-End Walkthrough:**
+Let's trace the input array: `[0, 1, 0, 3, 12]`
+
+```text
+Initial State:
+Array: [ 0, 1, 0, 3, 12 ]
+         ^
+         |
+    Anchor (left=0)
+    Explorer (right=0)
+
+Step 1:
+Explorer looks at index 0. It is a '0'. 
+Rule: Ignore '0's. Explorer moves forward.
+Array: [ 0, 1, 0, 3, 12 ]
+         ^  ^
+         |  |
+    Anchor  Explorer (right=1)
+
+Step 2:
+Explorer looks at index 1. It is a '1' (non-zero!).
+Rule: Swap the values at Anchor and Explorer. Move BOTH forward.
+Swap index 0 and index 1.
+Array: [ 1, 0, 0, 3, 12 ]  <-- The '1' moves to the front!
+            ^  ^
+            |  |
+       Anchor  Explorer (right=2)
+
+Step 3:
+Explorer looks at index 2. It is a '0'.
+Rule: Ignore '0's. Explorer moves forward.
+Array: [ 1, 0, 0, 3, 12 ]
+            ^     ^
+            |     |
+       Anchor     Explorer (right=3)
+
+Step 4:
+Explorer looks at index 3. It is a '3' (non-zero!).
+Rule: Swap Anchor and Explorer. Move BOTH forward.
+Swap index 1 and index 3.
+Array: [ 1, 3, 0, 0, 12 ]  <-- The '3' is placed perfectly!
+               ^     ^
+               |     |
+          Anchor     Explorer (right=4)
+
+Step 5:
+Explorer looks at index 4. It is a '12' (non-zero!).
+Rule: Swap Anchor and Explorer. Move BOTH forward.
+Swap index 2 and index 4.
+Array: [ 1, 3, 12, 0, 0 ]  <-- The '12' is placed!
+                   ^     ^ (out of bounds)
+                   |
+              Anchor
+
+Loop ends. The array is perfectly sorted with zeroes at the end!
+```
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+Here is the ASCII derivation of the complexity. Let `N` be the number of elements in the array.
+
+```text
+TIME COMPLEXITY: O(N)
+
+[ 0, 1, 0, 3, 12 ]
+  |--|--|--|--|  <-- The 'Explorer' pointer touches each element exactly once.
+  
+There is no nested looping.
+At each step, checking if a number is 0 takes O(1) time.
+Swapping two elements takes O(1) time.
+
+Total Time = N elements * O(1) operations = O(N)
+```
+
+```text
+SPACE COMPLEXITY: O(1)
+
+Original Array in Memory:
++---+---+---+---+----+
+| 0 | 1 | 0 | 3 | 12 |
++---+---+---+---+----+
+  ^   ^
+  L   R  <-- We only create two integer variables (Left and Right pointers).
+
+We modify the array directly. No matter if N is 5 or 5,000,000, 
+we still only use two variables for the pointers.
+
+Total Space = O(1) Constant Space.
+```
+
+---
+
+### 4. Solution Code
+
+I'll provide two solutions. 
+1. **The Overwrite + Fill Method:** A bit easier to think of intuitively, but suboptimal because it performs unnecessary writes.
+2. **The Optimal Swap Method:** The L5/L6 target solution that minimizes memory writes.
+
+#### Python Snippets
+
+```python
+# ==========================================
+# OPTIMAL SOLUTION (The Swap Method - Minimizes Writes)
+# ==========================================
+class Solution:
+    def moveZeroes(self, nums: list[int]) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+        # 'left' is our Anchor pointer
+        left = 0
+        
+        # 'right' is our Explorer pointer
+        for right in range(len(nums)):
+            if nums[right] != 0:
+                # When we find a non-zero, swap it to the Anchor's position.
+                # If left == right, it just swaps with itself (no real cost).
+                nums[left], nums[right] = nums[right], nums[left]
+                
+                # Move the Anchor forward to accept the next non-zero
+                left += 1
+
+# ==========================================
+# FALLBACK SOLUTION (Overwrite and Fill)
+# ==========================================
+class SolutionFallback:
+    def moveZeroes(self, nums: list[int]) -> None:
+        insert_pos = 0
+        
+        # Step 1: Shift all non-zeros to the front
+        for i in range(len(nums)):
+            if nums[i] != 0:
+                nums[insert_pos] = nums[i]
+                insert_pos += 1
+                
+        # Step 2: Fill the remaining spaces with zeroes
+        # Why is this worse? If array is [0, 0, ..., 1], 
+        # it writes '1' once, then rewrites N-1 zeroes unnecessarily.
+        while insert_pos < len(nums):
+            nums[insert_pos] = 0
+            insert_pos += 1
+```
+
+#### JavaScript Snippets
+
+```javascript
+// ==========================================
+// OPTIMAL SOLUTION (The Swap Method - Minimizes Writes)
+// ==========================================
+/**
+ * @param {number[]} nums
+ * @return {void} Do not return anything, modify nums in-place instead.
+ */
+var moveZeroes = function(nums) {
+    // 'left' is our Anchor pointer
+    let left = 0;
+    
+    // 'right' is our Explorer pointer
+    for (let right = 0; right < nums.length; right++) {
+        if (nums[right] !== 0) {
+            // Swap elements at 'left' and 'right'
+            let temp = nums[left];
+            nums[left] = nums[right];
+            nums[right] = temp;
+            
+            // Move the Anchor forward
+            left++;
+        }
+    }
+};
+
+// ==========================================
+// FALLBACK SOLUTION (Overwrite and Fill)
+// ==========================================
+var moveZeroesFallback = function(nums) {
+    let insertPos = 0;
+    
+    // Step 1: Overwrite the front with non-zero elements
+    for (let i = 0; i < nums.length; i++) {
+        if (nums[i] !== 0) {
+            nums[insertPos] = nums[i];
+            insertPos++;
+        }
+    }
+    
+    // Step 2: Fill the rest of the array with zeroes
+    for (let i = insertPos; i < nums.length; i++) {
+        nums[i] = 0;
+    }
+};
+```
+
+---
+
+### Note 1: Terminology
+
+The algorithm used here is based on **Array Partitioning**, specifically utilizing the **Fast/Slow Two-Pointer Technique**.
+* **Why it helps:** It allows us to process and reorganize an array in a single sweep without needing auxiliary (extra) memory space.
+* **How it applies:** This is actually the exact same logic used in the `partition` step of the famous **QuickSort** algorithm! In QuickSort, you pick a pivot and move all numbers smaller than the pivot to the left. Here, our "pivot condition" is simply whether the number is a `0` or not.
+
+### Note 2: Indirect / Real-World Interview Variations
+
+In Big Tech, they will often disguise this simple array problem as a systems or hardware problem:
+
+**1. Google: Memory Garbage Collection (Compaction)**
+* **The Prompt:** "You have an array representing blocks of memory. A `0` means the memory is freed, and a non-zero integer is an active process ID. Memory fragmentation is slowing down the system. Write an in-place algorithm to 'compact' the memory, moving all active processes to the front while maintaining their order."
+* **The Solution:** This is word-for-word the "Move Zeroes" problem. To ace the interview, you would provide the Optimal Swap method and specifically point out to the interviewer that you chose swapping over overwriting to *reduce wear on the memory hardware* (minimizing memory writes).
+
+**2. Meta: The "Move Negatives" Variant**
+* **The Prompt:** "Given an array of integers, move all negative numbers to the left and all positive numbers to the right. The relative order of negative numbers must be maintained."
+* **The Solution:** Exact same code, but instead of checking `if nums[right] != 0`, you check `if nums[right] < 0`. The Anchor pointer tracks where the next negative number should go.
+
+**3. Bloomberg: Order Book Consolidation**
+* **The Prompt:** "We receive a daily array of stock trade quantities. Cancelled trades are marked as `0`. We need to feed this array to a legacy pricing engine that breaks if it sees a `0`, but we can't allocate new arrays due to strict low-latency constraints. Consolidate the valid trades to the front."
+* **The Solution:** Again, apply the Two-Pointer swap. In a finance context, latency is king. You should explain that the algorithm is strictly `O(N)` with excellent spatial locality (it reads the array sequentially from left to right), which means it will be perfectly cached by the CPU during execution.
+
+# 636. Exclusive Time of Functions
+
+This is an excellent problem. A junior engineer might try to simulate the timeline second by second (which results in Time Limit Exceeded errors if a function runs for a million seconds). A top-tier L5/L6 engineer immediately recognizes that we only care about the "events" (the logs) and uses a **Stack** to keep track of execution context.
+
+Let's break down exactly how to model this.
+
+---
+
+### 1. Problem Explanation
+
+Imagine a CPU that can only run one function at a time (a single-threaded environment). 
+
+* When `Function A` starts, the CPU works on it.
+* If `Function A` calls `Function B`, `Function A` goes to sleep (pauses). 
+* The CPU works on `Function B` until it finishes.
+* Once `Function B` ends, `Function A` wakes up and resumes exactly where it left off.
+
+**The Goal:** Calculate the *exclusive* time each function spends actually executing on the CPU. Time spent sleeping (waiting for another function to finish) does not count.
+
+**The Tricky Part (The Timestamps):**
+* A "start" timestamp means the function starts at the very **beginning** of that time unit.
+* An "end" timestamp means the function finishes at the very **end** of that time unit.
+* Because of this, if a function starts at `time=2` and ends at `time=5`, it ran for `5 - 2 + 1 = 4` units of time (it ran during second 2, second 3, second 4, and second 5). That `+1` is where 90% of candidates fail.
+
+---
+
+### 2. Solution Explanation
+
+To solve this efficiently, we process the logs one by one, jumping forward in time from event to event. We need two things:
+1.  An array to store the total time for each function: `result`
+2.  A **Stack** to remember which function is currently running and which ones are paused.
+3.  A variable to remember the timestamp of the last event we processed: `prev_time`
+
+**The "How" (The Rules of the Stack):**
+
+When we read a log, we parse it into `id`, `action` (start or end), and `current_time`.
+
+* **Rule 1: If it's a "start" event:**
+    * Is there a function already running (i.e., is the stack not empty)? If so, that function is about to be paused!
+    * We calculate how long it just ran: `time_spent = current_time - prev_time`. We add this to its total in the `result` array.
+    * We push the new `id` onto the stack (it is now the active function).
+    * We update `prev_time = current_time`.
+
+* **Rule 2: If it's an "end" event:**
+    * The function at the top of the stack just finished. Pop it off.
+    * We calculate its final chunk of execution time. Because "end" means the end of the second, the formula is: `time_spent = current_time - prev_time + 1`. We add this to its total.
+    * We update `prev_time = current_time + 1`. Why `+1`? Because the *next* function in the stack will resume at the start of the *next* second!
+
+**End-to-End Walkthrough:**
+Let's trace `n = 2`, `logs = ["0:start:0", "1:start:2", "1:end:5", "0:end:6"]`
+
+```text
+Initial State:
+result = [0, 0]  (Space for f0 and f1)
+stack = []
+prev_time = 0
+
+--------------------------------------------------
+Step 1: Parse "0:start:0"
+--------------------------------------------------
+id=0, action=start, current_time=0
+
+Is stack empty? Yes. No running function to pause.
+Push 0 to stack. Update prev_time.
+
+stack = [0]       <-- f0 is running
+prev_time = 0
+result = [0, 0]
+
+--------------------------------------------------
+Step 2: Parse "1:start:2"
+--------------------------------------------------
+id=1, action=start, current_time=2
+
+Is stack empty? No. Top is 0. f0 is about to pause.
+Time f0 ran before pausing = current_time - prev_time = 2 - 0 = 2.
+Add 2 to f0's result.
+Push 1 to stack. Update prev_time.
+
+stack = [0, 1]    <-- f1 is running, f0 is asleep
+prev_time = 2
+result = [2, 0]
+
+--------------------------------------------------
+Step 3: Parse "1:end:5"
+--------------------------------------------------
+id=1, action=end, current_time=5
+
+Action is end! Top of stack is 1. Pop f1 (it's done).
+Time f1 ran = current_time - prev_time + 1 = 5 - 2 + 1 = 4.
+Add 4 to f1's result.
+Update prev_time to current_time + 1 = 5 + 1 = 6. (Next func resumes at 6)
+
+stack = [0]       <-- f0 wakes up!
+prev_time = 6
+result = [2, 4]
+
+--------------------------------------------------
+Step 4: Parse "0:end:6"
+--------------------------------------------------
+id=0, action=end, current_time=6
+
+Action is end! Top of stack is 0. Pop f0 (it's done).
+Time f0 ran = current_time - prev_time + 1 = 6 - 6 + 1 = 1.
+Add 1 to f0's result.
+Update prev_time = 6 + 1 = 7.
+
+stack = []        <-- All done!
+prev_time = 7
+result = [3, 4]   <-- Final Answer!
+```
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+Let `L` be the number of logs. Let `N` be the number of unique functions.
+
+```text
+TIME COMPLEXITY: O(L)
+
+Input Logs: ["0:start:0", "1:start:2", "1:end:5", "0:end:6"]
+             |------------|------------|----------|--------|
+Operations:    Parse log    Parse log   Parse log  Parse log
+                 O(1)         O(1)        O(1)       O(1)
+
+We process each log string exactly once.
+Parsing a string takes O(1) time.
+Stack push/pop takes O(1) time.
+Updating arrays takes O(1) time.
+
+Total Time = L logs * O(1) operations = O(L) Time Complexity.
+```
+
+```text
+SPACE COMPLEXITY: O(L/2) + O(N) = O(L)
+
+[ Data Structures in Memory ]
+
+1. Result Array: Size N 
+   [ f0_time, f1_time, ... fn_time ] -> O(N) space
+
+2. Stack:
+   In the worst case (f0 calls f1, f1 calls f2, ..., up to f_k without ending),
+   the stack will hold all "start" logs. 
+   Since every function has a start and an end, at most half the logs are starts.
+   Stack max size = L / 2 -> O(L) space
+
+Total Space = O(L) Space Complexity.
+```
+
+---
+
+### 4. Solution Code
+
+Both Python and JavaScript implementations use the exact same stack-based approach. Since this is the optimal O(L) solution, it's the only one you should write in an interview (simulating it second-by-second is an instant fail).
+
+#### Python Snippet
+
+```python
+class Solution:
+    def exclusiveTime(self, n: int, logs: list[str]) -> list[int]:
+        # Array to store the total exclusive time for each function
+        result = [0] * n
+        
+        # Stack will store the IDs of the functions that are currently running/paused
+        stack = []
+        
+        # Tracks the timestamp of the last processed event
+        prev_time = 0
+        
+        for log in logs:
+            # Parse the string into usable variables
+            # e.g., "1:start:2" -> func_id=1, action="start", time=2
+            parts = log.split(":")
+            func_id = int(parts[0])
+            action = parts[1]
+            current_time = int(parts[2])
+            
+            if action == "start":
+                # If another function is already running, it's about to be paused.
+                if stack:
+                    active_func_id = stack[-1]
+                    # Add the time spent to the active function
+                    result[active_func_id] += current_time - prev_time
+                
+                # Push the new function onto the stack
+                stack.append(func_id)
+                prev_time = current_time
+                
+            else: # action == "end"
+                # The function at the top of the stack is finishing
+                finished_func_id = stack.pop()
+                
+                # Calculate its final chunk of time. 
+                # +1 because the 'end' timestamp is at the end of the time unit.
+                result[finished_func_id] += current_time - prev_time + 1
+                
+                # The next function will resume at the start of the next time unit
+                prev_time = current_time + 1
+                
+        return result
+```
+
+#### JavaScript Snippet
+
+```javascript
+/**
+ * @param {number} n
+ * @param {string[]} logs
+ * @return {number[]}
+ */
+var exclusiveTime = function(n, logs) {
+    // Array to store the total exclusive time for each function
+    const result = new Array(n).fill(0);
+    
+    // Stack will store the IDs of the functions
+    const stack = [];
+    
+    // Tracks the timestamp of the last processed event
+    let prevTime = 0;
+    
+    for (let i = 0; i < logs.length; i++) {
+        // Parse the string into usable variables
+        const parts = logs[i].split(":");
+        const funcId = parseInt(parts[0]);
+        const action = parts[1];
+        const currentTime = parseInt(parts[2]);
+        
+        if (action === "start") {
+            // If another function is already running, pause it
+            if (stack.length > 0) {
+                const activeFuncId = stack[stack.length - 1];
+                result[activeFuncId] += currentTime - prevTime;
+            }
+            
+            // Push the new function onto the stack
+            stack.push(funcId);
+            prevTime = currentTime;
+            
+        } else { // action === "end"
+            // The function at the top of the stack is finishing
+            const finishedFuncId = stack.pop();
+            
+            // Calculate final chunk of time (add 1 because it spans to the end of the unit)
+            result[finishedFuncId] += currentTime - prevTime + 1;
+            
+            // The next function will resume at the start of the next time unit
+            prevTime = currentTime + 1;
+        }
+    }
+    
+    return result;
+};
+```
+
+---
+
+### Note 1: Terminology
+
+The technique used here is called a **Call Stack Simulation** using a **Stack Data Structure (LIFO - Last In, First Out)**.
+* **Why it helps:** In nested hierarchical operations (where event B starts and finishes entirely within the lifespan of event A), a Stack naturally tracks the "current active context". As you go deeper, you push. As you resolve, you pop.
+* **How it applies:** This perfectly mimics how modern CPU architectures handle nested function calls, making it the mathematically perfect way to track pause/resume states.
+
+### Note 2: Indirect / Real-World Interview Variations
+
+Big Tech companies use this core concept frequently, but they frame it around systems you would actually build on the job:
+
+**1. Google: The CPU Profiler System**
+* **The Prompt:** "You are building a profiler for Chrome V8 (the JavaScript engine). Given a stream of function entry and exit events with microsecond timestamps, generate a report of the bottleneck functions (the ones taking the most exclusive CPU time)."
+* **The Solution:** This is the exact LeetCode problem. To ace the interview, you would implement the Stack solution above. You would also want to mention edge cases: what happens if the profiler crashes and logs are malformed (e.g., an "end" without a "start")? You'd add error handling to check if the stack is empty before popping.
+
+**2. Meta: Ad Tracker / Viewability Session**
+* **The Prompt:** "We track when a user scrolls an ad into view (start) and out of view (end). However, if they click a popup, the ad is obscured (popup start) until they close it (popup end). Calculate the total *visible* time of the ad."
+* **The Solution:** Same Stack logic. The "Ad" is `Function 0`, and the "Popup" is `Function 1`. You track the exclusive time the ad is at the top of the "visibility stack".
+
+**3. Bloomberg: Trading Algorithm Latency Monitor**
+* **The Prompt:** "A high-frequency trading algorithm kicks off 'orders'. An order might trigger a 'risk check' subprocess, which pauses the main order execution. Calculate the pure network wait time vs the internal calculation time given a log file of trace IDs."
+* **The Solution:** Same Stack approach, but applied to parsing log files. You would read the file line by line (a stream) rather than loading a massive `logs` array into memory all at once. You'd keep a Map/Dictionary instead of a fixed array for `result`, because in a trading system, the trace `n` (number of functions/orders) isn't known ahead of time—it's dynamically generated UUIDs.
+
+# 1428. Leftmost Column with at Least a One
+
+This is a phenomenal problem that perfectly tests a candidate's ability to transition from a "good enough" solution to an "elegant" one. 
+
+When an L5 or L6 engineer looks at this problem, they immediately notice two critical hints in the prompt:
+1.  **Row-sorted:** The elements are sorted (0s then 1s). This screams "Binary Search".
+2.  **API call limit:** You can only make 1000 calls to `get()`. If the matrix is 100x100, checking every cell is 10,000 calls. We must be more efficient.
+
+A junior engineer will usually stop at running a Binary Search on every single row. A senior engineer will realize that rows shouldn't be treated independently; we can use the information learned from one row to skip unnecessary work in the next row.
+
+Let's break this down end-to-end.
+
+
+
+---
+
+### 1. Problem Explanation
+
+Imagine a grid of lightbulbs. `0` means the bulb is off, `1` means the bulb is on. 
+The special rule of this grid is that in any given row, once a bulb is turned on, every bulb to the right of it is also turned on. (e.g., `0, 0, 1, 1` is valid. `0, 1, 0, 1` is impossible).
+
+**The Goal:** Find the index of the column that has the left-most `1` (the earliest turned-on bulb) across the entire grid.
+
+**The Catch:** You cannot look at the whole grid at once. You have to ask an API: "Hey, what is at row X, column Y?" and it answers `0` or `1`. You want to find the answer by asking the API as few times as possible.
+
+---
+
+### 2. Solution Explanation
+
+Let's explore the progression of thought from the Fallback to the Optimal solution.
+
+**The Fallback: Binary Search Every Row**
+Because each row is sorted, you can find the first `1` in a row using Binary Search in `O(log N)` API calls. 
+If you do this for every `M` rows, your total API calls will be `M * log N`.
+For a 100x100 matrix, `100 * log2(100)` is roughly 700 calls. This is under the 1000 call limit and *will pass*, but it's not the most optimal. 
+
+**The Optimal L5/L6 Approach: The "Staircase" Search**
+Why is Binary Search on every row wasteful? 
+Suppose in Row 0, you find the first `1` at **Column 5**. 
+When you move to Row 1, do you care if there is a `1` at Column 7 or Column 8? **No!** You already know Column 5 has a `1`. You only care if Row 1 has a `1` at **Column 4 or earlier**. 
+
+This insight leads to a beautiful algorithm where we start at the **Top-Right** corner of the matrix.
+
+* **Rule 1:** If we see a `1`, this column is a candidate for our answer! To find a *better* (more left) answer, we step strictly **LEFT**.
+* **Rule 2:** If we see a `0`, it means there are no `1`s anywhere to the left in this row (because rows are sorted). We can't find a better answer in this row, so we step strictly **DOWN** to the next row.
+
+**End-to-End ASCII Walkthrough:**
+
+Let's use a 4x4 matrix. 
+Target: Find the leftmost `1`.
+Variables: `current_row = 0`, `current_col = 3` (Top-Right), `leftmost_col = -1`
+
+```text
+The Hidden Matrix:
+    0 1 2 3  <- Columns
+  +---------
+0 | 0 0 0 1
+1 | 0 0 1 1
+2 | 0 0 0 0
+3 | 0 1 1 1
+```
+
+**Step 1:** Start at Top-Right `(0, 3)`. 
+```text
+  0 0 0 [1]  <- API says 1!
+  0 0 1  1
+  0 0 0  0
+  0 1 1  1
+```
+* **API returns:** `1`
+* **Logic:** We found a `1`! Update `leftmost_col = 3`. We want to see if we can do better, so we move LEFT.
+* **Next position:** `(0, 2)`
+
+**Step 2:** At `(0, 2)`.
+```text
+  0 0 [0] 1  <- API says 0!
+  0 0  1  1
+  0 0  0  0
+  0 1  1  1
+```
+* **API returns:** `0`
+* **Logic:** This row has no more `1`s. Move DOWN.
+* **Next position:** `(1, 2)`
+
+**Step 3:** At `(1, 2)`.
+```text
+  0 0 0 1 
+  0 0[1]1    <- API says 1!
+  0 0 0 0
+  0 1 1 1
+```
+* **API returns:** `1`
+* **Logic:** We found a better `1`! Update `leftmost_col = 2`. Move LEFT.
+* **Next position:** `(1, 1)`
+
+**Step 4:** At `(1, 1)`.
+```text
+  0 0  0 1 
+  0[0] 1 1   <- API says 0!
+  0 0  0 0
+  0 1  1 1
+```
+* **API returns:** `0`
+* **Logic:** Move DOWN.
+* **Next position:** `(2, 1)`
+
+**Step 5:** At `(2, 1)`.
+```text
+  0 0 0 1 
+  0 0 1 1
+  0[0]0 0    <- API says 0!
+  0 1 1 1
+```
+* **API returns:** `0`
+* **Logic:** Move DOWN.
+* **Next position:** `(3, 1)`
+
+**Step 6:** At `(3, 1)`.
+```text
+  0 0 0 1 
+  0 0 1 1
+  0 0 0 0
+  0[1]1 1    <- API says 1!
+```
+* **API returns:** `1`
+* **Logic:** Best yet! Update `leftmost_col = 1`. Move LEFT.
+* **Next position:** `(3, 0)`
+
+**Step 7:** At `(3, 0)`.
+```text
+  0  0 0 1 
+  0  0 1 1
+  0  0 0 0
+ [0] 1 1 1   <- API says 0!
+```
+* **API returns:** `0`
+* **Logic:** Move DOWN.
+* **Next position:** `(4, 0)` -> Out of bounds! Loop terminates.
+
+**Final Answer:** `leftmost_col` is 1.
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+Let `M` be the number of rows and `N` be the number of columns.
+
+```text
+TIME COMPLEXITY DERIVATION: O(M + N)
+
+Grid Traversal Path:
+Start (0, N-1)
+       |
+       V
+      [X]<---[X]<---[X]
+                     |
+                     V
+                    [X]
+                     |
+                     V
+                   [END]
+
+In the absolute worst-case scenario, we move LEFT exactly N times (across all columns) 
+and we move DOWN exactly M times (across all rows). 
+We never move right, and we never move up.
+
+Max API calls = M (downs) + N (lefts) = M + N.
+Therefore, Time Complexity is strictly O(M + N).
+```
+
+```text
+SPACE COMPLEXITY DERIVATION: O(1)
+
+Variables held in memory:
+1. current_row (integer)
+2. current_col (integer)
+3. leftmost_col (integer)
+
+We do not copy the matrix. We do not use a recursive call stack.
+Therefore, Space Complexity is O(1) Constant Space.
+```
+
+---
+
+### 4. Solution Code
+
+*(Note: Leetcode provides a `BinaryMatrix` interface with `get(row, col)` and `dimensions()` methods. The code below assumes this interface exists).*
+
+#### Python Snippets
+
+```python
+# ==========================================
+# OPTIMAL SOLUTION (Staircase Search - O(M + N))
+# ==========================================
+class Solution:
+    def leftMostColumnWithOne(self, binaryMatrix: 'BinaryMatrix') -> int:
+        rows, cols = binaryMatrix.dimensions()
+        
+        # Start at the top-right corner
+        current_row = 0
+        current_col = cols - 1
+        
+        # This will hold our best answer so far
+        leftmost_col = -1
+        
+        # Walk the staircase while we are within matrix boundaries
+        while current_row < rows and current_col >= 0:
+            if binaryMatrix.get(current_row, current_col) == 1:
+                # We found a 1. Record this column as the best answer so far.
+                leftmost_col = current_col
+                # To find a better answer, we must look further left.
+                current_col -= 1
+            else:
+                # We found a 0. This row has no 1s to the left.
+                # Move down to the next row.
+                current_row += 1
+                
+        return leftmost_col
+
+# ==========================================
+# FALLBACK SOLUTION (Binary Search per Row - O(M * log N))
+# ==========================================
+class SolutionFallback:
+    def leftMostColumnWithOne(self, binaryMatrix: 'BinaryMatrix') -> int:
+        rows, cols = binaryMatrix.dimensions()
+        leftmost_col = cols # Initialize to an impossible max value
+        
+        for row in range(rows):
+            # Binary search on the current row
+            left = 0
+            right = cols - 1
+            found_in_row = False
+            
+            while left <= right:
+                mid = (left + right) // 2
+                if binaryMatrix.get(row, mid) == 1:
+                    found_in_row = True
+                    right = mid - 1 # Keep looking left
+                else:
+                    left = mid + 1  # Look right
+                    
+            if found_in_row:
+                leftmost_col = min(leftmost_col, left)
+                
+        return leftmost_col if leftmost_col < cols else -1
+```
+
+#### JavaScript Snippets
+
+```javascript
+// ==========================================
+// OPTIMAL SOLUTION (Staircase Search - O(M + N))
+// ==========================================
+/**
+ * // This is the BinaryMatrix's API interface.
+ * // You should not implement it, or speculate about its implementation
+ * function BinaryMatrix() {
+ * @param {integer} row, col
+ * @return {integer}
+ * this.get = function(row, col) { ... };
+ *
+ * @return {number[]}
+ * this.dimensions = function() { ... };
+ * };
+ */
+
+/**
+ * @param {BinaryMatrix} binaryMatrix
+ * @return {number}
+ */
+var leftMostColumnWithOne = function(binaryMatrix) {
+    const dimensions = binaryMatrix.dimensions();
+    const rows = dimensions[0];
+    const cols = dimensions[1];
+    
+    let currentRow = 0;
+    let currentCol = cols - 1;
+    let leftmostCol = -1;
+    
+    // Walk the staircase
+    while (currentRow < rows && currentCol >= 0) {
+        if (binaryMatrix.get(currentRow, currentCol) === 1) {
+            // Found a 1, record it, and move left to see if we can do better
+            leftmostCol = currentCol;
+            currentCol--;
+        } else {
+            // Found a 0, nothing better in this row, move down
+            currentRow++;
+        }
+    }
+    
+    return leftmostCol;
+};
+
+// ==========================================
+// FALLBACK SOLUTION (Binary Search per Row - O(M * log N))
+// ==========================================
+var leftMostColumnWithOneFallback = function(binaryMatrix) {
+    const dimensions = binaryMatrix.dimensions();
+    const rows = dimensions[0];
+    const cols = dimensions[1];
+    
+    let leftmostCol = cols;
+    
+    for (let row = 0; row < rows; row++) {
+        let left = 0;
+        let right = cols - 1;
+        let foundInRow = false;
+        
+        while (left <= right) {
+            let mid = Math.floor((left + right) / 2);
+            if (binaryMatrix.get(row, mid) === 1) {
+                foundInRow = true;
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        }
+        
+        if (foundInRow) {
+            leftmostCol = Math.min(leftmostCol, left);
+        }
+    }
+    
+    return leftmostCol < cols ? leftmostCol : -1;
+};
+```
+
+---
+
+### Note 1: Terminology
+
+The `O(M + N)` algorithm we used here is often called the **Staircase Search** or **Saddleback Search**.
+* **Why it helps:** It takes advantage of 2D properties where data increases or is sorted along two different axes.
+* **How it applies:** By starting at a specific corner (Top-Right or Bottom-Left), we can use the sorted nature of the matrix to safely eliminate an entire row or an entire column with a single `O(1)` check, dramatically pruning our search space.
+
+### Note 2: Indirect / Real-World Interview Variations
+
+Big Tech companies use this core algorithm to evaluate how you handle massive datasets where reading the data is an expensive operation (like querying a database or making a network call).
+
+**1. Google: Feature Flag Degradation Detection**
+* **The Prompt:** "We have `M` microservices. Over the last `N` releases, a bug was introduced. Once a microservice gets the bug, it stays bugged in all future releases. You have an expensive API `test_service(service_id, release_version)` that returns pass/fail. Find the earliest release version that introduced the bug."
+* **The Solution:** This maps exactly to the matrix. Rows are microservices, columns are releases, `0` is pass, `1` is fail. Because the API is expensive (simulating a network call/test execution), you use the Staircase Search to find the leftmost column (earliest release) in `O(M + N)` tests instead of `O(M * N)`.
+
+**2. Meta: Image Mask Edge Detection**
+* **The Prompt:** "You have a large 2D image array representing a transparency mask. `0` is transparent, `1` is opaque. In this specific image format, once a pixel becomes opaque in a row, the rest of the row is opaque. Find the bounding box's left edge without loading the whole image into memory."
+* **The Solution:** Again, this is the exact same problem. The constraint "without loading the whole image" forces you to use an API or file-stream read (`get(row, col)`). The Staircase Search guarantees you minimize file I/O operations.
+
+**3. Bloomberg: Order Book Spread Crossing**
+* **The Prompt:** "We track the ask prices of an asset across `M` different global exchanges over `N` milliseconds. Prices are strictly monotonically increasing throughout the day. Given a threshold price, find the earliest millisecond that *any* exchange crossed this price threshold. Querying historical tick data is slow."
+* **The Solution:** Convert the prices to a binary concept: `0` = below threshold, `1` = above threshold. Since prices are increasing, the `0`s will naturally be followed by `1`s. Use the Staircase Search to find the earliest millisecond column.
+
+# 523. Continuous Subarray Sum
+
+This is a classic problem that separates junior developers from senior engineers. At a junior level, the instinct is to write a nested loop to check every possible subarray. At the L5/L6 level, we immediately recognize that any problem asking about the "sum of a continuous subarray" is begging for a **Prefix Sum** approach. 
+
+Furthermore, because it asks for a *multiple* of `k`, it requires an understanding of **Modulo Arithmetic**.
+
+Let's break down how a senior engineer approaches this, moving from the mathematical intuition to the optimal solution.
+
+---
+
+### 1. Problem Explanation
+
+Imagine an array of integers: `[23, 2, 4, 6, 7]` and a target multiple `k = 6`.
+
+**The Goal:** Find if there is *any* continuous sequence of numbers (at least two numbers long) that adds up to a multiple of `k` (e.g., 0, 6, 12, 18, 24, 30, 36, etc.).
+
+**The Catch:** 1. The numbers must be **continuous** (next to each other). `[2, 4]` is valid, but `[23, 6]` is not.
+2. The subarray must contain **at least two** elements. A single `6` doesn't count.
+3. The sum must be exactly `n * k` where `n` is any integer. Note that `0` is always a multiple of `k` (since `0 * k = 0`).
+
+In our example, the sequence `[2, 4]` sums to 6. Since 6 is a multiple of 6, and the length is 2 (which is >= 2), the answer is `True`.
+
+---
+
+### 2. Solution Explanation
+
+
+
+Let's explore the progression of thought from the naive solution to the optimal one.
+
+**The Fallback (Naive): Nested Loops - O(n^2)**
+We can systematically test every single starting index, and iteratively add the next numbers to see if the sum eventually becomes a multiple of `k`. This works, but if the array is 100,000 items long, checking every subarray takes 10 billion operations. That's a Time Limit Exceeded error waiting to happen.
+
+**The Optimal L5/L6 Approach: Prefix Sum + Modulo Arithmetic - O(n)**
+We need to do this in a single pass. The secret weapon here is math, specifically the properties of remainders. 
+
+Imagine you are packing slices of pizza into boxes that hold exactly `k` slices.
+* You bake 14 slices. You pack them into boxes of 6. You get 2 full boxes and **2 slices left over** (remainder = 2).
+* You keep baking. Later, you have baked a total of 26 slices. You pack them into boxes of 6. You get 4 full boxes and **2 slices left over** (remainder = 2).
+
+Why did the remainder stay the same? Because the number of *new* slices you baked between the first point (14) and the second point (26) was exactly 12... which is a perfect multiple of 6! 
+
+**The Mathematical Invariant:**
+If `(prefix_sum_B % k) == (prefix_sum_A % k)`, then the sum of the elements between `A` and `B` is perfectly divisible by `k`.
+
+So, instead of keeping track of sums, we only need to keep track of **remainders** (modulo `k`). If we ever see the exact same remainder twice, we know the elements we added *between* those two moments sum up to a perfect multiple of `k`.
+
+To do this, we use a Hash Map (Dictionary/Object) to store: `{ remainder: index_where_we_first_saw_it }`.
+
+**End-to-End Walkthrough:**
+
+Let's use `nums = [23, 2, 4, 6, 7]`, `k = 6`.
+
+**Crucial Setup:** We start our Hash Map with a "dummy" entry: `{ 0 : -1 }`.
+*Why?* If our very first elements perfectly sum to a multiple of `k` right from index 0, the remainder will be `0`. Setting index `-1` ensures our distance calculation `current_index - (-1)` accurately reflects the length of the subarray.
+
+```text
+Input: nums = [23, 2, 4, 6, 7], k = 6
+Initial Map = { 0: -1 }
+Current Running Sum = 0
+
+Step 1: Index 0, Value 23
+-------------------------
+Running Sum = 0 + 23 = 23
+Remainder = 23 % 6 = 5
+Is 5 in Map? No. 
+Add to Map: { 0: -1, 5: 0 }
+
+Array: [ 23 ]
+Index:    0 
+
+Step 2: Index 1, Value 2
+-------------------------
+Running Sum = 23 + 2 = 25
+Remainder = 25 % 6 = 1
+Is 1 in Map? No. 
+Add to Map: { 0: -1, 5: 0, 1: 1 }
+
+Array: [ 23,  2 ]
+Index:    0   1 
+
+Step 3: Index 2, Value 4
+-------------------------
+Running Sum = 25 + 4 = 29
+Remainder = 29 % 6 = 5
+Is 5 in Map? YES!
+Wait, at what index did we first see remainder 5? Index 0.
+Current Index = 2.
+Distance = Current Index (2) - Past Index (0) = 2.
+Is Distance >= 2? YES! 
+We found a valid subarray! Return True.
+
+Array: [ 23,  2,  4 ]
+Index:    0   1   2
+              |---|  <-- The elements added since we last saw remainder 5!
+              Sum = 6 (perfect multiple of 6)
+```
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+Let `N` be the number of elements in the array.
+
+```text
+TIME COMPLEXITY DERIVATION: O(N)
+
+Array Processing:
+[ 23, 2, 4, 6, 7 ]
+  |  |  |  |  |  <-- We touch each element exactly once.
+ 
+At each step, we do 3 fast operations:
+1. Addition (Running Sum += nums[i]) -> O(1)
+2. Modulo (Sum % k)                  -> O(1)
+3. Hash Map Lookup & Insert          -> O(1) amortized
+
+Total Time = N elements * O(1) operations = O(N) Time Complexity.
+```
+
+```text
+SPACE COMPLEXITY DERIVATION: O(min(N, k))
+
+Memory usage is entirely determined by the Hash Map.
+
+Map structure: { remainder: index }
+Worst case scenario: Every single running sum gives a different remainder.
+If N < k: We can at most store N remainders. Space is O(N).
+If N >= k: Modulo k can only produce 'k' distinct remainders (0 to k-1). 
+           We can at most store 'k' remainders. Space is O(k).
+
+Total Space = O(min(N, k)) Space Complexity.
+```
+
+---
+
+### 4. Solution Code
+
+Here are both solutions in Python and JavaScript. The O(N) Hash Map solution is what gets you the L5/L6 hire. The Fallback O(n^2) is what you write quickly if you completely blank out on the math, to at least have something working on the board.
+
+#### Python Snippets
+
+```python
+# ==========================================
+# OPTIMAL SOLUTION (Prefix Sum Modulo - O(N))
+# ==========================================
+class Solution:
+    def checkSubarraySum(self, nums: list[int], k: int) -> bool:
+        # Initialize map with {0: -1} to handle cases where a valid 
+        # subarray starts from the very first element (index 0).
+        remainder_map = {0: -1}
+        
+        running_sum = 0
+        
+        for i in range(len(nums)):
+            running_sum += nums[i]
+            
+            # Calculate remainder. Python handles negative numbers gracefully 
+            # with modulo, but the problem constraints say nums are non-negative.
+            remainder = running_sum % k
+            
+            # If we have seen this remainder before...
+            if remainder in remainder_map:
+                # Check if the length of the subarray is at least 2
+                distance = i - remainder_map[remainder]
+                if distance >= 2:
+                    return True
+            else:
+                # IMPORTANT: Only add to map if it's NOT already there.
+                # We want to keep the EARLIEST index we saw this remainder 
+                # to maximize the potential distance/length of the subarray.
+                remainder_map[remainder] = i
+                
+        return False
+
+# ==========================================
+# FALLBACK SOLUTION (Nested Loops - O(N^2))
+# ==========================================
+class SolutionFallback:
+    def checkSubarraySum(self, nums: list[int], k: int) -> bool:
+        n = len(nums)
+        # Check every possible starting point
+        for i in range(n):
+            current_sum = nums[i]
+            # Iteratively add next elements to form subarrays of length 2 or more
+            for j in range(i + 1, n):
+                current_sum += nums[j]
+                
+                # Check if it's a multiple of k
+                if current_sum % k == 0:
+                    return True
+                    
+        return False
+```
+
+#### JavaScript Snippets
+
+```javascript
+// ==========================================
+// OPTIMAL SOLUTION (Prefix Sum Modulo - O(N))
+// ==========================================
+/**
+ * @param {number[]} nums
+ * @param {number} k
+ * @return {boolean}
+ */
+var checkSubarraySum = function(nums, k) {
+    // Initialize map. Key: remainder, Value: index
+    // {0: -1} handles valid subarrays starting at index 0
+    const remainderMap = new Map();
+    remainderMap.set(0, -1);
+    
+    let runningSum = 0;
+    
+    for (let i = 0; i < nums.length; i++) {
+        runningSum += nums[i];
+        
+        const remainder = runningSum % k;
+        
+        if (remainderMap.has(remainder)) {
+            // Found a matching remainder! Check the length.
+            const previousIndex = remainderMap.get(remainder);
+            const distance = i - previousIndex;
+            
+            if (distance >= 2) {
+                return true;
+            }
+        } else {
+            // Only insert the remainder if we haven't seen it yet
+            // to preserve the longest possible subarray distance.
+            remainderMap.set(remainder, i);
+        }
+    }
+    
+    return false;
+};
+
+// ==========================================
+// FALLBACK SOLUTION (Nested Loops - O(N^2))
+// ==========================================
+var checkSubarraySumFallback = function(nums, k) {
+    const n = nums.length;
+    
+    for (let i = 0; i < n; i++) {
+        let currentSum = nums[i];
+        
+        for (let j = i + 1; j < n; j++) {
+            currentSum += nums[j];
+            
+            if (currentSum % k === 0) {
+                return true;
+            }
+        }
+    }
+    
+    return false;
+};
+```
+
+---
+
+### Note 1: Terminology
+
+The core technique used here is called **Prefix Sum with Modulo Arithmetic**.
+* **Why it helps:** A "Prefix Sum" allows you to find the sum of *any* slice of an array in `O(1)` time by taking the sum up to the end of the slice and subtracting the sum up to the start of the slice. Applying "Modulo Arithmetic" directly to the running sum prevents us from tracking massive numbers, compressing our search space into just `k` possible remainder states.
+* **How it applies:** It transforms an O(N^2) "sum everything" search into an O(N) "have I seen this state before?" lookup.
+
+### Note 2: Indirect / Real-World Interview Variations
+
+Big Tech companies rarely ask this problem mathematically; they wrap it in system design/backend scenarios:
+
+**1. Google: The Load Balancer Request Batcher**
+* **The Prompt:** "We have a stream of incoming web requests of varying payload sizes (in KB). We want to batch process them, but our downstream server only accepts data in exact 1024KB (1MB) blocks to avoid fragmentation. Can you find a contiguous burst of requests that perfectly aligns to a 1MB block multiple?"
+* **The Solution:** This is the exact Leetcode problem. `nums` is the payload sizes, `k` is 1024. The requirement for a "burst" of requests maps to the "size >= 2" constraint. You solve this with the exact O(N) Hash Map approach above to process the stream in real-time.
+
+**2. Meta: Ad Campaign Budget Capping**
+* **The Prompt:** "An advertiser wants to spend a total daily budget in exact multiples of $500. We have a log of hourly ad spend over the past month. Did the campaign ever run for at least 2 consecutive hours where the total spend was an exact multiple of $500?"
+* **The Solution:** Exact same algorithm. `nums` is the hourly spend log, `k` is 500. This is often framed as an anomaly detection or billing reconciliation question. 
+
+**3. Bloomberg: Block Trade Volume Execution**
+* **The Prompt:** "To hide institutional trading activity, we execute 'block trades' in exact multiples of 10,000 shares. Given a time-series tape of individual retail trade sizes on the market, identify any continuous window of trades that sums perfectly to a block trade multiple, indicating a potential hidden institutional sweep."
+* **The Solution:** Same O(N) Hash Map solution. In a Bloomberg interview, the array (`nums`) will be massive (millions of ticks per day), making the O(N^2) approach instantly fail their constraints. You would emphasize the memory efficiency of `O(min(N, k))`—since `k` is fixed at 10,000, your memory footprint never exceeds 10,000 integers, easily fitting into the CPU's L1 cache for blazing fast execution.
+
+# 224. Basic Calculator
+
+This is a fantastic problem. As an interviewer, I often see candidates try to overcomplicate this by implementing Dijkstra’s "Shunting Yard" algorithm to convert the expression into Reverse Polish Notation (Postfix) before evaluating it. 
+
+While Shunting Yard works, an L5/L6 engineer recognizes a critical constraint in the prompt: **we only have addition `+` and subtraction `-`**. 
+
+Because `+` and `-` share the exact same precedence, we don't need complex priority queues or two-pass parsing. We can evaluate the math on the fly, strictly reading left to right. The only real challenge is the parentheses, which we can handle elegantly with a Stack.
+
+Let's break down the optimal approach step-by-step.
+
+
+
+---
+
+### 1. Problem Explanation
+
+Imagine you are given a string like `"10 - ( 2 + 3 )"`.
+
+**The Goal:** Calculate the final mathematical result.
+**The Allowed Characters:** * Digits (`0-9`)
+* Plus (`+`) and Minus (`-`)
+* Parentheses `(` and `)`
+* Spaces (which we must ignore)
+
+**The Core Challenges:**
+1.  **Multi-digit numbers:** The string contains characters like `'1'` and `'0'`, which need to be combined into the integer `10`.
+2.  **The Unary Minus / Parentheses:** A minus sign outside a parenthesis flips the sign of *everything* inside. In `"10 - (2 + 3)"`, that minus applies to the whole `(2 + 3)` block. We can't just subtract `2` and add `3`; we have to resolve the block first, then apply the minus.
+
+---
+
+### 2. Solution Explanation
+
+To solve this in a single left-to-right pass (`O(N)` time), we maintain three simple variables:
+1.  `current_number`: Builds our multi-digit numbers (e.g., seeing `'1'` then `'0'` becomes `10`).
+2.  `current_result`: The running sum of the current mathematical layer we are in.
+3.  `sign`: Either `1` (for positive) or `-1` (for negative). 
+
+**The Stack Strategy (The "Why"):**
+Whenever we hit an open parenthesis `(`, it means we are entering a brand new sub-world of math. We must pause our current calculation, save it, and start fresh.
+* We **push** our `current_result` and the `sign` that appeared right before the parenthesis onto a Stack.
+* We reset `current_result` to `0` and `sign` to `1` to calculate the inside of the parenthesis cleanly.
+
+Whenever we hit a close parenthesis `)`, the sub-world is finished. 
+* We take the result of the sub-world, multiply it by the `sign` we saved on the stack, and add it to the `current_result` we saved on the stack. We are back in the outer world!
+
+**End-to-End Walkthrough:**
+
+Let's evaluate the expression: `"4 - ( 10 + 2 )"`
+
+```text
+Variables:
+result = 0, sign = 1, number = 0
+stack = []
+
+---------------------------------------------------------
+Step 1: Read '4'
+---------------------------------------------------------
+Build the number: number = 0 * 10 + 4 = 4.
+
+State: res=0, sign=1, num=4, stack=[]
+
+---------------------------------------------------------
+Step 2: Read ' ' (space)
+---------------------------------------------------------
+Ignore spaces.
+
+---------------------------------------------------------
+Step 3: Read '-'
+---------------------------------------------------------
+We hit an operator! This means our previous number is fully built.
+1. Add to result: res = res + (sign * num) -> 0 + (1 * 4) = 4
+2. Reset number: num = 0
+3. Update sign for the NEXT number: sign = -1
+
+State: res=4, sign=-1, num=0, stack=[]
+
+---------------------------------------------------------
+Step 4: Read '('
+---------------------------------------------------------
+We are entering a sub-expression! 
+1. Push current result (4) and current sign (-1) to stack.
+2. Reset for the sub-expression: res = 0, sign = 1.
+
+State: res=0, sign=1, num=0
+Stack: [ 4, -1 ]  <-- Top of stack is -1, Bottom is 4
+
+---------------------------------------------------------
+Step 5: Read '1', then '0'
+---------------------------------------------------------
+Build the number: num = 10.
+
+State: res=0, sign=1, num=10
+Stack: [ 4, -1 ]
+
+---------------------------------------------------------
+Step 6: Read '+'
+---------------------------------------------------------
+Operator hit! 
+1. Add to result: res = 0 + (1 * 10) = 10
+2. Reset number: num = 0
+3. Update sign: sign = 1
+
+State: res=10, sign=1, num=0
+Stack: [ 4, -1 ]
+
+---------------------------------------------------------
+Step 7: Read '2'
+---------------------------------------------------------
+Build number: num = 2.
+
+State: res=10, sign=1, num=2
+Stack: [ 4, -1 ]
+
+---------------------------------------------------------
+Step 8: Read ')'
+---------------------------------------------------------
+Sub-expression finished!
+1. Add the final number inside the parenthesis to the local result:
+   res = 10 + (1 * 2) = 12.  (The parenthesis evaluated to 12!)
+2. Apply the saved sign: res = res * stack.pop() -> 12 * -1 = -12
+3. Add the saved result: res = res + stack.pop() -> -12 + 4 = -8
+4. Reset number: num = 0
+
+State: res=-8, sign=1, num=0
+Stack: []
+
+---------------------------------------------------------
+Step 9: End of String
+---------------------------------------------------------
+We reached the end. Add any lingering number to the result.
+res = res + (sign * num) -> -8 + (1 * 0) = -8.
+
+Final Answer: -8. 
+(Mathematical proof: 4 - (10 + 2) = 4 - 12 = -8).
+```
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+Let `N` be the length of the string `s`.
+
+```text
+TIME COMPLEXITY: O(N)
+
+String: " 4 - ( 10 + 2 ) "
+          | | | |  | | | |
+We step through the string exactly one time, left to right.
+At each character, we do O(1) operations (add, multiply, push to stack, pop from stack).
+There are no nested loops.
+
+Total Time = N * O(1) = O(N)
+```
+
+```text
+SPACE COMPLEXITY: O(N)
+
+The only extra memory we use is the Stack.
+When does the stack grow? Every time we see an open parenthesis '('.
+
+Worst Case Scenario: "(((((((((1)))))))))"
+If the string is entirely nested parentheses, we push to the stack N/2 times.
+Since N/2 scales linearly with N, our space complexity is O(N).
+
+Total Space = O(N)
+```
+
+---
+
+### 4. Solution Code
+
+I will provide the optimal O(N) Stack-based iteration. 
+
+I will also provide a fallback "Recursive Descent" solution. While the stack is iteratively better for memory constraints in extreme edge cases, recursion is deeply respected by interviewers because it models an Abstract Syntax Tree (AST) evaluator, which is how actual programming language compilers work.
+
+#### Python Snippets
+
+```python
+# ==========================================
+# OPTIMAL SOLUTION (Iterative Stack - O(N))
+# ==========================================
+class Solution:
+    def calculate(self, s: str) -> int:
+        stack = []
+        current_result = 0
+        current_number = 0
+        sign = 1 # 1 represents positive, -1 represents negative
+        
+        for char in s:
+            if char.isdigit():
+                # Build multi-digit numbers (e.g., '1' followed by '0' -> 10)
+                current_number = (current_number * 10) + int(char)
+                
+            elif char == '+':
+                # Add the accumulated number to the running total
+                current_result += sign * current_number
+                # Reset sign and number for the next term
+                sign = 1
+                current_number = 0
+                
+            elif char == '-':
+                # Add the accumulated number to the running total
+                current_result += sign * current_number
+                # Set sign to negative for the next term
+                sign = -1
+                current_number = 0
+                
+            elif char == '(':
+                # We are entering a new scope. 
+                # Save the current result and the sign applied to this parenthesis.
+                stack.append(current_result)
+                stack.append(sign)
+                # Reset everything for the new scope inside the parenthesis
+                current_result = 0
+                sign = 1
+                
+            elif char == ')':
+                # First, add the last number inside the parenthesis to the local result
+                current_result += sign * current_number
+                
+                # Now, pop the sign that was right before the '(' and multiply it
+                current_result *= stack.pop()
+                
+                # Then, pop the result from before the '(' and add it
+                current_result += stack.pop()
+                
+                # Reset the current number
+                current_number = 0
+                
+        # Add any trailing number to the final result
+        return current_result + (sign * current_number)
+
+# ==========================================
+# FALLBACK SOLUTION (Recursive Descent / AST approach)
+# ==========================================
+class SolutionFallback:
+    def calculate(self, s: str) -> int:
+        def evaluate(i):
+            current_result = 0
+            current_number = 0
+            sign = 1
+            
+            while i < len(s):
+                char = s[i]
+                
+                if char.isdigit():
+                    current_number = (current_number * 10) + int(char)
+                elif char in '+-':
+                    current_result += sign * current_number
+                    sign = 1 if char == '+' else -1
+                    current_number = 0
+                elif char == '(':
+                    # Recursively evaluate the inside of the parenthesis
+                    # The recursive call returns the evaluated number AND the new index
+                    num, i = evaluate(i + 1)
+                    current_number = num
+                elif char == ')':
+                    current_result += sign * current_number
+                    # Return the result of this block, and the index we stopped at
+                    return current_result, i
+                
+                i += 1
+                
+            return current_result + (sign * current_number)
+            
+        return evaluate(0)
+```
+
+#### JavaScript Snippets
+
+```javascript
+// ==========================================
+// OPTIMAL SOLUTION (Iterative Stack - O(N))
+// ==========================================
+/**
+ * @param {string} s
+ * @return {number}
+ */
+var calculate = function(s) {
+    let stack = [];
+    let currentResult = 0;
+    let currentNumber = 0;
+    let sign = 1;
+    
+    for (let i = 0; i < s.length; i++) {
+        let char = s[i];
+        
+        if (char >= '0' && char <= '9') {
+            // Build the multi-digit number
+            currentNumber = (currentNumber * 10) + parseInt(char);
+        } else if (char === '+') {
+            currentResult += sign * currentNumber;
+            sign = 1;
+            currentNumber = 0;
+        } else if (char === '-') {
+            currentResult += sign * currentNumber;
+            sign = -1;
+            currentNumber = 0;
+        } else if (char === '(') {
+            // Push current context to stack
+            stack.push(currentResult);
+            stack.push(sign);
+            // Reset for the new scope
+            currentResult = 0;
+            sign = 1;
+        } else if (char === ')') {
+            currentResult += sign * currentNumber;
+            
+            // Multiply by the saved sign
+            currentResult *= stack.pop();
+            // Add to the saved result
+            currentResult += stack.pop();
+            
+            currentNumber = 0;
+        }
+    }
+    
+    return currentResult + (sign * currentNumber);
+};
+
+// ==========================================
+// FALLBACK SOLUTION (Recursive Descent / AST approach)
+// ==========================================
+var calculateFallback = function(s) {
+    let i = 0; // Global index pointer
+    
+    const evaluate = () => {
+        let currentResult = 0;
+        let currentNumber = 0;
+        let sign = 1;
+        
+        while (i < s.length) {
+            let char = s[i];
+            
+            if (char >= '0' && char <= '9') {
+                currentNumber = (currentNumber * 10) + parseInt(char);
+            } else if (char === '+' || char === '-') {
+                currentResult += sign * currentNumber;
+                sign = char === '+' ? 1 : -1;
+                currentNumber = 0;
+            } else if (char === '(') {
+                i++; // Skip the '('
+                currentNumber = evaluate(); // Recursively calculate inner
+            } else if (char === ')') {
+                currentResult += sign * currentNumber;
+                return currentResult; // Exit recursion
+            }
+            
+            i++;
+        }
+        
+        return currentResult + (sign * currentNumber);
+    };
+    
+    return evaluate();
+};
+```
+
+---
+
+### Note 1: Terminology
+
+The iterative method we used is essentially building a **State Machine with a Stack**. 
+* **Why it helps:** A state machine allows you to define strict rules for what to do when you see a specific character based on your *current* state (building a number vs. assigning an operator). The stack gives the state machine "memory," allowing it to pause its current state, dive into a nested problem, and resume perfectly.
+* **How it applies:** This is exactly how your browser parses HTML tags! When it sees a `<div>`, it pushes context to a stack, parses the children, and when it sees `</div>`, it pops back up to the parent.
+
+The recursive method is a basic form of **Recursive Descent Parsing**. 
+* **Why it helps:** It directly maps to how languages build Abstract Syntax Trees (AST).
+
+
+### Note 2: Indirect / Real-World Interview Variations
+
+Big Tech companies use this parsing logic as the foundation for systems design and string manipulation questions:
+
+**1. Google: The Spreadsheet Formula Evaluator**
+* **The Prompt:** "You are building a basic version of Google Sheets. Users can type string formulas like `=(A1 + 5) - B2`. Given a dictionary mapping cell names (like A1) to integers, write a function to evaluate the final value of the formula."
+* **The Solution:** Exact same Stack/State Machine logic. The only difference is in the string parsing: when you encounter a letter instead of a digit, you read characters until you hit an operator, use that string (e.g., "A1") to do a hash map lookup, fetch the integer `10`, and treat it as `current_number`.
+
+**2. Meta: The UI Component Metric Aggregator**
+* **The Prompt:** "We have a serialized UI component tree sent from the mobile app represented as a string: `Container( Button(5) + Image(10) ) - Banner(2)`. The numbers represent memory cost. Write a parser to calculate the total memory cost of the component."
+* **The Solution:** This is a disguised recursive descent parser. Instead of ignoring letters, you ignore the component names. You treat `(` and `)` exactly as we did in the fallback solution, treating the whole string as a math evaluation problem to sum up the memory footprint.
+
+**3. Bloomberg: The Boolean Risk Query Parser**
+* **The Prompt:** "Traders filter stocks using boolean logic queries represented as strings, like `TRUE AND (FALSE OR TRUE)`. Write a function to evaluate if a stock passes the filter."
+* **The Solution:** While the operators change (`AND`, `OR` instead of `+`, `-`), the structure is identical. You maintain a stack to handle the parentheses. `AND` and `OR` have different precedences (unlike `+` and `-`), so you will need to evaluate `AND` immediately and defer `OR` operations, but the core LIFO (Last-In-First-Out) stack mechanism handles the nested brackets perfectly.
+
+# 227. Basic Calculator II
+
+Hey there! While I don't sip coffee in a Google micro-kitchen—being an AI and all—I can absolutely put on my L5/L6 engineer hat and break this down for you exactly how I'd expect a strong candidate to tackle it in an interview. 
+
+Basic Calculator II is a brilliant problem. It tests your ability to handle operator precedence (PEMDAS/BODMAS) without getting tangled in complex logic. Let's dive in.
+
+---
+
+### 1. Problem Explanation
+
+**The Goal:** We are given a string like `"3+5 / 2"` and we need to evaluate it like a standard calculator. 
+**The Rules:**
+* Only non-negative integers.
+* Four operators: `+`, `-`, `*`, `/`.
+* Empty spaces can be anywhere and should be ignored.
+* Division should **truncate toward zero** (e.g., `5 / 2 = 2`, not `2.5`).
+* **Crucial Rule:** Multiplication `*` and Division `/` happen *before* Addition `+` and Subtraction `-`.
+
+If we process left to right blindly on `"3 + 5 * 2"`, we get `8 * 2 = 16`. But math dictates we do `5 * 2` first, resulting in `3 + 10 = 13`.
+
+### 2. Solution Explanation
+
+To solve this, we have to deal with the fact that when we see a `+` or `-`, we can't apply it immediately because a `*` or `/` might be coming up next. 
+
+**Approach 1: The Stack (The Intuitive Way)**
+
+Think of a stack as a bucket where we throw numbers that are ready to be added together at the very end. 
+1. If we see a `+`, the number is positive. Throw it in the bucket.
+2. If we see a `-`, the number is negative. Throw it in the bucket.
+3. If we see a `*` or `/`, we pull the *last* number out of the bucket, do the math with the *current* number, and throw the result back in.
+
+Let's trace `" 3 - 5 * 2 "` with ASCII diagrams:
+
+```text
+INITIAL STATE:
+String: " 3 - 5 * 2 "
+Current Number: 0
+Previous Operator: '+' (We pretend there's a '+' before the first number)
+Stack: [ ]
+
+STEP 1: Read '3'
+Current Number becomes 3. 
+Next character is '-', an operator!
+Action: Look at Previous Operator ('+'). 
+Push Current Number to Stack.
+Stack:        |     |
+              |__3__| 
+Reset: Current Number = 0, Previous Operator = '-'
+
+STEP 2: Read '5'
+Current Number becomes 5.
+Next character is '*', an operator!
+Action: Look at Previous Operator ('-').
+Push negative Current Number to Stack.
+Stack:        | -5  |
+              |__3__|
+Reset: Current Number = 0, Previous Operator = '*'
+
+STEP 3: Read '2' (End of string)
+Current Number becomes 2.
+End of string triggers the final evaluation!
+Action: Look at Previous Operator ('*').
+Pop the top of the Stack (-5), multiply by Current Number (2). (-5 * 2 = -10).
+Push result back to Stack.
+Stack:        |-10  |   <-- (-5 * 2)
+              |__3__|
+
+FINAL STEP: Sum the Stack
+Result = 3 + (-10) = -7
+```
+
+**Approach 2: O(1) Space Optimization (The "Top-of-Band" Way)**
+If you look closely at the Stack approach, we only ever care about the *top* of the stack. We never dig deep into it. We just sum it all up at the end. 
+
+Instead of an actual stack array, we can just keep track of two variables:
+* `result`: The total sum of everything we've finished processing.
+* `last_number`: The number that *would* have been at the top of the stack.
+
+When we hit a `+` or `-`, we add `last_number` to `result`, and update `last_number` to the new number. When we hit a `*` or `/`, we just modify `last_number` on the fly. 
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+Here is the breakdown of why the optimized approach is the gold standard:
+
+```text
++-----------------------------------------------------------------+
+| COMPLEXITY ANALYSIS: OPTIMIZED APPROACH                         |
++-----------------------------------------------------------------+
+| TIME COMPLEXITY: O(N)                                           |
+| -> N is the length of the string.                               |
+| -> We loop through the string exactly once.                     |
+| -> String parsing and basic math operations take constant time. |
+|                                                                 |
+| SPACE COMPLEXITY: O(1)                                          |
+| -> We only use a few integer variables (result, last_number,    |
+|    current_number, sign).                                       |
+| -> No arrays or dynamic data structures are allocated.          |
++-----------------------------------------------------------------+
+
++-----------------------------------------------------------------+
+| COMPLEXITY ANALYSIS: STACK APPROACH                             |
++-----------------------------------------------------------------+
+| TIME COMPLEXITY: O(N)                                           |
+| -> One pass through the string, plus one pass through the stack.|
+|                                                                 |
+| SPACE COMPLEXITY: O(N)                                          |
+| -> In the worst case (e.g., "1+2+3+4+5"), we push N/2 numbers   |
+|    onto our stack array, requiring memory proportional to N.    |
++-----------------------------------------------------------------+
+```
+
+---
+
+### 4. Solution Code
+
+Here are both approaches. As an interviewer, I would expect you to write the Stack approach first to prove you understand the logic, and then optimize it to O(1) space if prompted.
+
+#### Python Code
+
+```python
+# Approach 1: Stack-based (O(N) Space)
+def calculate_stack(s: str) -> int:
+    stack = []
+    current_number = 0
+    operator = '+'
+    
+    # We append a dummy operator at the end to force the last calculation
+    s += '+'
+    
+    for i in range(len(s)):
+        char = s[i]
+        
+        if char.isdigit():
+            # Build the number (handles multi-digit like '123')
+            current_number = (current_number * 10) + int(char)
+            
+        if char in '+-*/' or i == len(s) - 1:
+            if operator == '+':
+                stack.append(current_number)
+            elif operator == '-':
+                stack.append(-current_number)
+            elif operator == '*':
+                # Pop, multiply, push back
+                stack.append(stack.pop() * current_number)
+            elif operator == '/':
+                # Pop, divide, push back. 
+                # Note: int() truncates toward zero in Python, unlike // which floors!
+                stack.append(int(stack.pop() / current_number))
+                
+            # Reset for the next number
+            operator = char
+            current_number = 0
+            
+    return sum(stack)
+
+
+# Approach 2: Optimized (O(1) Space)
+def calculate_optimized(s: str) -> int:
+    result = 0
+    last_number = 0
+    current_number = 0
+    operator = '+'
+    
+    s += '+'
+    
+    for i in range(len(s)):
+        char = s[i]
+        
+        if char.isdigit():
+            current_number = (current_number * 10) + int(char)
+            
+        if char in '+-*/' or i == len(s) - 1:
+            if operator == '+' or operator == '-':
+                # Commit the last number to the final result
+                result += last_number
+                # Update last_number with the new sign
+                last_number = current_number if operator == '+' else -current_number
+            elif operator == '*':
+                # Modify last_number directly
+                last_number = last_number * current_number
+            elif operator == '/':
+                # Modify last_number directly, truncating toward zero
+                last_number = int(last_number / current_number)
+                
+            operator = char
+            current_number = 0
+            
+    # Add the very last chunk to the result
+    result += last_number
+    return result
+```
+
+#### JavaScript Code
+
+```javascript
+// Approach 1: Stack-based (O(N) Space)
+function calculateStack(s) {
+    let stack = [];
+    let currentNumber = 0;
+    let operator = '+';
+    
+    // Append dummy operator
+    s += '+';
+    
+    for (let i = 0; i < s.length; i++) {
+        let char = s[i];
+        
+        if (char >= '0' && char <= '9') {
+            currentNumber = (currentNumber * 10) + parseInt(char);
+        }
+        
+        if (char === '+' || char === '-' || char === '*' || char === '/' || i === s.length - 1) {
+            if (char === ' ') continue; // Skip spaces safely
+            
+            if (operator === '+') {
+                stack.push(currentNumber);
+            } else if (operator === '-') {
+                stack.push(-currentNumber);
+            } else if (operator === '*') {
+                stack.push(stack.pop() * currentNumber);
+            } else if (operator === '/') {
+                // Math.trunc ensures division truncates toward zero
+                stack.push(Math.trunc(stack.pop() / currentNumber));
+            }
+            
+            operator = char;
+            currentNumber = 0;
+        }
+    }
+    
+    return stack.reduce((acc, curr) => acc + curr, 0);
+}
+
+// Approach 2: Optimized (O(1) Space)
+function calculateOptimized(s) {
+    let result = 0;
+    let lastNumber = 0;
+    let currentNumber = 0;
+    let operator = '+';
+    
+    s += '+';
+    
+    for (let i = 0; i < s.length; i++) {
+        let char = s[i];
+        
+        if (char >= '0' && char <= '9') {
+            currentNumber = (currentNumber * 10) + parseInt(char);
+        }
+        
+        if (char === '+' || char === '-' || char === '*' || char === '/' || i === s.length - 1) {
+            if (char === ' ') continue;
+            
+            if (operator === '+' || operator === '-') {
+                result += lastNumber;
+                lastNumber = operator === '+' ? currentNumber : -currentNumber;
+            } else if (operator === '*') {
+                lastNumber = lastNumber * currentNumber;
+            } else if (operator === '/') {
+                lastNumber = Math.trunc(lastNumber / currentNumber);
+            }
+            
+            operator = char;
+            currentNumber = 0;
+        }
+    }
+    
+    result += lastNumber;
+    return result;
+}
+```
+
+---
+
+### Note 1: Terminology Used
+
+* **Stack:** A "Last-In-First-Out" (LIFO) data structure. Helps here by "delaying" addition and subtraction operations until the higher-priority multiplications and divisions are resolved.
+* **Accumulator Pattern / Running Total:** Used in the O(1) space optimization. Instead of storing history, we accumulate the final answer incrementally.
+* **Lexing/Parsing:** Extracting tokens (numbers and operators) from a raw string. Building `current_number = current_number * 10 + digit` is a basic form of creating a lexer for integers.
+* **Truncate Toward Zero:** Rounding a fractional number towards `0`. `-2.5` becomes `-2`. In JS, `Math.trunc()` handles this. In Python, `int()` handles this (beware of Python's `//` floor division, which rounds `-2.5` down to `-3`).
+
+---
+
+### Note 2: Real-World Interview Variations (Meta, Google, Bloomberg)
+
+Companies rarely ask the exact LeetCode prompt anymore. Here is how they twist it:
+
+**1. Meta: "Add parentheses support" (Basic Calculator I or III)**
+* **The Twist:** The string now contains `(` and `)`. Ex: `3 * (5 - 2)`. 
+* **How to solve:** Recursion. Whenever you encounter a `(`, you make a recursive call to your `calculate` function. When you encounter a `)`, you return the calculated value so far. The string index needs to be passed globally or via reference so the outer function knows where to resume parsing after the recursive call finishes.
+
+**2. Google: "Calculator with Variable Bindings"**
+* **The Twist:** You are given an expression like `"A + B * 2"` and a hash map of variables `{"A": 3, "B": 5}`. Sometimes, variables can map to other expressions `{"A": "C + 1"}`.
+* **How to solve:** Add an environment/context map to your function signature. Before applying the stack logic, check if the current token is a string (variable). If it is, look it up in the map. If the map points to another expression, use Depth First Search (DFS) with memoization to evaluate it, watching out for circular dependencies (e.g., A depends on B, B depends on A) by keeping a "visited" set during traversal.
+
+**3. Bloomberg: "Validate before Calculating" or "Custom Operators"**
+* **The Twist:** You might get invalid strings like `"* 3 + 5"` or `"4 + + 5"`. Or, they might ask you to implement a `^` (power) operator which has higher precedence than `*`. 
+* **How to solve:** For validation, explicitly track the "expected next state". A number must be followed by an operator (or end of string). An operator must be followed by a number. Throw exceptions if the contract is violated. For custom operators, the "O(1) space" trick gets messy. This is when you pivot to building an **Abstract Syntax Tree (AST)** or using the **Shunting Yard Algorithm** to convert the string to Postfix notation, making it infinitely extensible for new operators and precedence rules.
+
+# 766. Toeplitz Matrix
+
+Hey there! As an engineer who has been on both sides of the interview table at Google, I totally get why this problem can seem tricky at first glance. The name "Toeplitz" sounds like complex linear algebra, but at its core, this is a pure pattern-recognition problem. 
+
+Let's break this down end-to-end exactly as we would during a top-tier tech interview, focusing on the *why* just as much as the *how*.
+
+
+
+---
+
+### 1. Problem Explanation
+
+You are given a 2D grid of numbers (a matrix) with `M` rows and `N` columns. 
+You need to return `True` if every diagonal going from top-left to bottom-right contains the exact same number. If even one diagonal has mismatched numbers, you return `False`.
+
+Here is what a valid Toeplitz matrix looks like (Example 1):
+
+```text
+  c=0 c=1 c=2 c=3
+r=0 [ 1 , 2 , 3 , 4 ]
+r=1 [ 5 , 1 , 2 , 3 ]
+r=2 [ 9 , 5 , 1 , 2 ]
+```
+
+Notice the diagonals:
+* Starts at (0,0): `1 -> 1 -> 1` (All 1s)
+* Starts at (0,1): `2 -> 2 -> 2` (All 2s)
+* Starts at (0,2): `3 -> 3` (All 3s)
+* Starts at (1,0): `5 -> 5` (All 5s)
+
+Every diagonal holds steady. That's a `True` case.
+
+---
+
+### 2. Solution Explanation
+
+**The Naive Thought:** Your first instinct might be to extract every single diagonal into a list and check if all elements in that list are identical. This requires complex indexing (like grouping by `row - col`) and extra memory. 
+
+**The Google L5/L6 Insight:**
+We don't need to trace the entire diagonal! We can use the **Transitive Property**. 
+Imagine a line of people holding hands. If Person A is wearing a red shirt, and Person B matches Person A, and Person C matches Person B... then the whole line is wearing red. 
+
+Translated to our matrix: If *every single cell* simply matches the cell immediately **up and to its left**, the whole matrix is Toeplitz. 
+
+Instead of walking diagonals, we just process the matrix row by row. For every number, we "look over our left shoulder" (row - 1, col - 1). If it matches, we are good.
+
+#### Walkthrough: Example 1 (The Success Case)
+
+```text
+Let's compare Row 1 against Row 0 (the row above it):
+
+  c=0   c=1   c=2   c=3
++-----+-----+-----+-----+
+|  1  |  2  |  3  |  4  |  <- Row 0 (Previous)
++---+-+---+-+---+-+-----+
+     \     \     \
+      v     v     v
++-----+-----+-----+-----+
+|  5  |  1  |  2  |  3  |  <- Row 1 (Current)
++-----+-----+-----+-----+
+
+Checks:
+- Cell(1,1) is 1. Top-Left(0,0) is 1. Match!
+- Cell(1,2) is 2. Top-Left(0,1) is 2. Match!
+- Cell(1,3) is 3. Top-Left(0,2) is 3. Match!
+
+Next, compare Row 2 against Row 1:
+
+  c=0   c=1   c=2   c=3
++-----+-----+-----+-----+
+|  5  |  1  |  2  |  3  |  <- Row 1 (Previous)
++---+-+---+-+---+-+-----+
+     \     \     \
+      v     v     v
++-----+-----+-----+-----+
+|  9  |  5  |  1  |  2  |  <- Row 2 (Current)
++-----+-----+-----+-----+
+
+Checks:
+- Cell(2,1) is 5. Top-Left(1,0) is 5. Match!
+- Cell(2,2) is 1. Top-Left(1,1) is 1. Match!
+- Cell(2,3) is 2. Top-Left(1,2) is 2. Match!
+
+Everything matched! Return True.
+```
+
+#### Walkthrough: Example 2 (The Failure Case)
+Input:
+```text
+r=0 [ 1 , 2 ]
+r=1 [ 2 , 2 ]
+```
+
+```text
+Compare Row 1 against Row 0:
+
+  c=0   c=1
++-----+-----+
+|  1  |  2  |  <- Row 0
++---+-+-----+
+     \    
+      v   
++-----+-----+
+|  2  |  2  |  <- Row 1
++-----+-----+
+        ^
+        |
+Comparing: Current (1, 1) is 2. Top-Left (0, 0) is 1.
+2 != 1 -> ERROR! Return False immediately.
+```
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+```text
+Time Complexity Derivation Diagram:
+
++---+---+---+---+
+| . | . | . | . | <- Row 0: 0 comparisons
++---+---+---+---+
+| . | * | * | * | <- Row 1: (N-1) comparisons
++---+---+---+---+
+| . | * | * | * | <- Row 2: (N-1) comparisons
++---+---+---+---+
+  ^
+Col 0: 0 comparisons
+
+Total '*' cells visited = (M - 1) rows * (N - 1) columns.
+Since we do exactly 1 check per '*' cell, it scales linearly with the grid size.
+```
+* **Time Complexity:** O(M * N) where M is the total number of rows and N is the total number of columns. We visit every cell essentially once.
+* **Space Complexity:** O(1) for the standard approach because we only use pointers (row and col variables) to compare values already sitting in memory.
+
+---
+
+### 4. Solution Code
+
+I'll provide two implementations in both Python and JavaScript. 
+1. **The Standard Approach** (Assuming the matrix fits fully in memory).
+2. **The Streaming Approach** (A real-world interview optimization where we only store one row at a time—crucial for massive datasets).
+
+#### Python Snippets
+
+```python
+# 1. Standard Approach: O(1) Space
+def isToeplitzMatrix(matrix):
+    # Iterate through rows, skipping the first row (no top-left neighbor)
+    for r in range(1, len(matrix)):
+        # Iterate through columns, skipping the first column
+        for c in range(1, len(matrix[0])):
+            # If current cell doesn't match the cell up and to the left, we fail
+            if matrix[r][c] != matrix[r-1][c-1]:
+                return False
+    return True
+
+
+# 2. Optimized Streaming Approach: O(N) Space
+def isToeplitzMatrixStreaming(matrix):
+    if not matrix:
+        return True
+        
+    # Store the first row as our initial 'previous row' tracker
+    prev_row = matrix[0]
+    
+    # Process stream row by row
+    for r in range(1, len(matrix)):
+        curr_row = matrix[r]
+        
+        # Compare current row elements with the stored previous row
+        for c in range(1, len(curr_row)):
+            if curr_row[c] != prev_row[c-1]:
+                return False
+                
+        # Update the tracker for the next iteration
+        prev_row = curr_row
+        
+    return True
+```
+
+#### JavaScript Snippets
+
+```javascript
+// 1. Standard Approach: O(1) Space
+function isToeplitzMatrix(matrix) {
+    // Iterate through rows starting from index 1
+    for (let r = 1; r < matrix.length; r++) {
+        // Iterate through columns starting from index 1
+        for (let c = 1; c < matrix[0].length; c++) {
+            // Check against the top-left neighbor
+            if (matrix[r][c] !== matrix[r - 1][c - 1]) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+
+// 2. Optimized Streaming Approach: O(N) Space
+function isToeplitzMatrixStreaming(matrix) {
+    if (matrix.length === 0) return true;
+    
+    // Track the previous row
+    let prevRow = matrix[0];
+    
+    for (let r = 1; r < matrix.length; r++) {
+        let currRow = matrix[r];
+        
+        // Check current row against the tracked previous row
+        for (let c = 1; c < currRow.length; c++) {
+            if (currRow[c] !== prevRow[c - 1]) {
+                return false;
+            }
+        }
+        // Current row becomes the previous row for the next cycle
+        prevRow = currRow;
+    }
+    
+    return true;
+}
+```
+
+---
+
+### Note 1: Core Techniques Used
+* **Transitive Property:** Mentioned above, this is the mathematical rule that if A = B, and B = C, then A = C. It saves us from having to traverse and store whole continuous diagonals.
+* **Row-by-Row Streaming (State Tracking):** In the optimized solution, we use a sliding window concept applied to rows. Instead of looking backward at a massive grid in memory, we maintain a small piece of "state" (the `prev_row`) and carry it forward. This prevents out-of-memory errors on massive datasets.
+
+---
+
+### Note 2: Real World / Interview Follow-ups (Google, Meta, Bloomberg)
+
+At top companies, the base problem is just a warm-up. The real evaluation happens in the follow-ups. Here is exactly how they will pressure test you:
+
+**Follow-up A (Meta / Google):** *"What if the matrix is stored on disk and is so huge you can only load one row into memory at a time?"*
+* **How to solve it:** This is exactly why I provided the **Streaming Approach** in the code section! Because we only ever look at `matrix[r-1]`, we never need the whole matrix. We just read a stream, holding `curr_row` and `prev_row` in RAM. When we finish checking `curr_row`, we overwrite `prev_row` with it and fetch the next row from disk. Space complexity drops from storing a massive grid to just O(N) memory.
+
+**Follow-up B (Bloomberg / Google):** *"What if the matrix is so ridiculously large that even a SINGLE ROW cannot fit into memory? You can only load partial rows (chunks)."*
+* **How to solve it:** We process the matrix in vertical chunks (e.g., columns 0 to 5000, then columns 5001 to 10000). But there is a trap! To check the first column of Chunk 2, you need the last element from the row above it from Chunk 1. 
+* **The Fix:** When processing Chunk 1, you store the very last element of `prev_row` in a small variable. You "carry it over" to act as the missing top-left neighbor when you start processing Chunk 2!
+
+```text
+Visualizing Follow-up B (Chunking):
+
+Processing Chunk 1 (Cols 0-1)
+  c=0   c=1      
++-----+-----+   +
+|  1  |  2  |-->| (Save '2' to carry over)
++---+-+---+-+   +
+     \     \      
+      v     v     
++-----+-----+   +
+|  5  |  1  |-->| (Save '1' to carry over)
++-----+-----+   +
+
+Processing Chunk 2 (Cols 2-3)
+                   c=2   c=3
+                +-----+-----+
+(Saved '2') --->|  3  |  4  |
+      \         +---+-+---+-+
+       \             \     \
+        v             v     v
+                +-----+-----+
+(Saved '1') --->|  2  |  3  |
+                +-----+-----+
+```
+By explicitly managing this "carry over" state, you can process infinitely large matrices across networks or disks with a strictly bounded memory footprint. 
+
+# 498. Diagonal Traverse
+
+This is a classic problem that can easily trip up even experienced engineers if they jump straight into coding without analyzing the boundary conditions. I completely understand why it feels hard to grasp—navigating a 2D matrix diagonally creates a lot of weird edge cases when you hit the corners.
+
+As an AI, I don't "feel" frustration, but I process thousands of solutions, and I can tell you that a junior engineer usually tries to solve this with a massive, tangled web of `if/else` statements that eventually breaks on non-square matrices (like a 2x4 grid). 
+
+A top-tier L5/L6 engineer takes a breath, maps out the exact state transitions (the boundaries), and realizes the "secret" to this problem is **the order in which you check the boundaries**.
+
+Let's break this down end-to-end.
+
+
+
+---
+
+### 1. Problem Explanation
+
+Imagine a grid of numbers. Instead of reading them left-to-right like a book, you want to read them by sweeping back and forth diagonally, bouncing off the walls like a DVD screensaver.
+
+**The Goal:** Return a single 1D list of all the elements in the order they are visited.
+
+**The Rules of Movement:**
+You only ever move in two distinct directions:
+1.  **Up-Right:** Moving diagonally up and to the right.
+2.  **Down-Left:** Moving diagonally down and to the left.
+
+Whenever you hit a "wall" (the edge of the matrix), you step strictly along the edge to set up your next diagonal, and then you flip your direction.
+
+```text
+The Matrix (3x3):
+  0 1 2  <- Columns
+ +-----
+0|1 2 3
+1|4 5 6
+2|7 8 9
+
+The Traversal Path:
+1 -> 2 -> 4 -> 7 -> 5 -> 3 -> 6 -> 8 -> 9
+```
+
+---
+
+### 2. Solution Explanation
+
+**The "Why": The Danger of the Corners**
+
+The actual diagonal movement is easy. 
+* To go Up-Right, you decrease the row and increase the column: `row - 1`, `col + 1`.
+* To go Down-Left, you increase the row and decrease the column: `row + 1`, `col - 1`.
+
+The absolute hardest part of this problem is knowing *how* to bounce off the walls. Let's look at the top-right corner element, the `3` at `(row=0, col=2)`.
+If you are moving Up-Right and hit the `3`, you are hitting the **Top Wall** and the **Right Wall** simultaneously. 
+* If you apply the "Top Wall" rule (move one step right), you will step out of bounds into column 3! 
+* You MUST apply the "Right Wall" rule (move one step down) to safely reach the `6`.
+
+**The "How": Boundary Priorities**
+
+To solve this cleanly, we define strict priorities for our boundary checks.
+
+**When moving Up-Right:**
+1.  Did we hit the **Right Wall**? If yes, step DOWN (`row + 1`).
+2.  Did we hit the **Top Wall**? If yes, step RIGHT (`col + 1`).
+3.  Otherwise, keep moving Up-Right (`row - 1`, `col + 1`).
+
+**When moving Down-Left:**
+1.  Did we hit the **Bottom Wall**? If yes, step RIGHT (`col + 1`).
+2.  Did we hit the **Left Wall**? If yes, step DOWN (`row + 1`).
+3.  Otherwise, keep moving Down-Left (`row + 1`, `col - 1`).
+
+**End-to-End Walkthrough:**
+
+Let's trace a 3x3 matrix.
+Target: `m = 3`, `n = 3`. Total elements = 9.
+Start: `row = 0`, `col = 0`. Direction = `Up-Right`.
+
+```text
+Matrix:
+[1] [2] [3]
+[4] [5] [6]
+[7] [8] [9]
+
+Step 1: At 1 (0,0). Dir: Up-Right.
+- Is it on the Right Wall? No.
+- Is it on the Top Wall? YES (row is 0).
+- Action: Step RIGHT. Next is (0,1). Flip direction to Down-Left.
+- Result Array: [1]
+
+Step 2: At 2 (0,1). Dir: Down-Left.
+- Is it on the Bottom Wall? No.
+- Is it on the Left Wall? No.
+- Action: Move Down-Left. Next is (1,0). 
+- Result Array: [1, 2]
+
+Step 3: At 4 (1,0). Dir: Down-Left.
+- Is it on the Bottom Wall? No.
+- Is it on the Left Wall? YES (col is 0).
+- Action: Step DOWN. Next is (2,0). Flip direction to Up-Right.
+- Result Array: [1, 2, 4]
+
+Step 4: At 7 (2,0). Dir: Up-Right.
+- Is it on the Right Wall? No.
+- Is it on the Top Wall? No.
+- Action: Move Up-Right. Next is (1,1).
+- Result Array: [1, 2, 4, 7]
+
+Step 5: At 5 (1,1). Dir: Up-Right.
+- Action: Move Up-Right. Next is (0,2).
+- Result Array: [1, 2, 4, 7, 5]
+
+Step 6: At 3 (0,2). Dir: Up-Right.  <--- THE TRICKY CORNER!
+- Is it on the Right Wall? YES (col is 2).
+- Action: Step DOWN. Next is (1,2). Flip direction to Down-Left.
+- Notice: If we checked Top Wall first, we would have crashed!
+- Result Array: [1, 2, 4, 7, 5, 3]
+
+Step 7: At 6 (1,2). Dir: Down-Left.
+- Action: Move Down-Left. Next is (2,1).
+- Result Array: [1, 2, 4, 7, 5, 3, 6]
+
+Step 8: At 8 (2,1). Dir: Down-Left.
+- Is it on the Bottom Wall? YES (row is 2).
+- Action: Step RIGHT. Next is (2,2). Flip direction to Up-Right.
+- Result Array: [1, 2, 4, 7, 5, 3, 6, 8]
+
+Step 9: At 9 (2,2). Dir: Up-Right.
+- We have collected 9 elements. Loop ends!
+- Final Array: [1, 2, 4, 7, 5, 3, 6, 8, 9]
+```
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+Let `M` be the number of rows and `N` be the number of columns.
+
+```text
+TIME COMPLEXITY DERIVATION: O(M * N)
+
+Matrix of size M x N:
+[ X X X ]
+[ X X X ]  <- Total elements = M * N
+[ X X X ]
+
+We run a single while loop that executes exactly M * N times.
+Inside the loop, we perform basic if/else checks to determine the next index.
+These checks are constant time O(1).
+
+Total Time = (M * N elements) * O(1) operations = O(M * N) Time Complexity.
+```
+
+```text
+SPACE COMPLEXITY DERIVATION: O(1) Extra Space
+
+Variables held in memory:
+1. row (integer)
+2. col (integer)
+3. direction (boolean or integer)
+
+We are required to return an array of size M * N, but the space used 
+for the output array does NOT count towards auxiliary space complexity 
+in standard algorithmic analysis.
+
+Since we do not create any temporary matrices, hash maps, or recursion stacks,
+our extra memory footprint is constant.
+
+Total Extra Space = O(1) Space Complexity.
+```
+
+---
+
+### 4. Solution Code
+
+Here is the simulation approach we just walked through. It is the cleanest and most optimal solution to put on a whiteboard or in an IDE during an interview.
+
+#### Python Snippet
+
+```python
+class Solution:
+    def findDiagonalOrder(self, mat: list[list[int]]) -> list[int]:
+        if not mat or not mat[0]:
+            return []
+            
+        m, n = len(mat), len(mat[0])
+        result = []
+        
+        row, col = 0, 0
+        going_up = True
+        
+        # We need to collect exactly m * n elements
+        while len(result) < m * n:
+            result.append(mat[row][col])
+            
+            if going_up:
+                # Moving Up-Right
+                # Rule 1: Hit Right Wall? Move Down, change direction.
+                if col == n - 1:
+                    row += 1
+                    going_up = False
+                # Rule 2: Hit Top Wall? Move Right, change direction.
+                elif row == 0:
+                    col += 1
+                    going_up = False
+                # Rule 3: Middle of the matrix? Move Up-Right.
+                else:
+                    row -= 1
+                    col += 1
+            else:
+                # Moving Down-Left
+                # Rule 1: Hit Bottom Wall? Move Right, change direction.
+                if row == m - 1:
+                    col += 1
+                    going_up = True
+                # Rule 2: Hit Left Wall? Move Down, change direction.
+                elif col == 0:
+                    row += 1
+                    going_up = True
+                # Rule 3: Middle of the matrix? Move Down-Left.
+                else:
+                    row += 1
+                    col -= 1
+                    
+        return result
+```
+
+#### JavaScript Snippet
+
+```javascript
+/**
+ * @param {number[][]} mat
+ * @return {number[]}
+ */
+var findDiagonalOrder = function(mat) {
+    if (!mat || mat.length === 0 || mat[0].length === 0) {
+        return [];
+    }
+    
+    const m = mat.length;
+    const n = mat[0].length;
+    const result = new Array(m * n);
+    
+    let row = 0;
+    let col = 0;
+    let goingUp = true;
+    
+    for (let i = 0; i < m * n; i++) {
+        result[i] = mat[row][col];
+        
+        if (goingUp) {
+            // Moving Up-Right
+            if (col === n - 1) {        // Priority 1: Right Wall
+                row++;
+                goingUp = false;
+            } else if (row === 0) {     // Priority 2: Top Wall
+                col++;
+                goingUp = false;
+            } else {                    // Priority 3: Keep going
+                row--;
+                col++;
+            }
+        } else {
+            // Moving Down-Left
+            if (row === m - 1) {        // Priority 1: Bottom Wall
+                col++;
+                goingUp = true;
+            } else if (col === 0) {     // Priority 2: Left Wall
+                row++;
+                goingUp = true;
+            } else {                    // Priority 3: Keep going
+                row++;
+                col--;
+            }
+        }
+    }
+    
+    return result;
+};
+```
+
+---
+
+### Note 1: Terminology
+
+The technique we used is a **Finite State Machine (FSM)** bounded by **Edge Priorities**.
+* **Why it helps:** An FSM allows us to define two distinct "states" (Going Up vs. Going Down). By handling the boundaries via a strict priority hierarchy (e.g., Right Wall > Top Wall), we completely eliminate the need to check for out-of-bounds exceptions (`IndexOutOfRange`), which keeps the code incredibly clean and safe.
+* **How it applies:** The entire problem is just a simulation of a bouncing object. Physics simulations rely entirely on state machines handling collision detection in a specific order.
+
+### Note 2: Indirect / Real-World Interview Variations
+
+Big Tech companies love this problem because it is identical to how real-world data compression and rendering engines work:
+
+**1. Google / YouTube: JPEG Image Compression (Zig-Zag Scanning)**
+* **The Prompt:** "In video and image compression, after discrete cosine transform (DCT), the high-frequency matrix components are often zeros grouped at the bottom right. Write a function to serialize an 8x8 block of pixels in a zig-zag pattern so we can effectively apply run-length encoding on the zeros."
+* **The Solution:**  This is the exact historical reason "Diagonal Traverse" exists! You would write the exact code above to serialize the 2D chunk into a 1D array. Knowing *why* JPEG uses this pattern (grouping zeros together for compression) is an instant "Strong Hire" signal.
+
+**2. Meta / Oculus: Isometric Grid Rendering**
+* **The Prompt:** "You are rendering a 2D isometric game map (like an old-school strategy game where the grid is tilted like a diamond). Write an algorithm to determine the rendering order of the tiles so that items in the back are drawn first and aren't drawn over by items in the front."
+* **The Solution:** This is a variation of diagonal traversal. Instead of zig-zagging back and forth, you might just do a strict one-way diagonal sweep (e.g., always Top-Right to Bottom-Left). You would use the index sum property: all tiles where `row + col = k` belong to the same diagonal depth layer and should be rendered together.
+
+**3. Bloomberg: Streaming Matrix Serialization**
+* **The Prompt:** "We have a grid of financial correlation data that is too large to fit in memory. It is stored on disk. We want to read it and send it over a network stream in diagonal slices. How do you yield these diagonals without keeping the whole matrix in RAM?"
+* **The Solution:** This tests your ability to adapt the algorithm. If you can't load `mat[row][col]`, you have to generate the *coordinates* first. You would write a generator function that calculates `(row, col)` using the exact logic above, and then uses those coordinates to fetch the byte-offset from the file stream iteratively.
+
+# 762. Buildings With an Ocean View
+
+Hey there! Putting on my L5/L6 engineer hat, I'd say "Buildings With an Ocean View" (often indexed as LeetCode 1762) is a fantastic interview question. It perfectly separates candidates who blindly write code from those who take a step back and look at the physical reality of the problem.
+
+Let's break this down end-to-end exactly how we'd whiteboard it out in an interview.
+
+
+
+### 1. Problem Explanation
+
+**The Setup:** Imagine a row of buildings side-by-side. You are given an array of integers representing their heights from left to right. 
+The ocean is located to the **strict right** of the very last building.
+
+**The Rule:**
+A building has an "ocean view" if and only if **every** building to its right is strictly shorter than it. If even one building to the right is the exact same height or taller, the view is blocked.
+
+Let's look at an example array of building heights: `[4, 2, 3, 1]`
+
+```text
+       ___
+      |   |       ___
+      | 4 |      |   |
+      |   |___   | 3 |
+      |   |   |  |   |___ 
+      |   | 2 |  |   |   |    ~~~~~~
+      |   |   |  |   | 1 |    ~OCEAN~
+      |___|___|  |___|___|    ~~~~~~
+Index:  0   1      2   3
+```
+
+* **Building 3 (height 1):** It's the last building. There is nothing to its right. It always sees the ocean.
+* **Building 2 (height 3):** To its right is building 3 (height 1). 3 is strictly greater than 1. It sees the ocean.
+* **Building 1 (height 2):** To its right are buildings of height 3 and 1. The building of height 3 blocks its view. No ocean view.
+* **Building 0 (height 4):** To its right are heights 2, 3, and 1. 4 is strictly greater than all of them. It sees the ocean.
+
+**Output:** `[0, 2, 3]` (We must return the indices in ascending order).
+
+---
+
+### 2. Solution Explanation
+
+**The Naive Approach (What to avoid):**
+The brute-force way is to stand at every single building, and loop through all the buildings to its right to check if any are taller. If we have 100,000 buildings, checking the right side over and over takes O(N^2) time. We'd get a "Time Limit Exceeded" error.
+
+**The "Top-of-Band" Approach (Right-to-Left Traversal):**
+Let's change our perspective. Instead of standing at each building and looking right, **let's stand in the ocean and look left.**
+
+If you are standing in the water looking at the coastline:
+1. You will *always* see the closest building (the last one in the array).
+2. As you scan left, you will only see a building if it is **taller than the tallest building you have seen so far.**
+
+This means we just need to read the array from right to left, and keep a running record of the `max_height` we've encountered. 
+
+Let's trace `[4, 2, 3, 1]` from right to left:
+
+```text
+INITIAL STATE:
+max_height_seen = 0
+result_indices = []
+
+STEP 1: Index 3 (Height 1)
+Is 1 > max_height_seen (0)? YES!
+Action: Add index 3 to result. Update max_height_seen to 1.
+State: max_height_seen = 1, result_indices = [3]
+
+STEP 2: Index 2 (Height 3)
+Is 3 > max_height_seen (1)? YES!
+Action: Add index 2 to result. Update max_height_seen to 3.
+State: max_height_seen = 3, result_indices = [3, 2]
+
+STEP 3: Index 1 (Height 2)
+Is 2 > max_height_seen (3)? NO. View is blocked.
+Action: Do nothing.
+State: max_height_seen = 3, result_indices = [3, 2]
+
+STEP 4: Index 0 (Height 4)
+Is 4 > max_height_seen (3)? YES!
+Action: Add index 0 to result. Update max_height_seen to 4.
+State: max_height_seen = 4, result_indices = [3, 2, 0]
+
+FINAL STEP: 
+Since we went backwards, our indices are backwards. We just reverse `result_indices` to get `[0, 2, 3]`.
+```
+
+**Alternative Approach: Monotonic Stack (Left-to-Right)**
+Sometimes interviewers ask, "What if the data is streaming in from left to right and you can't start at the end?" 
+We can use a stack. As we move left to right, we push building indices onto the stack. If we encounter a new building that is taller than the building at the top of our stack, we know the top building's view is blocked. We "pop" it off the stack and destroy it. We keep popping until we find a building taller than our current one, then we push our current one. At the end, whatever survived in the stack has an ocean view.
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+```text
++-----------------------------------------------------------------+
+| COMPLEXITY ANALYSIS: RIGHT-TO-LEFT APPROACH                     |
++-----------------------------------------------------------------+
+| TIME COMPLEXITY: O(N)                                           |
+| -> N is the number of buildings.                                |
+| -> We loop through the array exactly once from right to left.   |
+| -> Reversing the result array at the end takes O(K) where K     |
+|    is the number of buildings with a view (worst case O(N)).    |
+| -> Total time is strictly linear.                               |
+|                                                                 |
+| SPACE COMPLEXITY: O(1) Auxiliary / O(N) Total                   |
+| -> We only use a single variable (max_height_seen) to track     |
+|    the state, which is O(1) extra space.                        |
+| -> If we count the output array required by the problem         |
+|    signature, it takes O(N) space in the worst case (e.g., if   |
+|    all buildings are in descending order, all get a view).      |
++-----------------------------------------------------------------+
+
++-----------------------------------------------------------------+
+| COMPLEXITY ANALYSIS: MONOTONIC STACK APPROACH                   |
++-----------------------------------------------------------------+
+| TIME COMPLEXITY: O(N)                                           |
+| -> Every building is pushed to the stack exactly once.          |
+| -> Every building is popped from the stack at most once.        |
+|                                                                 |
+| SPACE COMPLEXITY: O(N)                                          |
+| -> The stack itself can grow to size N in the worst case.       |
++-----------------------------------------------------------------+
+```
+
+---
+
+### 4. Solution Code
+
+Here are both approaches. The Right-to-Left is the most elegant, while the Stack shows strong data structure knowledge.
+
+#### Python Snippets
+
+```python
+# Approach 1: Right-to-Left Traversal (Optimal & Most Elegant)
+def findBuildings_optimal(heights: list[int]) -> list[int]:
+    n = len(heights)
+    if n == 0: return []
+    
+    views = []
+    max_height_seen = 0
+    
+    # Traverse backwards: from last building to the first
+    for i in range(n - 1, -1, -1):
+        # If current building is strictly taller than everything to its right
+        if heights[i] > max_height_seen:
+            views.append(i)
+            # Update the tallest building seen so far
+            max_height_seen = heights[i]
+            
+    # The array was built backwards, so we reverse it to be strictly increasing
+    views.reverse()
+    return views
+
+
+# Approach 2: Monotonic Stack (Left-to-Right - Good for streaming data)
+def findBuildings_stack(heights: list[int]) -> list[int]:
+    stack = []
+    
+    for i in range(len(heights)):
+        # While stack has buildings AND the current building is taller or equal 
+        # to the building at the top of the stack, the previous building's view is blocked!
+        while stack and heights[i] >= heights[stack[-1]]:
+            stack.pop()
+            
+        # Push current building index onto stack. It might have a view!
+        stack.append(i)
+        
+    # The stack naturally remains in left-to-right (ascending index) order
+    return stack
+```
+
+#### JavaScript Snippets
+
+```javascript
+// Approach 1: Right-to-Left Traversal (Optimal & Most Elegant)
+function findBuildingsOptimal(heights) {
+    const n = heights.length;
+    if (n === 0) return [];
+    
+    const views = [];
+    let maxHeightSeen = 0;
+    
+    // Traverse backwards
+    for (let i = n - 1; i >= 0; i--) {
+        if (heights[i] > maxHeightSeen) {
+            views.push(i);
+            maxHeightSeen = heights[i];
+        }
+    }
+    
+    // Reverse to return indices in ascending order
+    return views.reverse();
+}
+
+
+// Approach 2: Monotonic Stack (Left-to-Right - Good for streaming data)
+function findBuildingsStack(heights) {
+    const stack = [];
+    
+    for (let i = 0; i < heights.length; i++) {
+        // Pop buildings from stack that are blocked by the current building
+        while (stack.length > 0 && heights[i] >= heights[stack[stack.length - 1]]) {
+            stack.pop();
+        }
+        
+        stack.push(i);
+    }
+    
+    return stack;
+}
+```
+
+---
+
+### Note 1: Terminology Used
+
+* **Running Maximum:** A variable (like `max_height_seen`) that continually updates to hold the largest value seen during an iteration. It acts as a cumulative filter.
+* **Monotonic Stack:** A stack whose elements are always sorted in a specific order (either always increasing or always decreasing). In our second solution, the stack maintains indices of buildings whose *heights* are strictly decreasing. If a taller building comes along, it breaks the decreasing order, so we pop the smaller ones out. It's incredibly powerful for "next greater element" problems.
+
+---
+
+### Note 2: Real Interview Variations
+
+Companies love this problem because it tests how you handle arrays and physical space. Here is how it's disguised:
+
+**1. Meta: "Right Side View of a Binary Tree"**
+* **The Twist:** Instead of an array of buildings, you have a binary tree. If you stand on the right side of the tree, which nodes can you see?
+* **How to solve:** Use Breadth-First Search (BFS) level-order traversal. For every level of the tree, capture the very last node in the queue (the rightmost node). This tests the exact same visual logic but mapped onto a tree data structure instead of a linear array.
+
+**2. Google: "Sunset Views" / "Stream of Buildings"**
+* **The Twist:** You get an array, but the sunset is on the *West* (left side), and buildings face left. OR, buildings are given to you one by one in a continuous stream, and at any moment, you must `get_buildings_with_view()`.
+* **How to solve:** For the West-facing sunset, do the exact same logic but traverse left-to-right keeping a `max_height_seen`. For the streaming version, you *must* use the Monotonic Stack approach. As `add_building(height)` is called, pop all buildings in your internal state that are shorter, then push the new one. 
+
+**3. Bloomberg: "Stock Price Spans" / "Find All Good Days to Rob the Bank"**
+* **The Twist:** Given an array of daily stock prices, find all days where the price is strictly greater than all prices on *future* days. 
+* **How to solve:** This is the *exact* same problem, just re-themed. The "future days" are the buildings to the right. You solve it using the exact same right-to-left running maximum algorithm. 
+
+# 215. Kth Largest Element in an Array
+
+Hello! As an engineer who frequently conducts technical interviews, I can tell you that "Kth Largest Element" is an absolute classic. At the L5/L6 level at companies like Google, Meta, or Bloomberg, the interviewer doesn't just want to see if you can sort an array—they want to see if you understand how to optimize for space, handle streaming data, and leverage advanced partitioning logic.
+
+Let's break this down end-to-end, making it as intuitive as possible.
+
+
+
+---
+
+### 1. Problem Explanation
+
+You are given an unsorted array of integers and a number `k`. Your goal is to find the `k`-th largest element in the array. 
+
+**Crucial Distinction:** This is the `k`-th largest element in the *sorted* order, NOT the `k`-th distinct element. If the array has duplicates, they count individually.
+
+**Example 1:**
+* **Input:** `[3, 2, 1, 5, 6, 4]`, `k = 2`
+* **Sorted order:** `[1, 2, 3, 4, 5, 6]`
+* **The 1st largest:** `6`
+* **The 2nd largest:** `5` 
+* **Output:** `5`
+
+**Example 2 (with duplicates):**
+* **Input:** `[3, 2, 3, 1, 2, 4, 5, 5, 6]`, `k = 4`
+* **Sorted order:** `[1, 2, 2, 3, 3, 4, 5, 5, 6]`
+* **Output:** `4` (Counting from the right: 6 is 1st, 5 is 2nd, 5 is 3rd, 4 is 4th).
+
+**The Naive Thought:** Just sort the array and pick the element at index `Length - k`. 
+* *Why we don't stop here:* Sorting takes O(N log N) time. An L5 engineer knows we don't need to sort the *entire* array just to find *one* specific element. We are doing unnecessary work.
+
+---
+
+### 2. Solution Explanation
+
+We will look at the two optimal ways to solve this: **Min-Heap** and **Quickselect**.
+
+#### Approach A: The Min-Heap (The "Streaming" Solution)
+Imagine you are a bouncer at an exclusive club that only allows the top `k` VIPs (largest numbers). The club holds exactly `k` people. 
+
+1. As numbers arrive, you let them in.
+2. Once the club is full (size `k`), you only let a new number in if it is *larger* than the *least* important person currently in the club.
+3. If a new, larger number comes in, you kick out the least important person to make room.
+4. At the end, the person standing right at the door (the least important person in your VIP club) is the `k`-th largest overall!
+
+A **Min-Heap** is the perfect data structure for this because it always keeps the smallest element at the very top, ready to be kicked out in O(log k) time.
+
+**Walkthrough: Input: [3, 2, 1, 5, 6, 4], k = 2**
+
+```text
+Initialize an empty Min-Heap. Max capacity = 2.
+
+1. Add 3:
+   Heap: [3]
+
+2. Add 2:
+   Heap: [2, 3]  <- 2 is at the top (smallest)
+
+3. Add 1: 
+   Wait, heap is full! Is 1 > top of heap (which is 2)? No. Reject 1.
+   Heap: [2, 3]
+
+4. Add 5:
+   Is 5 > 2? Yes! Kick out 2, insert 5.
+   Heap: [3, 5]  <- 3 is now the smallest
+
+5. Add 6:
+   Is 6 > 3? Yes! Kick out 3, insert 6.
+   Heap: [5, 6]  <- 5 is the new smallest
+
+6. Add 4:
+   Is 4 > 5? No. Reject 4.
+   Heap: [5, 6]
+
+Finished! The root of the heap is 5. That is our 2nd largest element.
+```
+
+
+
+#### Approach B: Quickselect (The "Divide and Conquer" Solution)
+Quickselect is a cousin of Quicksort. Instead of sorting both halves of an array, we pick a "pivot" and partition the array so that everything smaller than the pivot is on the left, and everything larger is on the right. 
+
+Because we know exactly where the pivot ends up, we can check its index. 
+* If the pivot lands exactly at `Length - k`, we found our answer!
+* If the pivot lands too far to the left, we only search the right side.
+* If the pivot lands too far to the right, we only search the left side.
+
+**Walkthrough: Input: [3, 2, 1, 5, 6, 4], k = 2. Target Index = (6 - 2) = 4.**
+
+```text
+Let's pick the last element (4) as the pivot.
+
+Step 1: Partition around 4
+Array: [3, 2, 1, 5, 6, 4]
+        ^              ^
+     compare         pivot
+
+- 3 < 4? Yes. Keep left.
+- 2 < 4? Yes. Keep left.
+- 1 < 4? Yes. Keep left.
+- 5 < 4? No. 
+- 6 < 4? No.
+
+Swap pivot (4) into its rightful place (after 1).
+Array becomes: [3, 2, 1, 4, 6, 5]
+                         ^
+                  Pivot is at index 3.
+
+Our target index is 4. The pivot is at 3. 
+Since 3 < 4, the answer MUST be in the right half: [6, 5]
+
+Step 2: Partition the right half [6, 5]. Target index is still 4.
+Let's pick the last element (5) as the pivot.
+
+- 6 < 5? No.
+Swap pivot (5) into its rightful place.
+Array becomes: [..., 5, 6]
+                     ^
+              Pivot is at index 4.
+
+Target index is 4. Pivot is at 4. WE FOUND IT! Return 5.
+```
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+#### Approach A: Min-Heap
+```text
+Time Complexity Derivation (Min-Heap):
+
+Array of size N:  [ * * * * * * * * * * ]
+                    \                   /
+                We process each of the N elements.
+
+For each element, we might push/pop from a Heap of max size K.
+Heap operations take log(K) time.
+
+Total Work = N elements * log(K) operations
+           = O(N * log K) Time Complexity
+
+Space Complexity Derivation:
+Heap size never exceeds K.
+[ V, I, P ] <- Max size K
+Space = O(K)
+```
+
+#### Approach B: Quickselect
+```text
+Time Complexity Derivation (Quickselect):
+
+Average Case: We eliminate half the array each time!
+N elements
++-------------------------+
+|                         |  O(N) work to partition
++-------------------------+
+             |
+             v
+       N/2 elements
+       +------------+        O(N/2) work
+       |            |
+       +------------+
+             |
+             v
+         N/4 elements        O(N/4) work...
+
+Total Work = N + N/2 + N/4 + N/8 ... = 2N
+Time Complexity = O(N) on average.
+
+Worst Case: If the array is already sorted and we pick bad pivots, 
+we only eliminate 1 element at a time (N + N-1 + N-2...).
+Worst Case Time = O(N^2). (Randomizing the pivot fixes this practically).
+
+Space Complexity Derivation:
+We do this "in-place" by swapping elements in the original array.
+We don't create new arrays.
+Space = O(1) memory used.
+```
+
+---
+
+### 4. Solution Code
+
+#### Python Snippets
+
+```python
+import heapq
+import random
+
+# Approach A: Min-Heap (Great for streaming data or when K is small)
+def findKthLargest_Heap(nums, k):
+    # Create a min-heap of the first k elements
+    min_heap = nums[:k]
+    heapq.heapify(min_heap)
+    
+    # Process the remaining elements
+    for num in nums[k:]:
+        # If the current number is bigger than the smallest in our heap
+        if num > min_heap[0]:
+            # Pop the smallest, and push the new larger number
+            heapq.heapreplace(min_heap, num)
+            
+    # The top of the heap is the k-th largest overall
+    return min_heap[0]
+
+
+# Approach B: Quickselect (Optimal O(N) average time, O(1) space)
+def findKthLargest_Quickselect(nums, k):
+    def quick_select(left, right, target_index):
+        # Pick a random pivot to avoid O(N^2) worst-case on sorted arrays
+        pivot_idx = random.randint(left, right)
+        pivot_val = nums[pivot_idx]
+        
+        # Move pivot out of the way to the end
+        nums[pivot_idx], nums[right] = nums[right], nums[pivot_idx]
+        
+        # Partition the array
+        store_idx = left
+        for i in range(left, right):
+            if nums[i] < pivot_val:
+                nums[store_idx], nums[i] = nums[i], nums[store_idx]
+                store_idx += 1
+                
+        # Move pivot to its final rightful place
+        nums[store_idx], nums[right] = nums[right], nums[store_idx]
+        
+        # Base case / Recursive step
+        if store_idx == target_index:
+            return nums[store_idx]
+        elif store_idx < target_index:
+            return quick_select(store_idx + 1, right, target_index)
+        else:
+            return quick_select(left, store_idx - 1, target_index)
+
+    # We want the k-th largest, which is at index (len - k) in a sorted array
+    return quick_select(0, len(nums) - 1, len(nums) - k)
+```
+
+#### JavaScript Snippets
+
+*Note: JavaScript does not have a built-in Heap data structure. In a real interview, you should mention this. Interviewers will usually allow you to assume a `MinPriorityQueue` exists, or they will ask you to write the Quickselect approach instead.*
+
+```javascript
+// Approach B: Quickselect (Optimal O(N) average time, O(1) space)
+// This is the most practical JS solution since JS lacks a native Heap.
+function findKthLargest_Quickselect(nums, k) {
+    const targetIndex = nums.length - k;
+
+    function quickSelect(left, right) {
+        // Pick a random pivot to prevent O(N^2) worst case
+        const pivotIndex = Math.floor(Math.random() * (right - left + 1)) + left;
+        const pivotVal = nums[pivotIndex];
+
+        // Swap pivot to the end
+        [nums[pivotIndex], nums[right]] = [nums[right], nums[pivotIndex]];
+
+        let storeIndex = left;
+        for (let i = left; i < right; i++) {
+            if (nums[i] < pivotVal) {
+                [nums[storeIndex], nums[i]] = [nums[i], nums[storeIndex]];
+                storeIndex++;
+            }
+        }
+
+        // Swap pivot back to its final sorted position
+        [nums[storeIndex], nums[right]] = [nums[right], nums[storeIndex]];
+
+        // Determine which side to search next
+        if (storeIndex === targetIndex) {
+            return nums[storeIndex];
+        } else if (storeIndex < targetIndex) {
+            return quickSelect(storeIndex + 1, right);
+        } else {
+            return quickSelect(left, storeIndex - 1);
+        }
+    }
+
+    return quickSelect(0, nums.length - 1);
+}
+
+// Approach A: Simplified Min-Heap concept (For completeness)
+// Using a naive sort to simulate heap insertions if building a full class is too long,
+// but conceptually, this is how you'd structure the logic if you had a Heap library.
+function findKthLargest_Heap(nums, k) {
+    // Note: In a real JS interview, if forced to write a heap, you'd write a 
+    // complete MinHeap class. Here we simulate it conceptually using sorting 
+    // for brevity, acknowledging JS limitations. 
+    
+    let minHeap = nums.slice(0, k).sort((a, b) => a - b);
+    
+    for (let i = k; i < nums.length; i++) {
+        if (nums[i] > minHeap[0]) {
+            minHeap[0] = nums[i];
+            // Re-sort to maintain the "heap" property (smallest at index 0)
+            // A true heap would do this in O(log K) via siftDown.
+            minHeap.sort((a, b) => a - b); 
+        }
+    }
+    
+    return minHeap[0];
+}
+```
+
+---
+
+### Note 1: Terms and Techniques
+
+* **Min-Heap:** A specialized tree-based data structure where the parent node is always smaller than or equal to its child nodes. It helps here because it acts as an automatic filter, effortlessly keeping track of the "smallest of the largest" in O(log k) time.
+* **Quickselect (Hoare / Lomuto Partitioning):** An algorithm that finds the k-th smallest/largest element in an unordered list. It helps by using the partitioning step of Quicksort but intentionally ignoring one half of the array at each step, dropping the time complexity from O(N log N) to an average of O(N).
+
+---
+
+### Note 2: Real World / Interview Follow-ups (Google, Meta, Bloomberg)
+
+Here is how top companies adapt this question to test your system design and deeper algorithmic knowledge:
+
+**1. Meta Follow-up: "What if the data is a continuous stream of billions of numbers (like real-time Facebook likes), and I want to query the Top K at any moment?"**
+* **The Solution:** You cannot use Quickselect because you don't have all the data at once, and you can't store a billion numbers in memory to partition them. You *must* use the **Min-Heap** approach. A Min-Heap of size `k` only takes O(k) memory. As the infinite stream of numbers comes in, you process them through the heap. At any second, the root of the heap gives you the k-th largest, and the whole heap gives you the Top K.
+
+**2. Bloomberg Follow-up: "What if `N` is massive (terabytes of financial tick data) stored across multiple different servers, and `k` is small?"**
+* **The Solution:** This is a MapReduce problem. You instruct every single server to find its own *local* Top `k` largest elements (using a Min-Heap locally). If you have 10 servers, they each send their local Top `k` (a total of 10 * `k` elements) to a master server. The master server then finds the overall Top `k` from that much smaller pool. This saves massive amounts of network bandwidth.
+
+**3. Google Follow-up: "Can we guarantee O(N) worst-case time for Quickselect?"**
+* **The Solution:** Yes, using the **Median of Medians** algorithm to pick the pivot. Instead of a random pivot, this algorithm groups the array into chunks of 5, finds the median of each chunk, and then finds the median of those medians to use as the pivot. It guarantees a good split, forcing the worst-case time to strictly O(N), though it is theoretically beautiful but practically slower due to overhead. Randomizing the pivot (as coded above) is the industry standard expectation.
+
+# 1570. Dot Product of Two Sparse Vectors
+
+This is a quintessential system design micro-problem disguised as a LeetCode question. I love discussing this one because it bridges the gap between basic coding and massive-scale data processing.
+
+When an L5 or L6 engineer at Google looks at "Sparse Vectors," they immediately think about Search Infrastructure (like PageRank or Inverted Indices) or Machine Learning (like Neural Network embeddings). 
+
+A junior engineer will often just store the arrays as-is, resulting in massive Memory Limit Exceeded (MLE) or Time Limit Exceeded (TLE) errors. A mid-level engineer might jump straight to a Hash Map. A top-tier senior engineer will evaluate the hardware-level trade-offs (CPU cache locality) and choose an **Array of Pairs with Two Pointers**.
+
+Let's break down exactly why and how.
+
+
+
+---
+
+### 1. Problem Explanation
+
+Imagine two massive arrays (vectors), each containing millions of numbers.
+You need to calculate their **Dot Product**.
+
+**What is a Dot Product?**
+You multiply the numbers at matching indices together, and then add all those results up to get one final number.
+`Result = (A[0] * B[0]) + (A[1] * B[1]) + (A[2] * B[2]) ...`
+
+**What is a "Sparse" Vector?**
+"Sparse" means the vast majority of the numbers in the array are exactly `0`. 
+
+**The Core Challenge:**
+If `A[500]` is `0`, and `B[500]` is `999`, their product is `0 * 999 = 0`. Adding `0` to our total sum does nothing! 
+If both arrays are 99% zeros, iterating through all 1,000,000 elements is a massive waste of CPU cycles. We only care about the indices where **BOTH** vectors have a non-zero number. We need a way to skip the zeros entirely.
+
+---
+
+### 2. Solution Explanation
+
+Let's explore the progression from the naive idea to the senior-level optimal design.
+
+**The Fallback (Good): The Hash Map Approach**
+Instead of storing the whole array, we only store the non-zero values in a Dictionary/Hash Map where the Key is the `index` and the Value is the `number`.
+`Array: [0, 0, 0, 5, 0, 8]`  ->  `Map: { 3: 5, 5: 8 }`
+To get the dot product, we iterate through the keys of Map A, and check if that key exists in Map B. If it does, we multiply and add. 
+*Why is this not perfectly optimal?* Hash Maps have overhead. Hashing takes time, handling collisions takes time, and the data is scattered across memory, which modern CPU caches hate.
+
+**The Optimal L5/L6 (Best): Array of Pairs + Two Pointers**
+Instead of a Hash Map, we store the non-zero elements as an array of pairs: `[index, value]`.
+Because we process the original array from left to right, our new array of pairs is naturally **sorted by index**. 
+
+`Array: [0, 0, 0, 5, 0, 8]` -> `Pairs: [ (3, 5), (5, 8) ]`
+
+
+
+Because both lists of pairs are sorted by index, we can use a **Two-Pointer** technique to find matching indices. This approach is incredibly fast because it accesses memory sequentially (making the CPU cache very happy) and has zero hashing overhead.
+
+**End-to-End Walkthrough (Two Pointers):**
+
+Let's trace two sparse vectors:
+`Vector A = [1, 0, 0, 2, 3]` -> `Pairs A: [ (0,1), (3,2), (4,3) ]`
+`Vector B = [0, 3, 0, 4, 0]` -> `Pairs B: [ (1,3), (3,4) ]`
+
+```text
+Variables:
+Pointer_A = 0
+Pointer_B = 0
+Total_Sum = 0
+
+Step 1: Compare indices at Pointer A and Pointer B
+--------------------------------------------------
+Pairs A [Ptr A]: Index 0, Value 1
+Pairs B [Ptr B]: Index 1, Value 3
+
+Indices do NOT match (0 vs 1).
+Since Index 0 < Index 1, Pointer A is lagging behind. 
+Action: Move Pointer A forward to catch up.
+
+Step 2:
+--------------------------------------------------
+Pairs A [Ptr A]: Index 3, Value 2
+Pairs B [Ptr B]: Index 1, Value 3
+
+Indices do NOT match (3 vs 1).
+Since Index 1 < Index 3, Pointer B is lagging behind.
+Action: Move Pointer B forward to catch up.
+
+Step 3:
+--------------------------------------------------
+Pairs A [Ptr A]: Index 3, Value 2
+Pairs B [Ptr B]: Index 3, Value 4
+
+Indices MATCH! (3 == 3)
+Action: Multiply values (2 * 4 = 8). Add to Total_Sum.
+Total_Sum = 0 + 8 = 8.
+Move BOTH pointers forward.
+
+Step 4:
+--------------------------------------------------
+Pairs A [Ptr A]: Index 4, Value 3
+Pairs B [Ptr B]: Out of bounds!
+
+Action: Since Vector B has no more non-zero elements, 
+it's impossible to find any more matches. Stop the loop.
+
+Final Answer: Total_Sum = 8.
+```
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+Let `N` be the total length of the original vector.
+Let `L1` be the number of non-zero elements in Vector A.
+Let `L2` be the number of non-zero elements in Vector B.
+
+```text
+TIME COMPLEXITY: O(L1 + L2)
+
+[ Vector A Pairs: L1 elements ]
+  ^
+  |-- Pointers move forward, never backward.
+
+[ Vector B Pairs: L2 elements ]
+  ^
+
+In the worst-case scenario, the pointers take turns moving one step at a time 
+until both reach the end. 
+Max movements = L1 + L2.
+
+Creating the pairs initially takes O(N) time, but this is done once during 
+instantiation. The actual dotProduct calculation takes strictly O(L1 + L2) time.
+```
+
+```text
+SPACE COMPLEXITY: O(L)
+
+Original Array in Memory:
+[ 0, 0, 0, 5, 0, 0, 0, 8, 0, 0 ]  (Size N)
+
+Our Data Structure in Memory:
+[ (3, 5), (7, 8) ]                (Size L, where L is non-zero count)
+
+We only store the non-zero elements. If a vector has 1 million zeros 
+and 5 actual numbers, we only store 5 pairs.
+
+Total Space = O(L) Space Complexity per vector.
+```
+
+---
+
+### 4. Solution Code
+
+#### Python Snippets
+
+```python
+# ==========================================
+# OPTIMAL SOLUTION (Array of Pairs + Two Pointers)
+# ==========================================
+class SparseVector:
+    def __init__(self, nums: list[int]):
+        # Store non-zero values as tuples: (index, value)
+        # Time to build: O(N), Space: O(L)
+        self.pairs = []
+        for index, value in enumerate(nums):
+            if value != 0:
+                self.pairs.append((index, value))
+
+    # Return the dotProduct of two sparse vectors
+    def dotProduct(self, vec: 'SparseVector') -> int:
+        result = 0
+        p1 = 0 # Pointer for this vector
+        p2 = 0 # Pointer for the other vector (vec)
+        
+        # Traverse until one of the vectors runs out of non-zero elements
+        while p1 < len(self.pairs) and p2 < len(vec.pairs):
+            index1, val1 = self.pairs[p1]
+            index2, val2 = vec.pairs[p2]
+            
+            if index1 == index2:
+                # Indices match! Multiply and add to result.
+                result += val1 * val2
+                p1 += 1
+                p2 += 1
+            elif index1 < index2:
+                # p1 is behind, move it forward
+                p1 += 1
+            else:
+                # p2 is behind, move it forward
+                p2 += 1
+                
+        return result
+
+# ==========================================
+# FALLBACK SOLUTION (Hash Map)
+# ==========================================
+class SparseVectorFallback:
+    def __init__(self, nums: list[int]):
+        # Store non-zero values in a dictionary: {index: value}
+        self.hash_map = {}
+        for index, value in enumerate(nums):
+            if value != 0:
+                self.hash_map[index] = value
+
+    def dotProduct(self, vec: 'SparseVectorFallback') -> int:
+        result = 0
+        
+        # Optimization: Always iterate over the smaller hash map
+        # to minimize the number of lookups.
+        if len(self.hash_map) > len(vec.hash_map):
+            # Swap them if the other one is smaller
+            return vec.dotProduct(self)
+            
+        for index, val in self.hash_map.items():
+            if index in vec.hash_map:
+                result += val * vec.hash_map[index]
+                
+        return result
+```
+
+#### JavaScript Snippets
+
+```javascript
+// ==========================================
+// OPTIMAL SOLUTION (Array of Pairs + Two Pointers)
+// ==========================================
+/**
+ * @param {number[]} nums
+ */
+var SparseVector = function(nums) {
+    // Store as array of arrays: [ [index, value], [index, value] ]
+    this.pairs = [];
+    for (let i = 0; i < nums.length; i++) {
+        if (nums[i] !== 0) {
+            this.pairs.push([i, nums[i]]);
+        }
+    }
+};
+
+/**
+ * @param {SparseVector} vec
+ * @return {number}
+ */
+SparseVector.prototype.dotProduct = function(vec) {
+    let result = 0;
+    let p1 = 0;
+    let p2 = 0;
+    
+    const pairs1 = this.pairs;
+    const pairs2 = vec.pairs;
+    
+    while (p1 < pairs1.length && p2 < pairs2.length) {
+        const index1 = pairs1[p1][0];
+        const val1 = pairs1[p1][1];
+        const index2 = pairs2[p2][0];
+        const val2 = pairs2[p2][1];
+        
+        if (index1 === index2) {
+            result += val1 * val2;
+            p1++;
+            p2++;
+        } else if (index1 < index2) {
+            p1++;
+        } else {
+            p2++;
+        }
+    }
+    
+    return result;
+};
+
+// ==========================================
+// FALLBACK SOLUTION (Hash Map)
+// ==========================================
+var SparseVectorFallback = function(nums) {
+    this.map = new Map();
+    for (let i = 0; i < nums.length; i++) {
+        if (nums[i] !== 0) {
+            this.map.set(i, nums[i]);
+        }
+    }
+};
+
+SparseVectorFallback.prototype.dotProduct = function(vec) {
+    let result = 0;
+    
+    let map1 = this.map;
+    let map2 = vec.map;
+    
+    // Optimization: Iterate over the smaller map
+    if (map1.size > map2.size) {
+        let temp = map1;
+        map1 = map2;
+        map2 = temp;
+    }
+    
+    for (let [index, val] of map1.entries()) {
+        if (map2.has(index)) {
+            result += val * map2.get(index);
+        }
+    }
+    
+    return result;
+};
+```
+
+---
+
+### Note 1: Terminology
+
+* **Two-Pointer Technique (Intersection of Sorted Arrays):** An algorithm that processes two sorted lists in tandem.
+    * *Why it helps:* It prevents nested loops (`O(N * M)`) by allowing a linear scan (`O(N + M)`), and relies on the sorted nature of the arrays to safely skip elements that can never match.
+* **Coordinate List (COO) Format:** The technical name for storing sparse matrices/vectors as `(index, value)` pairs.
+    * *How it applies:* This is standard practice in data science libraries (like `scipy.sparse`) to compress massive datasets before feeding them into machine learning models.
+
+### Note 2: Indirect / Real-World Interview Variations
+
+Because vectors are the foundation of modern search and AI, Big Tech masks this problem in deep systems-level contexts:
+
+**1. Google: Search Engine Inverted Index Intersection**
+* **The Prompt:** "When a user searches for 'Blue Shoes', we look up our index for 'Blue' (which returns a sorted list of Document IDs) and our index for 'Shoes' (another sorted list of Document IDs). How do you efficiently find the webpages that contain both words?"
+* **The Solution:** This is exactly the Two-Pointer array intersection. The `index` is the Document ID. The `value` (if needed) might be the term frequency. You run the two-pointer sweep to find matching Document IDs in O(L1 + L2) time.
+
+**2. Meta: Collaborative Filtering / Recommender Systems**
+* **The Prompt:** "We have 2 billion users and 10 million Facebook Groups. Most users are only in a few groups. How do you calculate the 'similarity score' between two users based on their shared groups to recommend new friends?"
+* **The Solution:** Users are the sparse vectors. Groups are the indices (0 to 10M). The value is `1` if they are in the group. You compress each user's group history into the Array of Pairs format. The dot product of User A and User B gives you the exact number of shared groups!
+
+**3. Bloomberg: Financial Tick Data Alignment**
+* **The Prompt:** "We receive millions of price ticks for Stock A and Stock B over a trading day. Ticks happen at irregular nanosecond timestamps. Calculate the correlation of price movements, but only at the exact timestamps where *both* stocks registered a trade."
+* **The Solution:** The timestamps are the indices. Since the ticks are naturally chronological, the array is already sorted. You use the Two-Pointer method to align the timestamps, multiplying the price changes only when `timestamp_A == timestamp_B`.
+
+# 359. Logger Rate Limiter
+
+Hey there! Slipping right back into that L5/L6 engineer mindset. "Logger Rate Limiter" (LeetCode 359) is a classic system design and data structures problem disguised as a simple coding question. 
+
+While a junior engineer might solve this with the first tool they reach for, a senior engineer will immediately spot the hidden trap: **Memory Leaks**. 
+
+Let's break down exactly how to navigate this end-to-end, showing both the standard acceptable answer and the "Top-of-Band" production-ready answer.
+
+---
+
+### 1. Problem Explanation
+
+**The Setup:** You are building a logging system. The system receives a continuous stream of messages, each stamped with a time (in seconds). 
+**The Rule:** A unique message can only be printed **once every 10 seconds**. If a duplicate message arrives within 10 seconds of the last time it was *successfully* printed, we drop it (ignore it). 
+*Crucial detail:* Dropped messages do *not* reset the 10-second timer. 
+
+Let's look at a timeline of events for the message `"foo"`:
+
+```text
+TIMELINE OF INCOMING MESSAGES:
+
+Time  Msg    Action   Why?
+----  -----  -------  --------------------------------------------------
+ 1    "foo"  PRINT    First time seeing "foo". Next allowed time is 11.
+ 3    "foo"  DROP     3 is less than 11. 
+ 8    "foo"  DROP     8 is less than 11.
+ 11   "foo"  PRINT    11 is >= 11! Allowed! Next allowed time is 21.
+ 15   "foo"  DROP     15 is less than 21.
+```
+
+If we receive a different message, like `"bar"`, it maintains its own independent 10-second timer.
+
+---
+
+### 2. Solution Explanation
+
+
+
+**Approach 1: The Simple Hash Map (The Standard Interview Answer)**
+The most intuitive way to solve this is to use a Hash Map (Dictionary). We map the `message` (string) to the `next_allowed_timestamp` (integer).
+
+* If the message isn't in the map, print it and store `timestamp + 10`.
+* If it is in the map, check if `current_timestamp >= next_allowed_timestamp`. 
+    * If yes, update the map to `current_timestamp + 10` and print.
+    * If no, drop it.
+
+*Why a senior engineer pushes back on this:* Imagine this is a real Google server running for months, receiving millions of unique error logs. The Hash Map will grow infinitely, holding onto timestamps for messages that haven't been seen in years. This causes an Out-Of-Memory (OOM) crash.
+
+**Approach 2: Queue + Set Sliding Window (The L5/L6 "Top-of-Band" Answer)**
+To prevent our system from crashing, we need "Garbage Collection." We only care about the last 10 seconds of history. Everything older than 10 seconds is garbage and should be deleted from memory.
+
+We can achieve this using a Queue and a Hash Set:
+1.  **Queue:** Stores pairs of `[message, timestamp]` in chronological order. 
+2.  **Hash Set:** Stores just the `messages` that are currently inside the active 10-second window.
+
+When a new message arrives at time `T`:
+1.  **Clean up:** Look at the front of the queue. If the oldest message is older than `T - 10`, remove it from the queue AND remove it from the Set. Keep doing this until the front of the queue is within the 10-second window.
+2.  **Check:** Is the new message in our Set?
+    * If YES: It's a duplicate within the window. Drop it.
+    * If NO: Print it. Add it to the Set. Add `[message, T]` to the back of the Queue.
+
+Let's visualize the "Queue + Set" sliding window over time:
+
+```text
+INITIAL STATE:
+Queue: [ Front -> ... <- Back ]
+Set:   { }
+
+EVENT 1: Time=1, Msg="foo"
+Cleanup: None needed.
+Check: "foo" is not in Set.
+Action: Add to Queue & Set. Return TRUE.
+-----------------------------------------
+Queue: [ ("foo", 1) ]
+Set:   { "foo" }
+
+
+EVENT 2: Time=2, Msg="bar"
+Cleanup: Current time is 2. (2 - 10 = -8). Oldest in queue is 1. (1 > -8), so no cleanup.
+Check: "bar" is not in Set.
+Action: Add to Queue & Set. Return TRUE.
+-----------------------------------------
+Queue: [ ("foo", 1), ("bar", 2) ]
+Set:   { "foo", "bar" }
+
+
+EVENT 3: Time=3, Msg="foo"
+Cleanup: Current time is 3. (3 - 10 = -7). Oldest is 1. No cleanup.
+Check: "foo" IS in Set! 
+Action: Return FALSE. (Do not add to queue/set again).
+-----------------------------------------
+Queue: [ ("foo", 1), ("bar", 2) ]
+Set:   { "foo", "bar" }
+
+
+EVENT 4: Time=12, Msg="baz"
+Cleanup: Current time is 12. Window is [2 to 12]. 
+         We must evict timestamps less than 2 (which is 12 - 10 = 2).
+         -> Look at Queue Front: ("foo", 1). 
+         -> 1 < 2! EVICT! Remove from Queue and Set.
+         -> Look at Queue Front: ("bar", 2). 
+         -> 2 >= 2. Stop cleanup.
+Check: "baz" is not in Set.
+Action: Add to Queue & Set. Return TRUE.
+-----------------------------------------
+Queue: [ ("bar", 2), ("baz", 12) ]    <-- Notice "foo" is completely gone from memory!
+Set:   { "bar", "baz" }
+```
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+```text
++-----------------------------------------------------------------+
+| COMPLEXITY ANALYSIS: SIMPLE HASH MAP APPROACH                   |
++-----------------------------------------------------------------+
+| TIME COMPLEXITY: O(1)                                           |
+| -> Hash map lookups and updates take constant time.             |
+|                                                                 |
+| SPACE COMPLEXITY: O(M)                                          |
+| -> M is the TOTAL number of unique messages ever received.      |
+| -> Memory grows unbounded over time.                            |
++-----------------------------------------------------------------+
+
++-----------------------------------------------------------------+
+| COMPLEXITY ANALYSIS: QUEUE + SET (SLIDING WINDOW) APPROACH      |
++-----------------------------------------------------------------+
+| TIME COMPLEXITY: Amortized O(1)                                 |
+| -> Every message is pushed to the queue exactly once.           |
+| -> Every message is popped from the queue exactly once.         |
+| -> Even if one call triggers multiple evictions, the average    |
+|    time per message remains constant O(1).                      |
+|                                                                 |
+| SPACE COMPLEXITY: O(W)                                          |
+| -> W is the maximum number of unique messages received within   |
+|    a 10-second window.                                          |
+| -> Memory usage is strictly bounded and will not leak!          |
++-----------------------------------------------------------------+
+```
+
+---
+
+### 4. Solution Code
+
+Here are both approaches. As an interviewer, if you wrote the HashMap solution quickly and then verbally explained *why* the Queue+Set solution is better for production, I would give you full marks.
+
+#### Python Snippets
+
+```python
+# Approach 1: Simple Hash Map (O(M) Space - Memory Leak Risk)
+class LoggerSimple:
+    def __init__(self):
+        # Maps message to the next allowed timestamp
+        self.msg_dict = {}
+
+    def shouldPrintMessage(self, timestamp: int, message: str) -> bool:
+        # If we haven't seen it, or enough time has passed
+        if message not in self.msg_dict or timestamp >= self.msg_dict[message]:
+            # Update the next allowed time to T + 10
+            self.msg_dict[message] = timestamp + 10
+            return True
+        return False
+
+
+from collections import deque
+
+# Approach 2: Queue + Set (O(W) Space - Production Ready)
+class LoggerOptimized:
+    def __init__(self):
+        # Deque stores tuples: (message, timestamp)
+        self.msg_queue = deque()
+        # Set stores active messages in the 10s window
+        self.active_msgs = set()
+
+    def shouldPrintMessage(self, timestamp: int, message: str) -> bool:
+        # 1. Clean up stale messages older than 10 seconds
+        # We evict if the oldest timestamp is <= timestamp - 10
+        while self.msg_queue and self.msg_queue[0][1] <= timestamp - 10:
+            old_msg, old_time = self.msg_queue.popleft()
+            self.active_msgs.remove(old_msg)
+            
+        # 2. Check if current message is in the active window
+        if message in self.active_msgs:
+            return False
+            
+        # 3. Message is valid. Add to queue and set.
+        self.msg_queue.append((message, timestamp))
+        self.active_msgs.add(message)
+        return True
+```
+
+#### JavaScript Snippets
+
+```javascript
+// Approach 1: Simple Hash Map (O(M) Space - Memory Leak Risk)
+class LoggerSimple {
+    constructor() {
+        // Maps message to the next allowed timestamp
+        this.msgMap = new Map();
+    }
+
+    shouldPrintMessage(timestamp, message) {
+        if (!this.msgMap.has(message) || timestamp >= this.msgMap.get(message)) {
+            // Update the map with the next allowed timestamp
+            this.msgMap.set(message, timestamp + 10);
+            return true;
+        }
+        return false;
+    }
+}
+
+
+// Approach 2: Queue + Set (O(W) Space - Production Ready)
+// Note: JS doesn't have a built-in optimized Deque, so we use an array 
+// and a pointer to simulate an efficient queue to avoid O(N) shift() operations.
+class LoggerOptimized {
+    constructor() {
+        this.queue = [];
+        this.headIndex = 0; // Simulates deque popleft()
+        this.activeMsgs = new Set();
+    }
+
+    shouldPrintMessage(timestamp, message) {
+        // 1. Clean up stale messages
+        while (this.headIndex < this.queue.length && 
+               this.queue[this.headIndex].time <= timestamp - 10) {
+            
+            const oldMsg = this.queue[this.headIndex].msg;
+            this.activeMsgs.delete(oldMsg);
+            this.headIndex++;
+        }
+        
+        // Periodic memory cleanup for the JS Array to prevent it growing forever
+        if (this.headIndex > 1000) {
+            this.queue = this.queue.slice(this.headIndex);
+            this.headIndex = 0;
+        }
+
+        // 2. Check active window
+        if (this.activeMsgs.has(message)) {
+            return false;
+        }
+
+        // 3. Add new valid message
+        this.queue.push({ msg: message, time: timestamp });
+        this.activeMsgs.add(message);
+        return true;
+    }
+}
+```
+
+---
+
+### Note 1: Terminology Used
+
+* **Rate Limiting:** A technique used to control the rate of traffic sent or received by a network or system. It prevents abuse, DoS attacks, and system overload.
+* **Sliding Window:** An algorithmic technique where we maintain a subset of data (a "window") that moves over time or over an array. As the window moves forward, old data is pushed out, and new data comes in.
+* **Amortized Time:** Sometimes an operation takes a long time (like evicting 5 old messages at once), but because it's balanced out by many operations that take almost no time, the *average* time per operation guarantees constant performance.
+* **Eviction Policy:** The rule a system uses to decide which data to delete when it's full or when data becomes irrelevant. Here, our eviction policy is "strictly older than 10 seconds".
+
+---
+
+### Note 2: Real-World Interview Variations (Meta, Google, Bloomberg)
+
+This specific problem is heavily tied to system design. Here is how top companies adapt it to test deeper engineering limits:
+
+**1. Meta: "Design an API Rate Limiter / Token Bucket"**
+* **The Twist:** Instead of dropping exact duplicate strings, you are given a `user_id`, and a user is allowed exactly `X` API calls per minute. If they exceed `X`, return `False`.
+* **How to solve:** The Queue + Set approach adapts perfectly here. Instead of a single global Queue, you maintain a Hash Map where the key is `user_id`, and the value is a `Queue` of their request timestamps. When a new request comes in, go to that user's queue, evict all timestamps older than 60 seconds. Then, if the queue's length is less than `X`, allow the request and push the new timestamp. 
+
+**2. Google: "Distributed Rate Limiter"**
+* **The Twist:** The interviewer will say, "Okay, your code works for one server. Now we have 50 load-balanced servers. How do we ensure the user doesn't spam our system by routing requests to different servers?"
+* **How to solve:** This transitions from coding to System Design. You can no longer store the Queue/Map in local memory. You must move the state to an external, fast, in-memory datastore like **Redis**. You would use Redis's `INCR` and `EXPIRE` commands to atomically count requests for a given time window (e.g., using a Fixed Window counter or Redis Sorted Sets for a precise Sliding Window).
+
+**3. Bloomberg: "The 24-Hour Unique Streaming Window"**
+* **The Twist:** Similar to Logger, but the window is 24 hours, and the volume is millions of ticks per second (typical Bloomberg financial data). Storing exact timestamps in a Queue will still blow up the memory because millions of messages can arrive in 24 hours.
+* **How to solve:** You have to sacrifice precision for memory. You pivot to a **Sliding Window Counter** with buckets. Instead of exact queues, you create an array of 60 buckets (one for each minute). As time passes, you increment the counter in the current bucket, and you clear out the bucket from exactly 24 hours ago. This keeps memory usage strictly fixed to array size of 60, regardless of how many millions of messages come in.
