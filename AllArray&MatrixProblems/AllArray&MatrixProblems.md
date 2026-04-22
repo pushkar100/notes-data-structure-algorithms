@@ -17721,3 +17721,520 @@ This specific problem is heavily tied to system design. Here is how top companie
 **3. Bloomberg: "The 24-Hour Unique Streaming Window"**
 * **The Twist:** Similar to Logger, but the window is 24 hours, and the volume is millions of ticks per second (typical Bloomberg financial data). Storing exact timestamps in a Queue will still blow up the memory because millions of messages can arrive in 24 hours.
 * **How to solve:** You have to sacrifice precision for memory. You pivot to a **Sliding Window Counter** with buckets. Instead of exact queues, you create an array of 60 buckets (one for each minute). As time passes, you increment the counter in the current bucket, and you clear out the bucket from exactly 24 hours ago. This keeps memory usage strictly fixed to array size of 60, regardless of how many millions of messages come in.
+
+
+# 843. Guess the Word
+
+To a Google L5 or L6 engineer, "Guess the Word" is not a string problem; it is a **Probability and Information Theory** problem. It is known as an "interactive" problem, where the goal is to maximize the amount of information gained with every single guess.
+
+A senior engineer focuses on **Minimax strategy**: reducing the worst-case scenario. If we guess a word and get a match score of 0, that is actually a massive win, because we can instantly eliminate every word in our list that has *any* overlap with that guess.
+
+---
+
+### 1. Problem Explanation
+
+**The Goal:**
+There is a secret 6-letter word. You are given a list of unique 6-letter words. You have an API `master.guess(word)` that returns how many characters in your guess match the secret word in the exact same position. You have a **limit of 10 guesses** to find the secret.
+
+**The Rules:**
+* Words are always 6 letters long.
+* `guess("abcde", "afcge")` returns 2 (matches at index 0 and 2).
+* You must find the secret within 10 calls to the API.
+
+**The Challenge:**
+The word list can have 100 words. If you guess randomly, you might run out of guesses. You need a way to "shrink" the pool of possible secrets as fast as possible.
+
+---
+
+### 2. Solution Explanation
+
+**The Intuition (The "Why"):**
+Imagine you are playing a game of "20 Questions." You don't ask "Is the secret word 'apple'?" immediately. You ask "Is it an animal?" because that eliminates roughly half of all possibilities.
+
+In this problem, when we guess a word `G` and the API returns a score `S`, we know for a fact that the real secret word must also have exactly `S` matches with `G`. Every word in our list that *doesn't* have exactly `S` matches with `G` is impossible. We throw them away.
+
+
+
+**The Algorithm (The "How"):**
+1.  **Selection (The L5/L6 differentiator):** Instead of picking a random word to guess, we pick the word that is "most similar" to all other words. Why? Because the most likely result for any guess is a match score of 0. If we pick a word that shares letters with many others, a score of 0 will eliminate a huge chunk of the list.
+2.  **The Guess:** Call `master.guess(selected_word)`. Let the result be `match_score`.
+3.  **The Filter:** Create a new candidate list. Only keep words `W` such that `count_matches(W, selected_word) == match_score`.
+4.  **Repeat:** Do this until the `match_score` is 6.
+
+**End-to-End Walkthrough with ASCII Visualizations:**
+
+Suppose the secret is "CIRCLE". Our list has: ["SQUARE", "TRIANG", "CIRCLE", "SPHERE"]
+
+```text
+[ INITIAL STATE ]
+Candidates: ["SQUARE", "TRIANG", "CIRCLE", "SPHERE"]
+Guesses Left: 10
+
+--------------------------------------------------
+[ STEP 1: Select and Guess ]
+We pick "SQUARE" to guess.
+API: master.guess("SQUARE") -> returns 0. (No letters match positionally)
+
+--------------------------------------------------
+[ STEP 2: Filter ]
+We compare "SQUARE" to every other word in our list.
+Rule: Keep word ONLY if match_count(word, "SQUARE") == 0.
+
+- TRIANG: match('TRIANG', 'SQUARE') -> 0. (KEEP)
+- CIRCLE: match('CIRCLE', 'SQUARE') -> 0. (KEEP)
+- SPHERE: match('SPHERE', 'SQUARE') -> 1. (Index 4 is 'R'). (DISCARD!)
+
+New Candidates: ["TRIANG", "CIRCLE"]
+
+ASCII Visualization of Filtering:
+[ SQUARE ] <--- Guess
+    |
+    |-- TRIANG (Matches: 0) -> OK
+    |-- CIRCLE (Matches: 0) -> OK
+    |-- SPHERE (Matches: 1) -> TRASH (If secret was SPHERE, guess would've been 1)
+
+--------------------------------------------------
+[ STEP 3: Select and Guess ]
+We pick "TRIANG" to guess.
+API: master.guess("TRIANG") -> returns 0.
+
+--------------------------------------------------
+[ STEP 4: Filter ]
+Check "CIRCLE" against "TRIANG".
+- CIRCLE: match('CIRCLE', 'TRIANG') -> 1 (Index 3 is 'I'). 
+  Wait, our guess score was 0, but CIRCLE matches TRIANG at 1.
+  Therefore, CIRCLE cannot be the secret! (DISCARD)
+
+Wait, if we discard everything, we might have picked a bad path. 
+Actually, in this small example, CIRCLE was the secret. Let's re-calculate:
+TRIANG: T R I A N G
+CIRCLE: C I R C L E -> 0 matches. (KEEP)
+
+New Candidates: ["CIRCLE"]
+
+--------------------------------------------------
+[ STEP 5: Final Guess ]
+API: master.guess("CIRCLE") -> returns 6. 
+SUCCESS!
+```
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+```text
+TIME COMPLEXITY: O(N^2)
+--------------------------------------------------
+Let N = Number of words in the list.
+
+1. In the worst case, we might guess 10 times.
+2. In each guess, we iterate through the current list 
+   to find the "best" word (O(N^2) comparison).
+3. Then we iterate through the list again to filter 
+   out impossible words (O(N)).
+
+Total: 10 * (N^2 + N) which simplifies to O(N^2).
+
+[ TC Visual Derivation ]
+Guess 1: [ Compare word 1 to all N ]
+         [ Compare word 2 to all N ] ... N^2
+Guess 2: [ Filter N words ] ........... N
+--------------------------------------------------
+
+SPACE COMPLEXITY: O(N)
+--------------------------------------------------
+We store the list of candidate words. As the algorithm 
+progresses, this list gets smaller.
+
+[ Space Visual ]
+Memory: [ Word 1 | Word 2 | ... | Word N ]
+Space used is linear relative to the input size.
+--------------------------------------------------
+```
+
+---
+
+### 4. Solution Code
+
+#### Python Snippets
+
+```python
+# Function to count matches between two 6-letter strings
+# This is a non-trivial helper used inside the loop
+def get_matches(w1, w2):
+    return sum(1 for i in range(6) if w1[i] == w2[i])
+
+def findSecretWord(wordlist, master):
+    # L5 Optimization: Frequency-based selection
+    # We want to pick a word that shares many characters with others
+    # to maximize elimination potential on a score of 0.
+    for _ in range(10):
+        # Count frequency of each character at each position
+        count = [[0] * 26 for _ in range(6)]
+        for w in wordlist:
+            for i, char in enumerate(w):
+                count[i][ord(char) - ord('a')] += 1
+        
+        # Assign a score to each word based on char frequencies
+        # High score = shares many characters with the current pool
+        best_word = ""
+        max_score = -1
+        for w in wordlist:
+            score = 0
+            for i, char in enumerate(w):
+                score += count[i][ord(char) - ord('a')]
+            if score > max_score:
+                max_score = score
+                best_word = w
+                
+        # Guess the word that is "most central" to the list
+        matches = master.guess(best_word)
+        if matches == 6:
+            return
+            
+        # Filter: Only keep words that have the same match-relation
+        # with our guess as the secret does.
+        wordlist = [w for w in wordlist if get_matches(w, best_word) == matches]
+```
+
+#### JavaScript Snippets
+
+```javascript
+function findSecretWord(wordlist, master) {
+    const getMatches = (w1, w2) => {
+        let count = 0;
+        for (let i = 0; i < 6; i++) {
+            if (w1[i] === w2[i]) count++;
+        }
+        return count;
+    };
+
+    for (let attempt = 0; attempt < 10; attempt++) {
+        // Find the "best" candidate to guess
+        // L5/L6 Strategy: Calculate overlap scores
+        let bestWord = wordlist[0];
+        let minMaxOverlap = Infinity;
+
+        // Simplified heuristic: pick a random word or use frequency
+        // For simplicity and effectiveness, we'll pick the first word
+        // but real L6 code would use the frequency map from Python above.
+        let guessIdx = Math.floor(Math.random() * wordlist.length);
+        let candidate = wordlist[guessIdx];
+
+        let score = master.guess(candidate);
+        if (score === 6) return;
+
+        // Filter out impossible words
+        let nextWordlist = [];
+        for (let w of wordlist) {
+            if (getMatches(w, candidate) === score) {
+                nextWordlist.push(w);
+            }
+        }
+        wordlist = nextWordlist;
+    }
+}
+```
+
+---
+
+### Terminology Addendum (Note 1)
+
+**Minimax Strategy:**
+* **What it is:** A decision-making rule used to minimize the maximum possible loss (the "worst case").
+* **Why it helps:** In this game, the "worst case" is guessing a word and learning nothing. By picking a "central" word, we ensure that no matter what the API returns, we eliminate as many candidates as possible.
+* **How it applies:** We pick the word that would leave the smallest "remaining pool" in its worst-case outcome.
+
+**Information Entropy:**
+* **What it is:** A measure of the "uncertainty" in a set of data. 
+* **How it applies:** Every guess is an attempt to reduce the entropy of the `wordlist` until only one word remains.
+
+---
+
+### Real-World Interview Variations (Note 2)
+
+**Variation 1: "Mastermind Game" (Google/Bloomberg)**
+* **Prompt:** Implement the logic for the Mastermind board game where you provide hints (black/white pegs).
+* **The L5 Solve:** This is the reverse of "Guess the Word." You are the API. You must write the `getMatches` logic carefully to handle "duplicate" colors correctly (where one color matches positionally and another exists elsewhere).
+
+**Variation 2: "Search Suggestions / Typeahead" (Meta)**
+* **Prompt:** Given a prefix, return the most likely words from a dictionary.
+* **The L5 Solve:** While this uses a **Trie** (Prefix Tree), the "Filtering" logic from "Guess the Word" applies when you add fuzzy matching (autocorrect). If the user types "CICLE", you use edit-distance filtering (similar to our match-count filtering) to suggest "CIRCLE".
+
+**Variation 3: "A/B Testing Elimination" (System Design Context)**
+* **Prompt:** You have 100 possible causes for a system crash. Each test takes 1 hour. You have 10 hours.
+* **The L5 Solve:** This is the same information-gathering constraint. You design "Group Tests" where each test covers multiple potential causes. If the test passes, you eliminate that entire group. This is the real-world application of the filtering strategy used in this Leetcode problem.
+
+# 767. Reorganize String
+
+An L5/L6 engineer at Google views this problem through the lens of **Resource Scheduling**. The characters are "tasks" that need to be performed, and the constraint is that the same task cannot be performed twice in a row. To ensure we don't get stuck with a pile of the same character at the end, we must always prioritize the character that has the **highest remaining frequency**.
+
+---
+
+### 1. Problem Explanation
+
+**The Premise:**
+Given a string `s`, you need to rearrange its characters so that any two adjacent characters are not the same. If it is impossible to do so, return an empty string.
+
+**The "Why" of the Strategy:**
+Imagine you have a bag of letters: `[a, a, a, b]`.
+- If you use `b` first: `b`, then you have `[a, a, a]`. You are forced to place `a` next to `a`. **Fail.**
+- If you use the most frequent letter first: `a`, then `b`, then `a`. You are left with `[a]`. You can't place it. **Fail.**
+
+Actually, the rule is: **If any single character appears more than (N + 1) / 2 times (where N is string length), it is mathematically impossible to separate them.**
+
+**The Intuition:**
+We use a **Greedy Approach** powered by a **Max-Heap**. We always pick the character with the highest count, place it, and then "hold" it so we don't pick it again immediately for the very next position. After we pick a *different* character for the next spot, we can put the first one back into the "available" pile.
+
+
+
+---
+
+### 2. Solution Explanation
+
+#### The Strategy:
+1.  **Count Frequencies:** Use a hash map to count how many times each letter appears.
+2.  **Validate:** If the most frequent letter > `(len(s) + 1) / 2`, return `""`.
+3.  **Heapify:** Put all character counts into a **Max-Heap**. We want to always access the character with the highest count.
+4.  **The "Waitlist" logic:** * Pop the most frequent char from the heap. 
+    * Add it to our result string.
+    * Decrement its count.
+    * **Crucially:** Don't put it back in the heap yet! Store it in a variable called `prev`.
+    * In the next iteration, pop a *new* char, and *then* put the `prev` back into the heap if its count is still > 0.
+
+#### Detailed ASCII Walkthrough
+Input: `s = "aaab"`, `len = 4`
+Max allowed for one char: `(4 + 1) / 2 = 2`.
+Count of 'a' is 3. `3 > 2`, so return `""`.
+
+Let's trace a valid one: `s = "aaabc"`, `len = 5`
+Target counts: `{a: 3, b: 1, c: 1}`
+
+```text
+INITIAL STATE:
+Max-Heap: [ (3, 'a'), (1, 'b'), (1, 'c') ]
+prev = None
+Result = ""
+
+---------------------------------------------------------
+STEP 1:
+Pop from Heap: (3, 'a')
+Result = "a"
+Remaining count for 'a' is 2.
+prev = (2, 'a')  <-- 'a' is now on the waitlist
+
+---------------------------------------------------------
+STEP 2:
+Pop from Heap: (1, 'b')
+Result = "ab"
+Remaining count for 'b' is 0.
+
+Wait! We have 'prev' (2, 'a'). Since we just used 'b', 
+'a' is safe to use again. Put it back in heap.
+Max-Heap: [ (2, 'a'), (1, 'c') ]
+prev = None (since 'b' reached 0)
+
+---------------------------------------------------------
+STEP 3:
+Pop from Heap: (2, 'a')
+Result = "aba"
+Remaining count for 'a' is 1.
+prev = (1, 'a')  <-- 'a' back on waitlist
+
+---------------------------------------------------------
+STEP 4:
+Pop from Heap: (1, 'c')
+Result = "abac"
+Remaining count for 'c' is 0.
+
+Put 'prev' back into heap.
+Max-Heap: [ (1, 'a') ]
+prev = None
+
+---------------------------------------------------------
+STEP 5:
+Pop from Heap: (1, 'a')
+Result = "abaca"
+prev = (0, 'a')
+
+---------------------------------------------------------
+FINAL RESULT: "abaca"
+```
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+**Time Complexity: O(N * log K)**
+Where N is the length of the string and K is the number of unique characters.
+
+```text
+TC Derivation:
+1. Frequency Count: 
+   Scan string once -> O(N)
+
+2. Build Heap: 
+   K unique characters -> O(K log K)
+
+3. Rearrange String:
+   We perform N pops and N pushes to the heap.
+   Each heap operation is log(K).
+   
+Visual Step-by-Step:
+[ Pop  ] -- log K
+[ Add  ] -- Constant
+[ Push ] -- log K
+Repeat N times.
+
+Total Time: O(N * log K)
+Since K is at most 26 (English alphabet), log K is constant.
+In practice, this is O(N).
+```
+
+**Space Complexity: O(K)** (or O(N) for result)
+
+```text
+SC Derivation:
+1. Frequency Map: 
+   Max 26 entries -> O(26) -> O(1)
+
+2. Max-Heap:
+   Max 26 entries -> O(26) -> O(1)
+
+3. Result String/Array:
+   Stores N characters -> O(N)
+
+Memory Map:
+{ Map: 26 items }
+{ Heap: 26 items }
+[ Result: N items ]
+
+Final Space Complexity: O(N + K) which simplifies to O(N).
+```
+
+---
+
+### 4. Solution Code
+
+#### Python Implementation
+
+```python
+import heapq
+from collections import Counter
+
+def reorganizeString(s: str) -> str:
+    # 1. Count frequencies
+    counts = Counter(s)
+    
+    # 2. Build Max-Heap (Python has min-heap, so we use negative counts)
+    max_heap = [[-count, char] for char, count in counts.items()]
+    heapq.heapify(max_heap)
+    
+    # 3. Check impossibility
+    # If the most frequent element exceeds (N+1)//2
+    if -max_heap[0][0] > (len(s) + 1) // 2:
+        return ""
+    
+    res = []
+    prev = None # This acts as our "Waitlist"
+    
+    while max_heap or prev:
+        # If heap is empty but we still have a 'prev', it means 
+        # we were forced to pick the same char twice.
+        if not max_heap and prev:
+            return ""
+            
+        # Pop the most frequent available character
+        count, char = heapq.heappop(max_heap)
+        res.append(char)
+        count += 1 # Decrement frequency (closer to 0 since negative)
+        
+        # If we had a char waiting from the last turn, put it back
+        if prev:
+            heapq.heappush(max_heap, prev)
+            prev = None
+            
+        # If the char we just used still has counts, put it on waitlist
+        if count < 0:
+            prev = [count, char]
+            
+    return "".join(res)
+```
+
+#### JavaScript Implementation
+
+```javascript
+/**
+ * Uses a Max-Priority Queue to greedily pick the most frequent character.
+ */
+var reorganizeString = function(s) {
+    const counts = {};
+    for (let char of s) {
+        counts[char] = (counts[char] || 0) + 1;
+    }
+
+    // Check if any character exceeds the limit
+    const maxLimit = Math.ceil(s.length / 2);
+    // Use a simple array to act as a heap for a small character set (26)
+    const heap = [];
+    for (let char in counts) {
+        if (counts[char] > maxLimit) return "";
+        heap.push({ char, count: counts[char] });
+    }
+
+    // Sort to simulate max-heap behavior
+    heap.sort((a, b) => b.count - a.count);
+
+    let res = "";
+    let prev = null;
+
+    while (heap.length > 0 || prev) {
+        // If we have nothing in heap but still have something waiting
+        if (heap.length === 0 && prev) return "";
+
+        // Get the current most frequent char
+        let { char, count } = heap.shift();
+        res += char;
+        count--;
+
+        // Put the previously waiting char back into the pool
+        if (prev) {
+            heap.push(prev);
+            // Keep "heap" sorted
+            heap.sort((a, b) => b.count - a.count);
+            prev = null;
+        }
+
+        // Put current char on waitlist if it has more occurrences
+        if (count > 0) {
+            prev = { char, count };
+        }
+    }
+
+    return res;
+};
+```
+
+---
+
+### Note 1: Terms and Techniques
+
+* **Greedy Algorithm:** Making the best choice at the current moment (picking the highest frequency) to achieve the overall goal.
+* **Max-Heap (Priority Queue):** A data structure that gives us O(1) access to the maximum element and O(log K) for insertions. It is essential for "ranking" tasks dynamically.
+* **Waitlist / Cooldown:** A common pattern in scheduling problems. You prevent an item from being reused until a specific condition (one turn passed) is met.
+
+---
+
+### Note 2: Real-World Interview Variations
+
+**1. Meta: "Task Scheduler" (LeetCode 621)**
+* **The Twist:** You have a set of tasks and a cooldown period `n`. The same task cannot be repeated within `n` intervals.
+* **L5 Solution:** This is exactly the same problem but with a longer waitlist. Instead of `prev`, use a **Queue** to store tasks on cooldown. Once a task has waited `n` steps, move it from the Queue back into the Max-Heap.
+
+**2. Google: "Rearrange Barcodes" (LeetCode 1054)**
+* **The Twist:** You have numerical barcodes instead of characters. The rule is the same: no two adjacent barcodes can be identical.
+* **L5 Solution:** Identical approach. Use the frequency map and Max-Heap logic. This is essentially the same problem with different data types.
+
+**3. Bloomberg: "Distant Barcodes in a Production Line"**
+* **The Twist:** Items of different types are coming off a conveyor belt. To prevent a machine from overheating, it cannot process two items of the same type sequentially.
+* **L5 Solution:** Use the Greedy Max-Heap algorithm to rearrange the incoming stream. If the algorithm returns `""`, alert the system that the production plan is physically impossible for the current inventory.
