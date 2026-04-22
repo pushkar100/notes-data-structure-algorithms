@@ -1,4 +1,4 @@
-# Dynamic Programming
+# Dynamic Programming & Backtracking
 
 # 70. Climbing Stairs
 
@@ -12879,3 +12879,909 @@ var countRoutes = function(locations, start, finish, fuel) {
 1. **Google (Google Maps Team):** "Find the number of ways to travel between two points given a limited battery range for an EV, where some points have charging stations." (This adds a state change at specific nodes).
 2. **Meta (Ads/Feed):** "Given a budget of $X, how many ways can we distribute ads across N placements where each placement has a specific cost and can be reused?"
 3. **Bloomberg (Ticker systems):** "Counting paths in a graph where nodes can be revisited but each edge traversal consumes a 'time' resource."
+
+# 282. Expression Add Operators
+
+To a Google L5/L6 engineer, "Expression Add Operators" is the ultimate test of **Backtracking** and **State Management**. It is famously classified as a "Hard" problem because of one specific rule: **Operator Precedence** (multiplication happens before addition).
+
+A senior engineer doesn't just "brute force" this; they solve the precedence problem by carrying a "correction" value through the recursion to ensure that `1 + 2 * 3` is calculated as `7`, not `9`.
+
+---
+
+### 1. Problem Explanation
+
+**The Goal:**
+Given a string `num` containing only digits and an integer `target`, return all possible strings formed by inserting binary operators `+`, `-`, or `*` between the digits such that the expression evaluates to the `target`.
+
+**Constraints & Rules:**
+1. **No Leading Zeros:** You cannot have a number like "05". "0" alone is fine, but "05" is invalid.
+2. **Order of Operations:** Multiplication must be handled correctly (PEMDAS/BODMAS).
+3. **Join Digits:** You can choose *not* to put an operator between digits, effectively joining them (e.g., "1" and "2" becomes "12").
+
+**Example:**
+Input: `num = "123"`, `target = 6`
+Valid Outputs: `["1+2+3", "1*2*3"]`
+
+---
+
+### 2. Solution Explanation
+
+**The Intuition (The "Why"):**
+We use **Backtracking**. At every step, we decide how long the next number should be, and then we decide which operator to put before it.
+
+**The "Non-Trivial" Problem: Multiplication Precedence**
+Imagine we are evaluating `2 + 3` and our current sum is `5`. Now we encounter `* 4`. 
+If we just multiply our total (`5 * 4 = 20`), we get the wrong answer because the expression is `2 + 3 * 4`, which should be `14`.
+
+**The Senior Fix:** We keep track of the **Last Value** we added to our sum.
+* When we see `* 4`, we "undo" the last addition: `Total (5) - LastValue (3) = 2`.
+* Then we multiply the `LastValue` by the new number: `3 * 4 = 12`.
+* Then we add that back: `2 + 12 = 14`.
+
+
+
+**The Algorithm (The "How"):**
+1. Start a recursive function with: `index`, `current_expression`, `current_total`, and `last_value`.
+2. Iterate from the `index` to the end of the string to pick the "next number".
+3. **If index is 0:** This is the first number. Just start the recursion with it.
+4. **Otherwise, try 3 operators:**
+   - **Addition:** `total + val`, `last_value = val`
+   - **Subtraction:** `total - val`, `last_value = -val`
+   - **Multiplication:** `(total - last_value) + (last_value * val)`, `last_value = (last_value * val)`
+
+**Walkthrough with ASCII Visualization:**
+Input: `num = "123"`, `target = 6`
+
+```text
+Level 0: Start with "1"
+   |
+   |-- Add "+2" (Total: 3, LastVal: 2)
+   |     |-- Add "+3" -> "1+2+3" = 6 (MATCH!)
+   |     |-- Sub "-3" -> "1+2-3" = 0
+   |     |-- Mul "*3" -> (3 - 2) + (2 * 3) = 1 + 6 = 7
+   |
+   |-- Sub "-2" (Total: -1, LastVal: -2)
+   |     |-- ... (no match)
+   |
+   |-- Mul "*2" (Total: 2, LastVal: 2)
+   |     |-- Add "+3" -> 2 + 3 = 5
+   |     |-- Mul "*3" -> (2 - 2) + (2 * 3) = 0 + 6 = 6 (MATCH!)
+
+Level 0: Start with "12"
+   |-- Add "+3" -> 15
+   |-- ...
+```
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+```text
+TIME COMPLEXITY: O(4^N)
+--------------------------------------------------
+At each gap between N digits, we have 4 choices:
+1. Put nothing (Join digits)
+2. Put '+'
+3. Put '-'
+4. Put '*'
+
+In the worst case, we explore all 4 possibilities for 
+every position.
+
+[ TC Visual Derivation ]
+Digits:    1 _ 2 _ 3 _ 4
+Choices:     4 * 4 * 4
+Growth:      4^(N-1)
+Result:      O(4^N)
+--------------------------------------------------
+
+SPACE COMPLEXITY: O(N)
+--------------------------------------------------
+- The recursion stack depth is at most N (the length of 
+  the string).
+- The string builder/array used to store the current 
+  expression also takes O(N) space.
+- We do not count the space for the final result list.
+
+[ Memory Stack ]
+| Depth 4: "1+2+3+4" |
+| Depth 3: "1+2+3"   |
+| Depth 2: "1+2"     |
+| Depth 1: "1"       |
+Total Space: O(N)
+--------------------------------------------------
+```
+
+---
+
+### 4. Solution Code
+
+#### Python Snippet
+
+```python
+def addOperators(num, target):
+    res = []
+    
+    def backtrack(index, prev_operand, current_val, expression_parts):
+        # Base Case: Reached the end of the string
+        if index == len(num):
+            if current_val == target:
+                res.append("".join(expression_parts))
+            return
+
+        for j in range(index, len(num)):
+            # Rule: No leading zeros (e.g., "05")
+            if j > index and num[index] == '0':
+                break
+            
+            # Extract the current substring and convert to integer
+            curr_str = num[index:j+1]
+            curr_num = int(curr_str)
+            
+            # Case 1: First number in the expression
+            if index == 0:
+                expression_parts.append(curr_str)
+                backtrack(j + 1, curr_num, curr_num, expression_parts)
+                expression_parts.pop() # Backtrack
+            else:
+                # Case 2: Addition
+                expression_parts.append('+')
+                expression_parts.append(curr_str)
+                backtrack(j + 1, curr_num, current_val + curr_num, expression_parts)
+                expression_parts.pop()
+                expression_parts.pop()
+                
+                # Case 3: Subtraction
+                expression_parts.append('-')
+                expression_parts.append(curr_str)
+                backtrack(j + 1, -curr_num, current_val - curr_num, expression_parts)
+                expression_parts.pop()
+                expression_parts.pop()
+                
+                # Case 4: Multiplication (Non-trivial precedence handling)
+                expression_parts.append('*')
+                expression_parts.append(curr_str)
+                # Undo prev_operand and apply multiplication
+                new_val = (current_val - prev_operand) + (prev_operand * curr_num)
+                backtrack(j + 1, prev_operand * curr_num, new_val, expression_parts)
+                expression_parts.pop()
+                expression_parts.pop()
+
+    backtrack(0, 0, 0, [])
+    return res
+```
+
+#### JavaScript Snippet
+
+```javascript
+function addOperators(num, target) {
+    const result = [];
+
+    /**
+     * @param {number} index - Current index in the input string
+     * @param {number} prev - The last value added/subtracted (used for '*' precedence)
+     * @param {number} total - Current evaluation of the expression
+     * @param {string} expr - The string expression built so far
+     */
+    function backtrack(index, prev, total, expr) {
+        if (index === num.length) {
+            if (total === target) result.push(expr);
+            return;
+        }
+
+        for (let i = index; i < num.length; i++) {
+            // Avoid leading zeros
+            if (i > index && num[index] === '0') break;
+
+            const part = num.substring(index, i + 1);
+            const val = parseInt(part);
+
+            if (index === 0) {
+                // First number, no operator needed
+                backtrack(i + 1, val, val, part);
+            } else {
+                // Try Addition
+                backtrack(i + 1, val, total + val, expr + "+" + part);
+                
+                // Try Subtraction
+                backtrack(i + 1, -val, total - val, expr + "-" + part);
+                
+                // Try Multiplication (Undo previous, multiply, then add back)
+                const multipliedVal = prev * val;
+                backtrack(i + 1, multipliedVal, (total - prev) + multipliedVal, expr + "*" + part);
+            }
+        }
+    }
+
+    backtrack(0, 0, 0, "");
+    return result;
+}
+```
+
+---
+
+### Note 1: Terminology Addendum
+
+**Backtracking:**
+* **What it is:** An algorithmic technique that builds a solution incrementally and abandons a path ("backtracks") as soon as it determines the path cannot lead to a valid solution.
+* **Why it helps:** It allows us to explore all possible combinations of operators efficiently.
+
+**State Management (Multiplication Precedence):**
+* **Why it matters:** Standard left-to-right evaluation fails for `1 + 2 * 3`. By passing the `prev` operand through recursion, we can "undo" the last step and apply the correct order of operations without using a separate parser.
+
+---
+
+### Note 2: Real-World Interview Variations
+
+**Variation 1: "Basic Calculator II" (Google/Bloomberg)**
+* **Prompt:** Evaluate a string like "3+2*2".
+* **The L5 Solve:** This is the "evaluation" half of the operator problem. Instead of recursion, use a **Stack**. Push numbers onto the stack. If you see `*`, pop the top, multiply, and push back. At the end, sum the stack.
+
+**Variation 2: "24 Game" (Google)**
+* **Prompt:** Given 4 cards, can you use `+`, `-`, `*`, `/` and `()` to get 24?
+* **The L5 Solve:** This is a more complex backtracking problem. Since parentheses change the order, you don't just go left-to-right. You pick any 2 numbers from the list, apply an operator, and put the result back into the list. Repeat until only one number remains.
+
+**Variation 3: "Target Sum" (Meta)**
+* **Prompt:** Given an array, add `+` or `-` to each number to reach a target.
+* **The L5 Solve:** While this can be done with backtracking, a senior engineer will recognize this is **Dynamic Programming (0/1 Knapsack variation)**. You use a hash map to store `dp[index][current_sum]` to avoid re-calculating the same states.
+
+# 818. Race Car
+
+This is a notoriously difficult LeetCode Hard. An L5/L6 Google engineer views this as a **Shortest Path problem in an Infinite State Space**. While a junior might struggle with the physics of the car, a senior engineer sees a graph where every (position, speed) pair is a node and "A" or "R" are edges.
+
+---
+
+### 1. Problem Explanation
+
+**The Premise:**
+You have a race car at position 0 and speed +1. You want to reach a `target` position on a 1D line using the minimum number of commands.
+
+**The Commands:**
+1.  **A (Accelerate):** * Position += Speed
+    * Speed *= 2
+2.  **R (Reverse):**
+    * If Speed > 0: Speed = -1
+    * Else: Speed = +1
+    * (Position stays the same)
+
+**The Challenge:**
+The car's speed grows exponentially (1, 2, 4, 8...). You will almost always overshoot your target. To get back, you must reverse, but reversing resets your speed to 1 in the opposite direction. The puzzle is finding the perfect sequence of "over-shooting" and "back-tracking."
+
+
+
+---
+
+### 2. Solution Explanation
+
+We use **Breadth-First Search (BFS)** because we need the absolute minimum number of steps in an unweighted state graph.
+
+#### The State
+A "state" is defined by `(position, speed)`.
+* We start at `(0, 1)`.
+* We want to find the first state where `position == target`.
+
+#### The Pruning (The "Why")
+If we explore every possible state, the search will never end because the car can drive to infinity. An L5/L6 engineer applies these constraints to "prune" the search space:
+1.  **Don't go too far:** If the target is at 10, and you are at 20, you probably shouldn't keep accelerating to 40. A safe boundary is `2 * target`.
+2.  **Don't go negative:** We shouldn't go much further back than position 0.
+3.  **Visited Set:** Never process the same `(position, speed)` twice.
+
+#### Detailed ASCII Walkthrough
+Let's reach `target = 3`.
+
+```text
+Initial State: (pos: 0, speed: 1)
+Queue: [(0, 1, 0 steps)]
+
+---------------------------------------------------------
+STEP 1: Process (0, 1)
+Command A: New Pos = 0+1=1, New Speed = 1*2=2. State: (1, 2)
+Command R: New Pos = 0, New Speed = -1. State: (0, -1)
+
+Queue: [(1, 2, 1s), (0, -1, 1s)]
+---------------------------------------------------------
+STEP 2: Process (1, 2)
+Command A: New Pos = 1+2=3, New Speed = 2*2=4. State: (3, 4)
+*** TARGET REACHED! ***
+Position is 3. Steps = 2.
+Sequence: AA
+
+---------------------------------------------------------
+WAIT! Let's try target = 6.
+(0,1) --A--> (1,2) --A--> (3,4) --A--> (7,8) [Overshot!]
+
+From (7,8):
+Command R: (7, -1)
+From (7, -1):
+Command A: New Pos = 7+(-1)=6. State: (6, -2)
+*** TARGET REACHED! ***
+Sequence: AAAR A (5 steps)
+
+---------------------------------------------------------
+Visualizing the Graph:
+(0,1) 
+  |
+  +-- A --> (1,2)
+  |           |
+  |           +-- A --> (3,4) --A--> (7,8) --R--> (7,-1) --A--> (6,-2) FOUND!
+  |           |
+  |           +-- R --> (1,-1)
+  |
+  +-- R --> (0,-1)
+```
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+The complexity is bounded by the number of unique states we visit.
+
+**Time Complexity: O(T * log T)**
+Where T is the target position.
+
+```text
+TC Derivation:
+1. Position: Can range from 0 to 2*T (approximately T states).
+2. Speed: Speed is always a power of 2 or its negative. 
+   Speed can be 1, 2, 4, 8 ... up to 2*T.
+   The number of such speeds is log(T).
+
+Total unique states = Position * Speeds
+Total unique states = T * log T
+
+Since BFS visits each state once:
+Total Work = O(T * log T)
+```
+
+**Space Complexity: O(T * log T)**
+
+```text
+SC Derivation:
+We use a 'visited' set to store every unique (pos, speed) pair.
+We use a 'queue' for BFS.
+
+Memory used:
+[ (0,1), (1,2), (3,4), (7,8), (7,-1), (6,-2) ... ]
+
+The size of these structures scales with the number 
+of unique states.
+Total Space = O(T * log T)
+```
+
+---
+
+### 4. Solution Code
+
+We will provide the BFS solution. Note that for extremely large targets, an L6 would use Dynamic Programming, but BFS is more intuitive and standard for interviews.
+
+#### Python Implementation (BFS)
+
+```python
+from collections import deque
+
+def racecar(target):
+    # Queue stores (position, speed, steps)
+    queue = deque([(0, 1, 0)])
+    # Visited stores (position, speed)
+    visited = {(0, 1)}
+    
+    while queue:
+        pos, speed, steps = queue.popleft()
+        
+        if pos == target:
+            return steps
+        
+        # 1. Try Accelerate (A)
+        next_pos = pos + speed
+        next_speed = speed * 2
+        # Check boundaries to prevent infinite search
+        if (next_pos, next_speed) not in visited and \
+           0 < next_pos < (target * 2):
+            visited.add((next_pos, next_speed))
+            queue.append((next_pos, next_speed, steps + 1))
+            
+        # 2. Try Reverse (R)
+        # Reversing resets speed to -1 (if was forward) or 1 (if was backward)
+        rev_speed = -1 if speed > 0 else 1
+        if (pos, rev_speed) not in visited:
+            visited.add((pos, rev_speed))
+            queue.append((pos, rev_speed, steps + 1))
+
+    return -1
+```
+
+#### JavaScript Implementation (BFS)
+
+```javascript
+var racecar = function(target) {
+    // Queue stores [position, speed, steps]
+    let queue = [[0, 1, 0]];
+    // Visited uses a string key "pos,speed" for Set compatibility
+    let visited = new Set(["0,1"]);
+
+    while (queue.length > 0) {
+        let [pos, speed, steps] = queue.shift();
+
+        if (pos === target) return steps;
+
+        // Command A
+        let nextPosA = pos + speed;
+        let nextSpeedA = speed * 2;
+        let keyA = nextPosA + "," + nextSpeedA;
+
+        // Pruning: stay within reasonable bounds
+        if (!visited.has(keyA) && nextPosA > 0 && nextPosA < target * 2) {
+            visited.add(keyA);
+            queue.push([nextPosA, nextSpeedA, steps + 1]);
+        }
+
+        // Command R
+        let nextSpeedR = speed > 0 ? -1 : 1;
+        let keyR = pos + "," + nextSpeedR;
+
+        if (!visited.has(keyR)) {
+            visited.add(keyR);
+            queue.push([pos, nextSpeedR, steps + 1]);
+        }
+    }
+};
+```
+
+---
+
+### Note 1: Terms and Techniques
+
+* **Pruning:** The act of cutting off search branches that are mathematically unlikely to yield the best result. In this car problem, going to position 1,000,000 to reach a target at 10 is clearly useless, so we prune it.
+* **Infinite State Space:** A problem where the possible configurations (position and speed) could go on forever. Shortest path algorithms require a "box" or constraints to work on these.
+* **BFS (Breadth-First Search):** Exploring all possibilities at 1 step, then 2 steps, then 3 steps. This guarantees that the first time we see the `target`, it is via the shortest path.
+
+---
+
+### Note 2: Real-World Interview Variations
+
+**1. Google: "The Robot Vacuum"**
+* **The Setup:** A robot can move in 4 directions. Every move it doubles its speed in that direction. To slow down or change direction, it must "reset" (Reverse).
+* **L5 Solution:** This is 2D Race Car. You expand the state to `(x, y, speed_x, speed_y)`. Use BFS with pruning.
+
+**2. Bloomberg: "Optimal Trading Volume"**
+* **The Setup:** You are buying stocks. Every "Accelerate" order doubles your batch size (100, 200, 400). You want to reach exactly 10,500 shares. If you over-buy, you must "Reverse" to sell in batches of 100.
+* **L5 Solution:** This is the same math. The "position" is total shares, "speed" is batch size. BFS finds the minimum number of trades to hit the exact target.
+
+**3. Meta: "Exponential Backoff Optimization"**
+* **The Setup:** A network request retries at exponential intervals (1s, 2s, 4s). You want the total wait time to equal exactly `T`. You can "Reset" the timer at any point.
+* **L5 Solution:** Use the same BFS. The state is `(total_time_waited, current_backoff_timer)`.
+
+# 304. Range Sum Query 2D - Immutable
+
+A Google L5/L6 engineer views this problem through the lens of **API Latency and Computational Trade-offs**. 
+
+The "Immutable" keyword in the title is the biggest hint. It tells us that we can afford a heavy one-time cost (Preprocessing) to make the repetitive operation (Querying) lightning-fast. In a production environment at Google, this is the difference between a dashboard that loads in 10ms versus one that hangs for 5 seconds.
+
+---
+
+### 1. Problem Explanation
+
+**The Goal:**
+You are given a 2D matrix. You need to handle multiple queries that ask for the sum of elements inside a specific rectangle, defined by its upper-left corner `(row1, col1)` and lower-right corner `(row2, col2)`.
+
+**The Constraint:**
+The matrix is **immutable** (never changes). You will be asked for these sums many, many times. 
+
+**The Naive Approach (The L3/Junior Way):**
+Every time a query comes in, you use a nested loop to sum up all numbers in that rectangle.
+* If the matrix is 1000x1000 and the query asks for the whole thing, you do 1,000,000 additions per query.
+* If you have 10,000 queries, that is 10 billion operations. **This will time out.**
+
+**The Senior Approach:**
+We want to answer every query in **constant time O(1)**. To do this, we use a 2D version of a "Prefix Sum."
+
+---
+
+### 2. Solution Explanation
+
+
+
+The core idea is to precalculate a `prefixSum` matrix where every cell `(i, j)` stores the sum of **all elements** in the rectangle from `(0, 0)` to `(i, j)`.
+
+#### Phase 1: Preprocessing (Building the Map)
+To calculate the sum at `(r, c)`, we don't start from scratch. We use the values we already calculated for the neighbors:
+* **Sum = [Cell Value] + [Sum Above] + [Sum to the Left] - [Diagonal Overlap]**
+
+**Why subtract the diagonal?** Because when you add the "Sum Above" and the "Sum to the Left," they both contain the diagonal rectangle starting at `(r-1, c-1)`. You've added it twice!
+
+#### Phase 2: The Query (Extraction)
+Imagine you want the sum of the red area below. You take the big rectangle starting from the origin and subtract the "top" and "left" chunks.
+
+```text
+ORIGIN (0,0)
+  +-----------+-----------+
+  |     A     |     B     |  A = prefixSum[row1-1][col1-1]
+  |           |           |  A + B = prefixSum[row1-1][col2]
+  +-----------+-----------+  A + C = prefixSum[row2][col1-1]
+  |     C     |   TARGET  |  A+B+C+TARGET = prefixSum[row2][col2]
+  |           |           |
+  +-----------+-----------+
+```
+
+**To get TARGET:**
+`TARGET = (A + B + C + TARGET) - (A + B) - (A + C) + A`
+
+In coordinate terms:
+`Result = Sum(r2, c2) - Sum(r1-1, c2) - Sum(r2, c1-1) + Sum(r1-1, c1-1)`
+
+
+
+#### ASCII Walkthrough
+Matrix:
+```text
+3  0  1
+5  6  3
+1  2  0
+```
+
+**Step 1: Pad with zeros (makes the math easier so we don't check for index -1)**
+```text
+0  0  0  0
+0  3  3  4
+0  8  14 18
+0  9  17 21  <-- This is our PrefixSum Matrix
+```
+*How did we get 14?* Value (6) + Left (3) + Above (8) - Diagonal (3) = 14.
+
+**Step 2: Query for rectangle (1,1) to (2,2)**
+*Target values are: 6, 3, 2, 0 (Sum = 11)*
+Formula: `Sum(3,3) - Sum(1,3) - Sum(3,1) + Sum(1,1)`
+`21 - 4 - 9 + 3 = 11`. **Correct!**
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+```text
++-----------------------------------------------------------------------+
+| TIME COMPLEXITY DERIVATION                                            |
++-----------------------------------------------------------------------+
+| R = Number of rows, C = Number of columns                             |
+|                                                                       |
+| 1. Constructor (Preprocessing):                                       |
+|    We visit each cell in the matrix exactly once to calculate         |
+|    the prefix sum.                                                    |
+|    Cost: O(R * C)                                                     |
+|                                                                       |
+| 2. sumRegion (Query):                                                 |
+|    Four lookups in the prefixSum matrix and basic arithmetic.         |
+|    Cost: O(1) per query                                               |
+|                                                                       |
+| TOTAL: O(R*C) initial, then O(1) per call.                            |
++-----------------------------------------------------------------------+
+
++-----------------------------------------------------------------------+
+| SPACE COMPLEXITY DERIVATION                                           |
++-----------------------------------------------------------------------+
+| 1. PrefixSum Matrix:                                                  |
+|    We store a new matrix of size (R+1) * (C+1).                       |
+|                                                                       |
+| TOTAL: O(R * C)                                                       |
++-----------------------------------------------------------------------+
+```
+
+---
+
+### 4. Solution Code
+
+**Python Snippet**
+```python
+class NumMatrix:
+    def __init__(self, matrix: list[list[int]]):
+        if not matrix or not matrix[0]:
+            return
+            
+        rows, cols = len(matrix), len(matrix[0])
+        # Create a prefix sum matrix padded with an extra row/col of 0s
+        # This prevents "out of bounds" errors for row1-1 or col1-1
+        self.ps = [[0] * (cols + 1) for _ in range(rows + 1)]
+        
+        for r in range(rows):
+            for c in range(cols):
+                # Core DP Formula:
+                # Sum = Current + Top + Left - TopLeftDiagonal
+                self.ps[r + 1][c + 1] = (matrix[r][c] + 
+                                         self.ps[r][c + 1] + 
+                                         self.ps[r + 1][c] - 
+                                         self.ps[r][c])
+
+    def sumRegion(self, r1: int, c1: int, r2: int, c2: int) -> int:
+        # Adjustment: Since we padded with 0s at the start,
+        # we access r2+1 and c2+1.
+        return (self.ps[r2 + 1][c2 + 1] - 
+                self.ps[r1][c2 + 1] - 
+                self.ps[r2 + 1][c1] + 
+                self.ps[r1][c1])
+```
+
+**JavaScript Snippet**
+```javascript
+class NumMatrix {
+    /**
+     * @param {number[][]} matrix
+     */
+    constructor(matrix) {
+        if (!matrix.length || !matrix[0].length) return;
+        
+        const rows = matrix.length;
+        const cols = matrix[0].length;
+        
+        // Initialize padded prefix sum array
+        this.ps = Array.from({ length: rows + 1 }, () => new Array(cols + 1).fill(0));
+
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                // Calculate current prefix sum using previously computed neighbors
+                this.ps[r + 1][c + 1] = matrix[r][c] + 
+                                        this.ps[r][c + 1] + 
+                                        this.ps[r + 1][c] - 
+                                        this.ps[r][c];
+            }
+        }
+    }
+
+    /** * @param {number} row1 @param {number} col1 
+     * @param {number} row2 @param {number} col2
+     * @return {number}
+     */
+    sumRegion(row1, col1, row2, col2) {
+        // Inclusion-Exclusion Principle logic
+        return this.ps[row2 + 1][col2 + 1] - 
+               this.ps[row1][col2 + 1] - 
+               this.ps[row2 + 1][col1] + 
+               this.ps[row1][col1];
+    }
+}
+```
+
+---
+
+### Note 1: Terminology and Techniques
+
+* **Inclusion-Exclusion Principle:** This is the math term for adding overlapping parts and then subtracting the intersections so you don't double-count.
+* **Prefix Sum:** A precomputed array/matrix where each element is the sum of all elements before it. It transforms range-sum problems from linear time to constant time.
+* **Immutability:** When data is "immutable," it means it doesn't change. This justifies the O(R*C) setup cost because we know we won't have to rebuild the table.
+
+---
+
+### Note 2: Real-World Interview Variations
+
+**1. Google: "Satellite Image Heatmap"**
+* **Prompt:** You have a 2D grid of satellite data representing heat. Users need to zoom into specific coordinates and get the average heat of that square instantly.
+* **Solution:** Same logic. The "Sum" from our algorithm is divided by the "Area" (Width * Height) of the query rectangle to get the average.
+
+**2. Meta: "Ad Placement Pixels"**
+* **Prompt:** A webpage is a grid of pixels. Some pixels have "user engagement" scores. Calculate how much total engagement a rectangular ad banner covers.
+* **Solution:** Directly applies LC 304. Since ad banners are queried constantly across billions of pages, the O(1) query time is non-negotiable.
+
+**3. Bloomberg: "Stock Ticker Correlation Matrix"**
+* **Prompt:** You have a matrix where `matrix[i][j]` is the correlation between stock i and stock j. Find the "aggregate sector correlation" for a group of stocks in a specific index range.
+* **Solution:** Use the 2D prefix sum. This allows financial analysts to scan through different sub-sectors (rectangles in the matrix) and get immediate feedback without the system lagging.
+
+# 31. Next Permutation
+
+At the L5/L6 level at Google, we don't look at "Next Permutation" as a math riddle; we look at it as a **lexicographical sequence** problem. 
+
+To solve this effectively, you have to realize that "permutations" are just like numbers. If you have the number **15842**, what is the next largest number using those same digits? It's **18245**. A senior engineer identifies the "pivot" point where the increasing sequence breaks and performs a surgical swap to find the smallest possible increase.
+
+---
+
+### 1. Problem Explanation
+
+**The Core Question:** Implement "next permutation," which rearranges numbers into the lexicographically next greater permutation of numbers. If such an arrangement is not possible (it is the largest possible arrangement), it must rearrange it as the lowest possible order (i.e., sorted in ascending order).
+
+**The Rules:**
+* The replacement must be in-place.
+* Use only constant extra memory.
+
+**Visualizing the "Lexicographical Hill":**
+Imagine the numbers as a path that goes up and then down.
+
+```text
+Input: [1, 5, 8, 4, 2]
+
+Lexicographical Hill:
+      8 (Peak)
+     / \
+    5   4
+   /     \
+  1       2
+
+To find the next largest, we need to change the number that is 
+as far to the right as possible, but still allows for an increase.
+```
+
+---
+
+### 2. Solution Explanation
+
+We follow a 3-step surgical approach. Let's use `nums = [1, 5, 8, 4, 2]` as our example.
+
+#### Step 1: Find the "Pivot" (The break in the mountain)
+Scan from **right to left** to find the first pair of numbers where `nums[i] < nums[i + 1]`. 
+This index `i` is our **pivot**. Everything to the right of this pivot is in descending order (it's at its maximum possible value).
+
+
+
+```text
+[ 1, 5, 8, 4, 2 ]
+     ^  ^
+     i  i+1
+
+8 > 4 (ok)
+4 > 2 (ok)
+5 < 8 (STOP!) -> Pivot is at index 1 (value 5).
+```
+
+#### Step 2: Find the "Successor" (The smallest increase)
+Now we need to replace the pivot (5) with the smallest number to its right that is still **larger than 5**. This ensures our "increase" is as small as possible.
+
+```text
+Pivot is 5.
+Numbers to the right: [8, 4, 2]
+Numbers larger than 5: [8]
+Smallest of those: 8.
+
+Swap Pivot (5) and Successor (8):
+[ 1, 8, 5, 4, 2 ]
+```
+
+#### Step 3: Minimize the Tail (The reversal)
+After the swap, the numbers to the right of our old pivot position are still in descending order `[5, 4, 2]`. To make this the *next* lexicographical permutation, we want the tail to be as small as possible (ascending order). 
+**Trick:** To turn a descending list into an ascending one, just reverse it!
+
+```text
+Current: [ 1, 8, 5, 4, 2 ]
+Tail to reverse: [5, 4, 2]
+
+Reversed Tail: [2, 4, 5]
+Result: [1, 8, 2, 4, 5]
+```
+
+**What if there is no pivot?**
+If you scan right-to-left and never find `nums[i] < nums[i+1]`, the whole array is descending (e.g., `[5, 4, 3, 2, 1]`). This is the absolute maximum. Following the rules, we reverse the entire thing to get `[1, 2, 3, 4, 5]`.
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+Let N be the number of elements in the array.
+
+```text
+========================================================================
+TIME COMPLEXITY: O(N)
+========================================================================
+Derivation Diagram:
+
+[ N elements ]
+      |
+      |--> (Step 1) Scan right-to-left: Max N steps ----> O(N)
+      |
+      |--> (Step 2) Scan right-to-left: Max N steps ----> O(N)
+      |
+      |--> (Step 3) Reverse the tail: Max N/2 steps ----> O(N)
+      V
+Total Time = O(N) + O(N) + O(N) = O(N)
+
+The algorithm visits each element a constant number of times.
+
+========================================================================
+SPACE COMPLEXITY: O(1)
+========================================================================
+Derivation Diagram:
+
+[ Memory Footprint ]
+      |
+      |--> i (integer index)
+      |--> j (integer index)
+      |--> temp (for swapping)
+      V
+No matter how large N is (10 or 1,000,000), we only use a 
+fixed number of pointer variables. No extra arrays are created.
+
+Total Space = O(1)
+========================================================================
+```
+
+---
+
+### 4. Solution Code
+
+#### Python
+
+```python
+def nextPermutation(nums):
+    """
+    Standard L5/L6 In-place solution.
+    """
+    n = len(nums)
+    i = n - 2
+    
+    # Step 1: Find the first decreasing element from the right
+    while i >= 0 and nums[i] >= nums[i + 1]:
+        i -= 1
+        
+    if i >= 0:
+        # Step 2: Find the element just larger than nums[i] to swap with
+        j = n - 1
+        while nums[j] <= nums[i]:
+            j -= 1
+        # Swap the pivot and the successor
+        nums[i], nums[j] = nums[j], nums[i]
+        
+    # Step 3: Reverse the elements to the right of i
+    # This turns a descending tail into an ascending tail (the smallest possible)
+    left, right = i + 1, n - 1
+    while left < right:
+        nums[left], nums[right] = nums[right], nums[left]
+        left += 1
+        right -= 1
+```
+
+#### JavaScript
+
+```javascript
+/**
+ * L5/L6 Approach: Single-pass Pointer Manipulation
+ */
+function nextPermutation(nums) {
+    let i = nums.length - 2;
+
+    // Step 1: Find pivot where the increasing trend (from right) breaks
+    while (i >= 0 && nums[i] >= nums[i + 1]) {
+        i--;
+    }
+
+    // If i is -1, the array was strictly descending (e.g. 3,2,1)
+    if (i >= 0) {
+        let j = nums.length - 1;
+        // Step 2: Find successor to pivot in the tail
+        while (nums[j] <= nums[i]) {
+            j--;
+        }
+        // Swap them
+        [nums[i], nums[j]] = [nums[j], nums[i]];
+    }
+
+    // Step 3: Reverse the tail from i + 1 to the end
+    reverse(nums, i + 1);
+}
+
+function reverse(nums, start) {
+    let i = start, j = nums.length - 1;
+    while (i < j) {
+        [nums[i], nums[j]] = [nums[j], nums[i]];
+        i++;
+        j--;
+    }
+}
+```
+
+---
+
+### Note 1: Terms and Techniques
+
+* **Lexicographical Order:** The order in which words are listed in a dictionary (a < b < c). For numbers, it means treating the array as one large number and finding the next largest value possible.
+* **Pivot and Successor:** The pivot is the point where we lose control of the "maximized" tail. The successor is the replacement that causes the smallest possible increment to the higher-value digits.
+* **Tail Reversal:** A key property of permutations is that if a sub-segment is sorted in descending order, it is at its maximum value. Reversing it makes it its minimum value.
+
+---
+
+### Note 2: Real Interview / Real World Variations
+
+**1. Google: "Next Greater Element III" (LeetCode 556)**
+* **The Problem:** Given a 32-bit integer `n`, find the smallest integer which has exactly the same digits and is greater than `n`.
+* **The Solution:** This is literally the exact same problem. You convert the integer to a string or character array, run `nextPermutation`, and convert it back. The "Senior" catch: You must check if the result exceeds the 32-bit integer limit (`2^31 - 1`) before returning.
+
+**2. Meta: "Permutation Sequence" (LeetCode 60)**
+* **The Problem:** Given `n` and `k`, return the `k-th` permutation sequence.
+* **The Solution:** While you *could* run `nextPermutation` `k` times, that's $O(k * N)$. A senior engineer uses the **Factorial Number System**. Since there are `(n-1)!` permutations starting with each digit, you can mathematically determine which digit belongs at each position in $O(N)$ time.
+
+**3. Bloomberg: "Previous Permutation With One Swap" (LeetCode 1053)**
+* **The Problem:** Find the largest lexicographical permutation smaller than the current one using only **one swap**.
+* **The Solution:** You look for the pivot from the right (where `nums[i] > nums[i+1]`). Then you find the largest number to the right that is smaller than the pivot. Swapping these two once is much more constrained than the standard "next permutation" problem.
