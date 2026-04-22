@@ -1,7 +1,6 @@
-<!-- TOC --><a name="graphs"></a>
 # Graphs
 
-<!-- TOC --><a name="leetcode-133-clone-graph"></a>
+
 # LeetCode 133: Clone Graph
 
 Here is a breakdown of how a senior engineer (L5/L6) would approach **LeetCode 133: Clone Graph**.
@@ -10,7 +9,7 @@ At a senior level, we look beyond just "getting it to pass." We care about code 
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation"></a>
+
 ### 1. Problem Explanation
 
 **The Goal:**
@@ -60,7 +59,7 @@ NOTICE:
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation"></a>
+
 ### 2. Solution Explanation
 
 To solve this, we can use **Graph Traversal** (either BFS or DFS). The specific algorithm matters less than the **state management**.
@@ -137,7 +136,7 @@ Let's clone `1 -- 2`. (1 connects to 2, 2 connects to 1).
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis"></a>
+
 ### 3. Time and Space Complexity Analysis
 
 **Time Complexity: O(N + M)**
@@ -197,10 +196,10 @@ VISUAL COST ANALYSIS
 
 ---
 
-<!-- TOC --><a name="4-solution-code"></a>
+
 ### 4. Solution Code
 
-<!-- TOC --><a name="python-solution"></a>
+
 #### Python Solution
 
 Using `dfs` with a dictionary for mapping.
@@ -253,7 +252,7 @@ class Solution:
 
 ```
 
-<!-- TOC --><a name="javascript-solution"></a>
+
 #### JavaScript Solution
 
 Using `DFS` and a `Map` object (which allows using Objects as keys).
@@ -309,12 +308,12 @@ var cloneGraph = function(node) {
 
 ---
 
-<!-- TOC --><a name="real-world-interview-variations-indirect"></a>
+
 ### Real-World Interview Variations (Indirect)
 
 Top companies rarely ask "Clone this Graph" directly anymore. They wrap it in a system design or practical engineering context.
 
-<!-- TOC --><a name="1-the-deep-copy-json-problem-google-meta"></a>
+
 #### 1. The "Deep Copy JSON" Problem (Google / Meta)
 
 **The Question:** "Write a function to deep copy a complex object in JavaScript/Python that might contain circular references."
@@ -327,7 +326,7 @@ Top companies rarely ask "Clone this Graph" directly anymore. They wrap it in a 
 
 
 
-<!-- TOC --><a name="2-the-dependency-build-order-or-package-manager-bloomberg-google"></a>
+
 #### 2. The "Dependency Build Order" or "Package Manager" (Bloomberg / Google)
 
 **The Question:** "You have a build system where Library A depends on B, and B depends on A. We need to replicate this dependency tree into a new environment (e.g., a sandbox)."
@@ -335,7 +334,7 @@ Top companies rarely ask "Clone this Graph" directly anymore. They wrap it in a 
 * **Why it's the same:** The dependencies form a graph. To "replicate" the environment, you are cloning the graph structure.
 * **Twist:** Often combined with **Topological Sort** to detect if the cycle is "legal" or "illegal" before cloning.
 
-<!-- TOC --><a name="3-social-graph-replication-system-design-context"></a>
+
 #### 3. Social Graph Replication (System Design Context)
 
 **The Question:** "We are sharding a database. We need to move a user and their immediate connection graph to a new shard. How do you copy the data?"
@@ -347,7 +346,7 @@ Top companies rarely ask "Clone this Graph" directly anymore. They wrap it in a 
 
 
 
-<!-- TOC --><a name="terminology-recap"></a>
+
 #### Terminology Recap
 
 **Deep Copy vs. Shallow Copy:**
@@ -359,7 +358,7 @@ Top companies rarely ask "Clone this Graph" directly anymore. They wrap it in a 
 
 * The way the graph is likely represented in memory. A list (or map) where every node stores a list of the nodes it connects to.
 
-<!-- TOC --><a name="207-course-schedule"></a>
+
 # 207. Course Schedule
 
 An L5/L6 engineer looks at LeetCode 207 not just as a "graph problem" but as a **Dependency Resolution** problem. This is the core logic behind build systems (like Bazel at Google), package managers (npm/pip), and task schedulers (Airflow).
@@ -370,7 +369,7 @@ Here is the solution broken down with the requested depth and visualizations.
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-1"></a>
+
 ### 1. Problem Explanation
 
 You have `numCourses` (let's call them **Tasks**) labeled `0` to `numCourses - 1`.
@@ -388,7 +387,7 @@ If there is a **Cycle** (a deadlock).
 * To do C, you need A.
 * You can never start any of them.
 
-<!-- TOC --><a name="visualizing-the-problem"></a>
+
 #### Visualizing the Problem
 
 **Scenario A: A Valid Schedule (Linear)**
@@ -441,7 +440,7 @@ Result: FALSE. No matter where you start, you hit a wall.
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-kahns-algorithm-topological-sort"></a>
+
 ### 2. Solution Explanation: Kahn's Algorithm (Topological Sort)
 
 An L6 engineer often prefers **Kahn's Algorithm** (BFS approach) over simple DFS recursion for this specific problem because:
@@ -458,7 +457,7 @@ We look for courses that have **Zero Prerequisites** (Indegree = 0).
 4. Repeat.
 5. If we processed all courses, return `True`. If courses remain stuck in the graph (because they are waiting on each other), return `False`.
 
-<!-- TOC --><a name="step-by-step-visualization"></a>
+
 #### Step-by-Step Visualization
 
 **Input:** 4 Courses (0, 1, 2, 3)
@@ -581,10 +580,10 @@ Result: 4 == 4 -> TRUE.
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-1"></a>
+
 ### 3. Time and Space Complexity Analysis
 
-<!-- TOC --><a name="time-complexity-ov-e"></a>
+
 #### Time Complexity: O(V + E)
 
 * **V**: Number of Vertices (Courses)
@@ -620,7 +619,7 @@ Total Work = Build(E) + Init(V) + ProcessNodes(V) + ProcessEdges(E)
 
 ```
 
-<!-- TOC --><a name="space-complexity-ov-e"></a>
+
 #### Space Complexity: O(V + E)
 
 ```text
@@ -648,10 +647,10 @@ Total Space = O(V + E)
 
 ---
 
-<!-- TOC --><a name="4-solution-code-1"></a>
+
 ### 4. Solution Code
 
-<!-- TOC --><a name="python-production-style"></a>
+
 #### Python (Production Style)
 
 ```python
@@ -710,7 +709,7 @@ class Solution:
 
 ```
 
-<!-- TOC --><a name="javascript-production-style"></a>
+
 #### JavaScript (Production Style)
 
 ```javascript
@@ -773,7 +772,7 @@ var canFinish = function(numCourses, prerequisites) {
 
 ---
 
-<!-- TOC --><a name="note-1-terminology-breakdown"></a>
+
 ### Note 1: Terminology Breakdown
 
 * **DAG (Directed Acyclic Graph):** A directed graph with no cycles. If the graph is a DAG, we can finish the courses. If it is not a DAG, we cannot.
@@ -782,7 +781,7 @@ var canFinish = function(numCourses, prerequisites) {
 
 ---
 
-<!-- TOC --><a name="note-2-real-world-indirect-interview-variations"></a>
+
 ### Note 2: Real World & Indirect Interview Variations
 
 At companies like Google, Meta, or Bloomberg, they rarely ask "Solve Course Schedule." They wrap it in a real-world scenario.
@@ -815,7 +814,7 @@ At companies like Google, Meta, or Bloomberg, they rarely ask "Solve Course Sche
 * Formulas = Edges.
 * You must perform a Topological Sort to decide which cell to calculate first. If you detect a cycle, you throw a "Circular Reference Error" (just like Excel does).
 
-<!-- TOC --><a name="417-pacific-atlantic-water-flow"></a>
+
 # 417: Pacific Atlantic Water Flow
 
 Here is a breakdown of how a Senior (L5/L6) Engineer would approach **LeetCode 417: Pacific Atlantic Water Flow**.
@@ -824,7 +823,7 @@ At this level, the focus shifts from "getting code to run" to **optimizing the a
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-2"></a>
+
 ### 1. Problem Explanation
 
 Imagine a rectangular island.
@@ -837,7 +836,7 @@ Imagine a rectangular island.
 
 **The Goal:** Find the coordinates of all cells where, if you poured water on them, that water could eventually flow to **BOTH** the Pacific and Atlantic oceans.
 
-<!-- TOC --><a name="visualization-of-the-island"></a>
+
 #### Visualization of the Island
 
 Let's look at a 5x5 Grid. Parentheses `( )` denote the cells we are inspecting.
@@ -871,10 +870,10 @@ Look at the cell with height `5` at `grid[2][2]` (middle):
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-1"></a>
+
 ### 2. Solution Explanation
 
-<!-- TOC --><a name="the-juniorbrute-force-approach-to-be-avoided"></a>
+
 #### The Junior/Brute Force Approach (To be avoided)
 
 A naive approach would be to iterate through every single cell `(r, c)` and start a traversal (DFS/BFS) to see if it reaches the Pacific, then reset and see if it reaches the Atlantic.
@@ -882,7 +881,7 @@ A naive approach would be to iterate through every single cell `(r, c)` and star
 * **Why this fails L5 standards:** It repeats work. If cell A flows into cell B, calculating flow for B shouldn't need to be redone when checking A.
 * **Complexity:** O((M*N)^2). Too slow for large maps.
 
-<!-- TOC --><a name="the-l5l6-inverted-thinking-approach"></a>
+
 #### The L5/L6 "Inverted Thinking" Approach
 
 Instead of asking "Where can water go from this cell?", we ask **"From which cells can the Ocean reach uphill?"**
@@ -895,7 +894,7 @@ We reverse the physics. If water flows High -> Low, then we can trace a path fro
 2. Create a set of cells reachable from the **Atlantic** (`atlantic_reachable`). Start at the Atlantic edges (Right & Bottom) and move "uphill".
 3. The answer is the **Intersection** of these two sets.
 
-<!-- TOC --><a name="step-by-step-visualization-1"></a>
+
 #### Step-by-Step Visualization
 
 **Phase 1: Pacific Flood (Blue Flow)**
@@ -957,10 +956,10 @@ The cell `5` at bottom-left `(4,0)` touches Pacific (Left edge) and Atlantic (Bo
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-2"></a>
+
 ### 3. Time and Space Complexity Analysis
 
-<!-- TOC --><a name="time-complexity-om-n"></a>
+
 #### Time Complexity: O(M * N)
 
 Where M is the number of rows and N is the number of columns.
@@ -991,7 +990,7 @@ Where M is the number of rows and N is the number of columns.
 
 ```
 
-<!-- TOC --><a name="space-complexity-om-n"></a>
+
 #### Space Complexity: O(M * N)
 
 **Visual Derivation:**
@@ -1017,12 +1016,12 @@ Where M is the number of rows and N is the number of columns.
 
 ---
 
-<!-- TOC --><a name="4-solution-code-2"></a>
+
 ### 4. Solution Code
 
 We will use **DFS (Depth First Search)** because it is often cleaner to implement for grid traversal problems in interviews, though BFS is equally valid.
 
-<!-- TOC --><a name="python-solution-1"></a>
+
 #### Python Solution
 
 ```python
@@ -1092,7 +1091,7 @@ class Solution:
 
 ```
 
-<!-- TOC --><a name="javascript-solution-1"></a>
+
 #### JavaScript Solution
 
 ```javascript
@@ -1172,7 +1171,7 @@ var pacificAtlantic = function(heights) {
 
 ---
 
-<!-- TOC --><a name="note-1-terms-and-techniques"></a>
+
 ### Note 1: Terms and Techniques
 
 **"Inverse Flow" / "Reverse Graph Traversal"**
@@ -1183,12 +1182,12 @@ This is the technique of starting from the *destination* and working backward to
 
 ---
 
-<!-- TOC --><a name="note-2-real-world-interview-variations"></a>
+
 ### Note 2: Real World & Interview Variations
 
 Senior interviews (Google/Meta/Bloomberg) rarely ask the "vanilla" version. They wrap it in a real-world scenario to test if you can model the problem.
 
-<!-- TOC --><a name="1-the-continental-divide-google-maps-team"></a>
+
 #### 1. The "Continental Divide" (Google / Maps Team)
 
 **Prompt:** "Given a terrain map of the USA represented as a grid of elevations, identify the 'Continental Divide'—the line of high points where water falling on one side flows to the Pacific and the other side flows to the Atlantic."
@@ -1196,7 +1195,7 @@ Senior interviews (Google/Meta/Bloomberg) rarely ask the "vanilla" version. They
 * **How to solve:** This IS the Pacific Atlantic Water Flow problem, but the output requirement might be slightly different. Instead of returning *all* cells, you might need to return only the cells that form the boundary (the "ridge") between the two reachable sets.
 * **Modification:** Perform the exact solution above. The "Divide" is effectively the intersection set.
 
-<!-- TOC --><a name="2-the-market-highs-bloomberg-finance"></a>
+
 #### 2. The "Market Highs" (Bloomberg / Finance)
 
 **Prompt:** "You have a matrix representing stock prices of different sectors over time. We want to find 'Stable Sectors' which have outperformed their neighbors consistently leading up to a market crash (edge of the matrix)."
@@ -1209,7 +1208,7 @@ Senior interviews (Google/Meta/Bloomberg) rarely ask the "vanilla" version. They
 
 
 
-<!-- TOC --><a name="3-information-propagation-meta-social-graph"></a>
+
 #### 3. Information Propagation (Meta / Social Graph)
 
 **Prompt:** "We have two distinct user groups, Group A and Group B, located at opposite ends of a social graph grid. Users only share posts with friends who have a 'influence score' lower than or equal to them. Find the 'Key Influencers' who can get a message out to BOTH Group A and Group B."
@@ -1220,14 +1219,14 @@ Senior interviews (Google/Meta/Bloomberg) rarely ask the "vanilla" version. They
 * **Oceans** = Group A and Group B.
 * **Solution:** Trace from Group A (uphill/higher influence) and Group B (uphill). The intersection are the users who have enough influence to cascade messages down to both groups.
 
-<!-- TOC --><a name="200-number-of-islands"></a>
+
 # 200. Number of Islands
 
 A Google L5/L6 engineer doesn’t just solve this problem; they treat it as a **graph traversal exercise** where the goal is to optimize for readability, modularity, and handling edge cases (like a grid with millions of cells).
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-3"></a>
+
 ## 1. Problem Explanation
 
 Imagine a map represented as a 2D grid. The grid contains two types of values:
@@ -1239,7 +1238,7 @@ An **island** is a group of connected `'1's` (land). Connections only happen **h
 
 **Goal:** Count the total number of distinct islands.
 
-<!-- TOC --><a name="visual-example"></a>
+
 ### Visual Example
 
 ```text
@@ -1263,12 +1262,12 @@ Total Islands: 3
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-the-sinking-strategy"></a>
+
 ## 2. Solution Explanation: The "Sinking" Strategy
 
 An L5+ engineer would likely use **Depth First Search (DFS)** or **Breadth First Search (BFS)**. The most elegant "in-place" approach is the **Sinking Method**.
 
-<!-- TOC --><a name="the-logic"></a>
+
 ### The Logic
 
 1. **Iterate** through every cell in the grid using a nested loop.
@@ -1279,7 +1278,7 @@ An L5+ engineer would likely use **Depth First Search (DFS)** or **Breadth First
 
 3. By sinking the island, you ensure that you don't count the same island twice as you continue your loop.
 
-<!-- TOC --><a name="non-trivial-detail-the-dfs-recursion"></a>
+
 ### Non-Trivial Detail: The DFS Recursion
 
 When you hit a `'1'`, the recursion acts like a "flood fill." It spreads in four directions. If it hits a boundary or water, it stops.
@@ -1298,10 +1297,10 @@ The algorithm then continues until it finds the next '1' at (2,2).
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-3"></a>
+
 ## 3. Time and Space Complexity Analysis
 
-<!-- TOC --><a name="time-complexity-tc"></a>
+
 ### Time Complexity (TC)
 
 We visit every cell in the grid at most twice (once in the main loop and once if it's part of a DFS "sink"). If `M` is the number of rows and `N` is the number of columns:
@@ -1322,7 +1321,7 @@ TC DERIVATION (ASCII)
 
 ```
 
-<!-- TOC --><a name="space-complexity-sc"></a>
+
 ### Space Complexity (SC)
 
 The space depends on the recursion stack. In the worst-case scenario (the entire grid is land), the recursion goes `M * N` deep.
@@ -1342,10 +1341,10 @@ SC DERIVATION (ASCII)
 
 ---
 
-<!-- TOC --><a name="4-solution-code-3"></a>
+
 ## 4. Solution Code
 
-<!-- TOC --><a name="python-snippet"></a>
+
 ### Python Snippet
 
 ```python
@@ -1384,7 +1383,7 @@ class Solution:
 
 ```
 
-<!-- TOC --><a name="javascript-snippet"></a>
+
 ### Javascript Snippet
 
 ```javascript
@@ -1433,7 +1432,7 @@ var numIslands = function(grid) {
 
 ---
 
-<!-- TOC --><a name="note-1-terms-and-techniques-1"></a>
+
 ## Note 1: Terms and Techniques
 
 * **Depth First Search (DFS):** An algorithm for traversing a tree or graph where you go as deep as possible along each branch before backtracking. In this problem, it helps by "cleaning up" an entire island as soon as you touch one piece of it.
@@ -1441,36 +1440,36 @@ var numIslands = function(grid) {
 
 ---
 
-<!-- TOC --><a name="note-2-real-world-interview-variations-1"></a>
+
 ## Note 2: Real World / Interview Variations
 
-<!-- TOC --><a name="1-the-large-map-problem-google"></a>
+
 ### 1. The "Large Map" Problem (Google)
 
 **Variation:** What if the grid is too large to fit in memory (e.g., a map of the Earth)?
 
 * **Solution:** Use **Union-Find** with a "sliding window" or "chunking" approach. You process two rows at a time, keeping track of connections between chunks. This avoids loading the whole grid into RAM.
 
-<!-- TOC --><a name="2-the-max-area-problem-meta"></a>
+
 ### 2. The "Max Area" Problem (Meta)
 
 **Variation:** Instead of the number of islands, find the area of the largest island.
 
 * **Solution:** Modify the `sink_island` function to return an integer (`1 + area_of_neighbors`). Keep a global `max_area` variable and update it after each DFS call.
 
-<!-- TOC --><a name="3-the-distributed-server-clusters-bloomberg"></a>
+
 ### 3. The "Distributed Server Clusters" (Bloomberg)
 
 **Variation:** Servers are nodes in a grid. If two servers are adjacent, they belong to the same cluster. If one server fails, how many clusters are left?
 
 * **Solution:** This is exactly the same as Number of Islands, but often framed as a "Dynamic Connectivity" problem. You would use **Union-Find** because it allows you to efficiently add and remove connections (nodes) and check the "number of components" in real-time.
 
-<!-- TOC --><a name="128-longest-consecutive-sequence"></a>
+
 # 128. Longest Consecutive Sequence
 
 Here is how a Senior Staff Engineer (L6) at Google would approach, explain, and solve this problem. We prioritize clarity, scalability of thought, and handling edge cases over "clever" one-liners.
 
-<!-- TOC --><a name="1-problem-explanation-4"></a>
+
 ### 1. Problem Explanation
 
 **The Core Task:**
@@ -1510,7 +1509,7 @@ The longest sequence is `[1, 2, 3, 4]`.
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-2"></a>
+
 ### 2. Solution Explanation
 
 **The "Naive" Approach (Mental Check):**
@@ -1612,7 +1611,7 @@ HashSet: {100, 4, 200, 1, 3, 2}
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-4"></a>
+
 ### 3. Time and Space Complexity Analysis
 
 This is the part where candidates often stumble. They see a `while` loop inside a `for` loop and assume it is O(N^2). An L6 engineer proves why it isn't.
@@ -1666,12 +1665,12 @@ We store every unique number exactly once in the hash set.
 
 ---
 
-<!-- TOC --><a name="4-solution-code-4"></a>
+
 ### 4. Solution Code
 
 We focus on readable variable names and handling empty inputs, which are common production bugs.
 
-<!-- TOC --><a name="python-solution-2"></a>
+
 #### **Python Solution**
 
 ```python
@@ -1709,7 +1708,7 @@ class Solution:
 
 ```
 
-<!-- TOC --><a name="javascript-solution-2"></a>
+
 #### **Javascript Solution**
 
 ```javascript
@@ -1754,7 +1753,7 @@ var longestConsecutive = function(nums) {
 
 ---
 
-<!-- TOC --><a name="note-1-terminology-breakdown-1"></a>
+
 ### Note 1: Terminology Breakdown
 
 **HashSet (Hashing):**
@@ -1767,12 +1766,12 @@ This solution is a form of a greedy algorithm. We "greedily" try to build the lo
 
 ---
 
-<!-- TOC --><a name="note-2-real-world-interview-variations-2"></a>
+
 ### Note 2: Real World / Interview Variations
 
 At companies like Google, Meta (Facebook), and Bloomberg, the "vanilla" Leetcode question is just the warmup. They will twist the requirements to see if you can adapt your data structure knowledge.
 
-<!-- TOC --><a name="variation-a-the-data-stream-meta-google"></a>
+
 #### **Variation A: The "Data Stream" (Meta / Google)**
 
 **Question:** "What if the numbers come in one by one as a stream? You need to return the longest consecutive sequence length seen *so far* after every new number."
@@ -1786,7 +1785,7 @@ At companies like Google, Meta (Facebook), and Bloomberg, the "vanilla" Leetcode
 
 
 
-<!-- TOC --><a name="variation-b-range-summary-bloomberg"></a>
+
 #### **Variation B: "Range Summary" (Bloomberg)**
 
 **Question:** "Instead of just the length, return the actual ranges. E.g., for `[1, 2, 3, 5, 7]`, return `['1->3', '5', '7']`."
@@ -1794,7 +1793,7 @@ At companies like Google, Meta (Facebook), and Bloomberg, the "vanilla" Leetcode
 * **Why it's hard:** Requires formatting and careful tracking of start/end points.
 * **Solution:** Sort the array first (O(N log N)). Since we need to output the ranges in order usually, sorting is acceptable and makes printing trivial. If sorting is banned, use the HashSet approach but store the `(start, end)` pairs.
 
-<!-- TOC --><a name="variation-c-2d-grid-longest-path-google"></a>
+
 #### **Variation C: "2D Grid Longest Path" (Google)**
 
 **Question:** "Given a 2D matrix of integers, find the longest consecutive path. You can move up, down, left, right."
@@ -1805,12 +1804,12 @@ At companies like Google, Meta (Facebook), and Bloomberg, the "vanilla" Leetcode
 * Store results in a `memo` table so you don't re-calculate the path for the same cell twice.
 * **Complexity:** O(Rows * Cols).
 
-<!-- TOC --><a name="alien-dictionary"></a>
+
 # Alien Dictionary
 
 Here is how a Senior Staff Engineer (L6) at Google would break down the "Alien Dictionary" problem. We focus on clarity, edge cases, and maintainable patterns.
 
-<!-- TOC --><a name="1-problem-explanation-5"></a>
+
 ### 1. Problem Explanation
 
 **The Scenario:**
@@ -1846,7 +1845,7 @@ We treat these relationships as a **Directed Graph**.
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-3"></a>
+
 ### 2. Solution Explanation
 
 This problem is a classic application of **Topological Sorting** on a Directed Acyclic Graph (DAG).
@@ -1957,7 +1956,7 @@ If the Queue becomes empty but the Result string doesn't contain all unique char
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-5"></a>
+
 ### 3. Time and Space Complexity Analysis
 
 Let `C` be the total length of all words combined (total characters).
@@ -2005,10 +2004,10 @@ TOTAL SPACE                       | O(1) or O(U)
 
 ---
 
-<!-- TOC --><a name="4-solution-code-5"></a>
+
 ### 4. Solution Code
 
-<!-- TOC --><a name="python-solution-3"></a>
+
 #### Python Solution
 
 ```python
@@ -2065,7 +2064,7 @@ def alienOrder(words: list[str]) -> str:
 
 ```
 
-<!-- TOC --><a name="javascript-solution-3"></a>
+
 #### JavaScript Solution
 
 ```javascript
@@ -2146,7 +2145,7 @@ var alienOrder = function(words) {
 
 ---
 
-<!-- TOC --><a name="note-1-terminology-explained"></a>
+
 ### Note 1: Terminology Explained
 
 **Topological Sort:**
@@ -2158,7 +2157,7 @@ This is a specific way to implement Topological Sort. It relies on the concept o
 
 ---
 
-<!-- TOC --><a name="note-2-real-world-interview-variations-3"></a>
+
 ### Note 2: Real World / Interview Variations
 
 At the L5/L6 level, I'm not just checking if you know the algorithm. I'm checking if you can map a messy real-world problem to this clean abstract graph problem.
@@ -2189,14 +2188,14 @@ At the L5/L6 level, I'm not just checking if you know the algorithm. I'm checkin
 * **Focus:** Ambiguity. Unlike Alien Dictionary, we might have disjoint graphs (e.g., we know USD > CAD, and EUR > GBP, but we don't know the relation between USD and EUR).
 * **Modification:** You must clarify if a partial order is acceptable or if you need to flag that the ranking is incomplete. In Alien Dictionary, any valid topological sort is fine, but in financial ranking, disjoint sets might imply missing data.
 
-<!-- TOC --><a name="graph-valid-tree"></a>
+
 # Graph Valid Tree
 
 Here is how a Senior Staff (L6) or Senior (L5) Engineer at Google would break down the "Graph Valid Tree" problem.
 
 At this level, the focus isn't just on getting *a* solution, but on verifying the fundamental properties of the data structure (Connectivity + Acyclicity) and choosing the most trade-off-appropriate algorithm (Union-Find vs. BFS/DFS).
 
-<!-- TOC --><a name="1-problem-explanation-6"></a>
+
 ### 1. Problem Explanation
 
 The problem asks: Given `n` nodes labeled from `0` to `n-1` and a list of undirected edges, write a function to check if these edges make up a valid tree.
@@ -2257,7 +2256,7 @@ If *either* of these conditions is violated, it is **not** a tree.
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-4"></a>
+
 ### 2. Solution Explanation
 
 An L5/L6 engineer recognizes that checking for cycles and connectivity can be done via **Graph Traversal (DFS/BFS)** or **Union-Find (Disjoint Set)**.
@@ -2342,7 +2341,7 @@ Parents: [1, 1, 1, 1, 4]  <-- 3 points to 1
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-6"></a>
+
 ### 3. Time and Space Complexity Analysis
 
 **Time Complexity: O(N * α(N))**
@@ -2391,10 +2390,10 @@ Takes exactly N integers of space.
 
 ---
 
-<!-- TOC --><a name="4-solution-code-6"></a>
+
 ### 4. Solution Code
 
-<!-- TOC --><a name="python-solution-union-find"></a>
+
 #### Python Solution (Union-Find)
 
 ```python
@@ -2447,7 +2446,7 @@ class Solution:
 
 ```
 
-<!-- TOC --><a name="javascript-solution-union-find"></a>
+
 #### Javascript Solution (Union-Find)
 
 ```javascript
@@ -2510,7 +2509,7 @@ var validTree = function(n, edges) {
 
 ---
 
-<!-- TOC --><a name="new-term-path-compression-union-find"></a>
+
 ### New Term: Path Compression & Union-Find
 
 **What is it?**
@@ -2527,7 +2526,7 @@ When analyzing Union-Find complexity, we use α(N). This function grows extremel
 
 ---
 
-<!-- TOC --><a name="real-world-interview-variations"></a>
+
 ### Real World / Interview Variations
 
 Senior roles at Google, Meta, and Bloomberg rarely ask the "raw" Leetcode question. They wrap it in a practical scenario.
@@ -2561,12 +2560,12 @@ Senior roles at Google, Meta, and Bloomberg rarely ask the "raw" Leetcode questi
 * Use **Union-Find**. If `find(centerA) != find(centerB)`, build that connection (Union them). If they are already connected, skip it (it's redundant and costs money).
 * This builds the cheapest Valid Tree.
 
-<!-- TOC --><a name="number-of-connected-components-in-an-undirected-graph"></a>
+
 # Number of Connected Components in an Undirected Graph
 
 This response breaks down the "Number of Connected Components" problem as requested, simulating the approach of a high-level engineer.
 
-<!-- TOC --><a name="1-problem-explanation-7"></a>
+
 ### 1. Problem Explanation
 
 Imagine you are analyzing a social network.
@@ -2583,7 +2582,7 @@ We are given:
 1. `n`: The number of nodes (labeled `0` to `n-1`).
 2. `edges`: A list of pairs `[a, b]` indicating a connection.
 
-<!-- TOC --><a name="visual-examples"></a>
+
 #### **Visual Examples**
 
 **Example 1:**
@@ -2625,7 +2624,7 @@ Cluster A:      Cluster B:
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-5"></a>
+
 ### 2. Solution Explanation
 
 While DFS or BFS (Graph Traversal) are valid solutions, a Senior Engineer (L5/L6) would likely opt for the **Union-Find (Disjoint Set Union - DSU)** data structure.
@@ -2633,7 +2632,7 @@ While DFS or BFS (Graph Traversal) are valid solutions, a Senior Engineer (L5/L6
 **Why Union-Find?**
 It is designed specifically for dynamic connectivity. It processes connections elegantly and is often easier to implement for "grouping" problems than recursive DFS.
 
-<!-- TOC --><a name="the-algorithm-union-find"></a>
+
 #### **The Algorithm: Union-Find**
 
 1. **Start:** Treat every node as its own independent "Component". Total components = `n`.
@@ -2647,7 +2646,7 @@ It is designed specifically for dynamic connectivity. It processes connections e
 
 
 
-<!-- TOC --><a name="visualizing-the-algorithm"></a>
+
 #### **Visualizing the Algorithm**
 
 **Input:** `n = 5`, `edges = [[0, 1], [1, 2], [3, 4]]`
@@ -2724,10 +2723,10 @@ Visual:    (0)          (3)
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-7"></a>
+
 ### 3. Time and Space Complexity Analysis
 
-<!-- TOC --><a name="time-complexity"></a>
+
 #### **Time Complexity**
 
 We use **Path Compression**, which flattens the tree structure every time we search. This makes the `find` operation nearly constant time on average.
@@ -2757,7 +2756,7 @@ Simplified: O(n + E)
 
 ```
 
-<!-- TOC --><a name="space-complexity"></a>
+
 #### **Space Complexity**
 
 We store arrays to track parent pointers and rank (size of trees).
@@ -2781,10 +2780,10 @@ Total Space: O(n)
 
 ---
 
-<!-- TOC --><a name="4-solution-code-7"></a>
+
 ### 4. Solution Code
 
-<!-- TOC --><a name="python-solution-4"></a>
+
 #### **Python Solution**
 
 ```python
@@ -2841,7 +2840,7 @@ class Solution:
 
 ```
 
-<!-- TOC --><a name="javascript-solution-4"></a>
+
 #### **JavaScript Solution**
 
 ```javascript
@@ -2904,7 +2903,7 @@ var countComponents = function(n, edges) {
 
 ---
 
-<!-- TOC --><a name="note-1-new-terms"></a>
+
 ### Note 1: New Terms
 
 **Union-Find (DSU):**
@@ -2918,12 +2917,12 @@ An optimization in the `union` function. We always attach the shorter tree to th
 
 ---
 
-<!-- TOC --><a name="note-2-real-interview-variations"></a>
+
 ### Note 2: Real Interview Variations
 
 Top companies rarely ask the "raw" version of this question. They wrap it in a real-world scenario.
 
-<!-- TOC --><a name="1-account-merging-google-meta"></a>
+
 #### **1. Account Merging (Google / Meta)**
 
 **Scenario:** You have a list of accounts. Each account has a `Name` and a list of `Emails`. If two accounts share a common email, they are actually the same person. Merge them and return the sorted list of emails for each person.
@@ -2934,7 +2933,7 @@ Top companies rarely ask the "raw" version of this question. They wrap it in a r
 * Run **Union-Find** on the emails.
 * Group all emails by their "Root Parent" email.
 
-<!-- TOC --><a name="2-graph-valid-tree-bloomberg-google"></a>
+
 #### **2. Graph Valid Tree (Bloomberg / Google)**
 
 **Scenario:** Given `n` nodes and `edges`, determine if they form a valid Tree.
@@ -2950,7 +2949,7 @@ Top companies rarely ask the "raw" version of this question. They wrap it in a r
 
 * At the end, return `count == 1`.
 
-<!-- TOC --><a name="3-number-of-islands-grid-version-amazon-google"></a>
+
 #### **3. Number of Islands (Grid Version) (Amazon / Google)**
 
 **Scenario:** Given a 2D grid of `1`s (land) and `0`s (water), count the number of islands.
@@ -2962,7 +2961,7 @@ Top companies rarely ask the "raw" version of this question. They wrap it in a r
 * Iterate through the grid. If `grid[r][c] == 1`, check its neighbors (down and right). If a neighbor is also `1`, `union` them.
 * This is preferred if the grid is infinite or streaming (dynamic updates).
 
-<!-- TOC --><a name="939-minimum-area-rectangle"></a>
+
 # 939. Minimum Area Rectangle
 
 Hello! As a senior engineer (L5/L6) at Google, I look for three things when solving a problem like this: **Clarity**, **Trade-offs**, and **Readability**. We aren't just trying to get the code to pass; we are trying to write code that is maintainable and logically sound.
@@ -2971,7 +2970,7 @@ Here is how I would break down **Leetcode 939. Minimum Area Rectangle**.
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-8"></a>
+
 ### 1. Problem Explanation
 
 The goal is to find the smallest area of a rectangle formed by a given set of 2D points.
@@ -3012,7 +3011,7 @@ Area = 2 * 2 = 4.
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-6"></a>
+
 ### 2. Solution Explanation
 
 A junior engineer might try to find all groups of 4 points and check if they make a rectangle. That is **O(N^4)**—too slow.
@@ -3063,7 +3062,7 @@ We iterate through all pairs of points, which is **O(N^2)**. This is significant
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-8"></a>
+
 ### 3. Time and Space Complexity Analysis
 
 **Time Complexity Derivation:**
@@ -3107,7 +3106,7 @@ Total Space Complexity: O(N)
 
 ---
 
-<!-- TOC --><a name="4-solution-code-8"></a>
+
 ### 4. Solution Code
 
 Here is how we write this in production-quality code.
@@ -3216,7 +3215,7 @@ var minAreaRect = function(points) {
 
 ---
 
-<!-- TOC --><a name="note-1-terms-and-techniques-2"></a>
+
 ### Note 1: Terms and Techniques
 
 **Spatial Hashing / Coordinate Hashing:**
@@ -3227,7 +3226,7 @@ Without hashing, checking if a point exists requires iterating through the list,
 
 ---
 
-<!-- TOC --><a name="note-2-real-world-interview-variations-4"></a>
+
 ### Note 2: Real World & Interview Variations
 
 Big tech companies rarely ask the "vanilla" version. Here is how Google, Meta, and Bloomberg have twisted this recently:
@@ -3261,7 +3260,7 @@ This ensures the sides are equal length.
 `y' = x - y`
 Then solve the standard problem on the new `(x', y')` coordinates.
 
-<!-- TOC --><a name="14-longest-common-prefix"></a>
+
 # 14. Longest Common Prefix
 
 Here is a breakdown of how a Senior (L5) or Staff (L6) Engineer at a major tech company would approach **LeetCode 14: Longest Common Prefix**.
@@ -3270,7 +3269,7 @@ At this level, the focus shifts from just "getting it right" to **code readabili
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-9"></a>
+
 ### 1. Problem Explanation
 
 **The Goal:**
@@ -3348,7 +3347,7 @@ String 2:     | r | a | c | ...
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-7"></a>
+
 ### 2. Solution Explanation
 
 **The Algorithm: Vertical Scanning**
@@ -3375,7 +3374,7 @@ While there are many ways to solve this (Horizontal Scanning, Sorting, Tries), a
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-9"></a>
+
 ### 3. Time and Space Complexity Analysis
 
 **Time Complexity: O(S)**
@@ -3412,10 +3411,10 @@ In the best case (mismatch at index 0), we perform `O(N)` comparisons (where N i
 
 ---
 
-<!-- TOC --><a name="4-solution-code-9"></a>
+
 ### 4. Solution Code
 
-<!-- TOC --><a name="python-solution-5"></a>
+
 #### Python Solution
 
 ```python
@@ -3455,7 +3454,7 @@ class Solution:
 
 ```
 
-<!-- TOC --><a name="javascript-solution-5"></a>
+
 #### JavaScript Solution
 
 ```javascript
@@ -3499,7 +3498,7 @@ var longestCommonPrefix = function(strs) {
 
 ---
 
-<!-- TOC --><a name="note-1-terms-techniques-used"></a>
+
 ### Note 1: Terms & Techniques Used
 
 * **Vertical Scanning:** This refers to processing the data "column by column" rather than "row by row." Instead of reading String 1 entirely, then String 2 entirely, we read Index 0 of all strings, then Index 1 of all strings. This is highly effective for "Prefix" problems because the moment a column is inconsistent, the entire operation is invalid, allowing us to abort early.
@@ -3507,12 +3506,12 @@ var longestCommonPrefix = function(strs) {
 
 ---
 
-<!-- TOC --><a name="note-2-indirect-real-world-interview-variants"></a>
+
 ### Note 2: Indirect (Real World / Interview) Variants
 
 The "Top of the Band" engineer differentiates themselves by answering the "So what?" question. Here is how Google, Meta, and Bloomberg actually ask this question in system design or advanced coding rounds:
 
-<!-- TOC --><a name="1-the-typeahead-autocomplete-meta-google"></a>
+
 #### 1. The "Typeahead" / Autocomplete (Meta / Google)
 
 **The Question:** "Design the backend for a search bar. When a user types 'goo', we want to suggest 'google', 'good', 'goofy'. How do we quickly find the common starting sequence for millions of words?"
@@ -3525,7 +3524,7 @@ The "Top of the Band" engineer differentiates themselves by answering the "So wh
 
 
 
-<!-- TOC --><a name="2-the-dna-sequence-alignment-biotech-google-health"></a>
+
 #### 2. The "DNA Sequence Alignment" (Biotech / Google Health)
 
 **The Question:** "Given huge DNA strings (A, C, T, G), find the longest common sequence. The data is too large to fit in RAM."
@@ -3539,7 +3538,7 @@ The "Top of the Band" engineer differentiates themselves by answering the "So wh
 
 
 
-<!-- TOC --><a name="3-the-stock-ticker-grouping-bloomberg"></a>
+
 #### 3. The "Stock Ticker Grouping" (Bloomberg)
 
 **The Question:** "We have a stream of incoming stock symbols (`GOOG`, `GOOGL`, `GOLD`). We need to group them by hierarchy in real-time."
@@ -3551,7 +3550,7 @@ The "Top of the Band" engineer differentiates themselves by answering the "So wh
 * This turns the complexity from `O(S)` to `O(M * N)` in the worst case, but practically `O(M)` comparisons where M is length of first/last string.
 
 
-<!-- TOC --><a name="695-max-area-of-island"></a>
+
 # 695. Max Area of Island
 
 Here is how a Senior (L5/L6) Engineer approaches "Max Area of Island".
@@ -3560,7 +3559,7 @@ At this level, the focus shifts from "getting code that works" to "writing code 
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-10"></a>
+
 ### 1. Problem Explanation
 
 Imagine you are analyzing a satellite image of an ocean. The image is pixelated into a grid.
@@ -3574,7 +3573,7 @@ We need to find the **biggest island**.
 * Connections are only **Horizontal** (Left/Right) or **Vertical** (Up/Down). Diagonal connections do not count.
 * The **Area** is simply the number of `1`s in that connected group.
 
-<!-- TOC --><a name="visualizing-the-grid"></a>
+
 #### Visualizing the Grid
 
 Let's look at a sample 5x5 Grid.
@@ -3633,14 +3632,14 @@ This group has three `1`s connected vertically.
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-the-flood-fill-dfs"></a>
+
 ### 2. Solution Explanation: The "Flood Fill" (DFS)
 
 An L5 engineer recognizes this immediately as a **Graph Traversal** problem. Specifically, finding **Connected Components**.
 
 We can use **Depth First Search (DFS)**. Think of this as the "Flood Fill" tool in MS Paint or Photoshop. When you click a pixel, the color spreads to all connected pixels of the same color.
 
-<!-- TOC --><a name="the-algorithm-strategy"></a>
+
 #### The Algorithm Strategy
 
 1. **Scan:** Loop through every cell in the grid, row by row, column by column.
@@ -3656,7 +3655,7 @@ We can use **Depth First Search (DFS)**. Think of this as the "Flood Fill" tool 
 4. **Record:** Once the DFS finishes for that island, compare its area to our current `max_area`.
 5. **Resume:** Continue the main loop scanning for the next unvisited `1`.
 
-<!-- TOC --><a name="step-by-step-execution-visualization"></a>
+
 #### Step-by-Step Execution Visualization
 
 **Initial State:**
@@ -3736,10 +3735,10 @@ Resume main loop scan. When the loop reaches (1,1) or (1,2), it sees `#` (or `0`
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-10"></a>
+
 ### 3. Time and Space Complexity Analysis
 
-<!-- TOC --><a name="time-complexity-or-c"></a>
+
 #### Time Complexity: O(R * C)
 
 * **R** = Number of Rows
@@ -3763,7 +3762,7 @@ Main Loop Scan  +   DFS Visits   = Total Work
 
 We never revisit a processed node because we mark it as `0` or visited immediately.
 
-<!-- TOC --><a name="space-complexity-or-c"></a>
+
 #### Space Complexity: O(R * C)
 
 * **Worst Case:** The entire grid is land (`1`s).
@@ -3788,12 +3787,12 @@ In the worst case, the stack height equals the number of cells: `R * C`.
 
 ---
 
-<!-- TOC --><a name="4-solution-code-10"></a>
+
 ### 4. Solution Code
 
 We will write a `dfs` helper function.
 
-<!-- TOC --><a name="python-solution-6"></a>
+
 #### Python Solution
 
 *This solution modifies the input grid to save space (sets visited cells to 0). If the interviewer asks not to modify input, we would use a separate `set()` called `visited`.*
@@ -3848,7 +3847,7 @@ class Solution:
 
 ```
 
-<!-- TOC --><a name="javascript-solution-6"></a>
+
 #### JavaScript Solution
 
 ```javascript
@@ -3897,7 +3896,7 @@ var maxAreaOfIsland = function(grid) {
 
 ---
 
-<!-- TOC --><a name="note-1-terms-and-techniques-3"></a>
+
 ### Note 1: Terms and Techniques
 
 **Connected Components:**
@@ -3908,12 +3907,12 @@ In graph theory, a connected component is a subgraph in which any two vertices a
 
 ---
 
-<!-- TOC --><a name="note-2-real-world-interview-variations-5"></a>
+
 ### Note 2: Real World & Interview Variations
 
 Interviews at top companies (Google, Meta, Bloomberg) rarely ask the vanilla version of this question anymore. Here is how they twist it and how to solve it.
 
-<!-- TOC --><a name="1-the-lake-or-enclave-problem-googlebloomberg"></a>
+
 #### 1. The "Lake" or "Enclave" Problem (Google/Bloomberg)
 
 **Question:** "Find the number of islands that are completely surrounded by water (i.e., they do NOT touch the edge of the grid)."
@@ -3924,7 +3923,7 @@ Interviews at top companies (Google, Meta, Bloomberg) rarely ask the vanilla ver
 * If `r == 0` or `r == max` etc., set `touches_boundary = True`.
 * Only count the island if `touches_boundary` remains `False` after the DFS completes.
 
-<!-- TOC --><a name="2-the-largest-island-after-flipping-one-0-to-1-harder-version-google"></a>
+
 #### 2. The "Largest Island after Flipping one 0 to 1" (Harder Version - Google)
 
 **Question:** "You can change exactly one `0` to a `1`. What is the largest possible island you can create?"
@@ -3940,7 +3939,7 @@ Interviews at top companies (Google, Meta, Bloomberg) rarely ask the vanilla ver
 
 4. Return the max sum found.
 
-<!-- TOC --><a name="3-image-segmentation-real-world-application"></a>
+
 #### 3. Image Segmentation (Real World Application)
 
 **Scenario:** "Given a black and white MRI scan where white pixels are 'tissue' and black is 'background', identify the tumor."
@@ -3949,7 +3948,7 @@ Interviews at top companies (Google, Meta, Bloomberg) rarely ask the vanilla ver
 * This is the exact same problem. The tumor is usually the "largest connected component" of a specific density/color.
 * You would run `Max Area of Island` on the MRI pixel grid to isolate the mass.
 
-<!-- TOC --><a name="4-distinct-islands-meta"></a>
+
 #### 4. Distinct Islands (Meta)
 
 **Question:** "Count the number of distinct islands, where 'distinct' means the **shape** is unique (ignoring rotation/reflection sometimes, or just translation)."
@@ -3960,14 +3959,14 @@ Interviews at top companies (Google, Meta, Bloomberg) rarely ask the vanilla ver
 * Store these path strings in a `Set`.
 * The result is the size of the `Set`.
 
-<!-- TOC --><a name="332-reconstruct-itinerary"></a>
+
 # 332. Reconstruct Itinerary
 
 Here is a deep dive into **Leetcode 332. Reconstruct Itinerary**, explained from the perspective of a Google L6 Staff Software Engineer.
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-11"></a>
+
 ### 1. Problem Explanation
 
 At its core, this problem asks us to organize a chaotic pile of flight tickets into a valid travel itinerary.
@@ -4028,7 +4027,7 @@ Let's look at this specific set of tickets:
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-eulerian-path-hierholzers-algorithm"></a>
+
 ### 2. Solution Explanation: Eulerian Path (Hierholzer's Algorithm)
 
 To an L6 engineer, this isn't just "recursion"; this is a graph theory problem called finding an **Eulerian Path**.
@@ -4049,7 +4048,7 @@ We use a **Post-Order DFS (Depth First Search)**.
 
 This logic ensures that "dead ends" are added to the itinerary last. Since we are building the itinerary backwards (from the end to the start), we just reverse the list at the very end.
 
-<!-- TOC --><a name="detailed-ascii-walkthrough"></a>
+
 #### Detailed ASCII Walkthrough
 
 **Tickets:** `[["JFK","SFO"],["JFK","ATL"],["SFO","ATL"],["ATL","JFK"],["ATL","SFO"]]`
@@ -4145,7 +4144,7 @@ Eventually, the `Result List` looks like this:
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-11"></a>
+
 ### 3. Time and Space Complexity Analysis
 
 **Time Complexity: O(E * log E)**
@@ -4197,10 +4196,10 @@ Total Space = O(V + E)
 
 ---
 
-<!-- TOC --><a name="4-solution-code-11"></a>
+
 ### 4. Solution Code
 
-<!-- TOC --><a name="python-solution-7"></a>
+
 #### Python Solution
 
 This implementation uses a `stack` for iterative DFS to avoid recursion depth limits, though the recursive approach is also standard. We use `sort(reverse=True)` so we can pop efficiently from the end of the list (O(1)) instead of the front (O(N)).
@@ -4247,7 +4246,7 @@ class Solution:
 
 ```
 
-<!-- TOC --><a name="javascript-solution-7"></a>
+
 #### Javascript Solution
 
 This uses the recursive approach for clarity.
@@ -4296,7 +4295,7 @@ var findItinerary = function(tickets) {
 
 ---
 
-<!-- TOC --><a name="new-concepts-terms"></a>
+
 ### New Concepts & Terms
 
 **Hierholzer's Algorithm:**
@@ -4307,7 +4306,7 @@ var findItinerary = function(tickets) {
 
 ---
 
-<!-- TOC --><a name="indirect-real-world-interview-variations"></a>
+
 ### Indirect / Real-World Interview Variations
 
 When companies like Google, Meta, or Bloomberg ask this, they rarely say "Here are plane tickets." They disguise the Eulerian Path problem in practical engineering scenarios.
@@ -4342,7 +4341,7 @@ When companies like Google, Meta, or Bloomberg ask this, they rarely say "Here a
 
 * **Solution:** Construct the itinerary of transfers. This minimizes the "context switching" of the network controller jumping between unrelated servers.
 
-<!-- TOC --><a name="1233-remove-sub-folders-from-the-filesystem"></a>
+
 # 1233. Remove Sub-Folders from the Filesystem
 
 Here is how a Senior (L5) or Staff (L6) Google Engineer would deconstruct, solve, and expand upon this problem.
@@ -4351,7 +4350,7 @@ At this level, the focus shifts from "getting it right" to **efficiency, readabi
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-12"></a>
+
 ### 1. Problem Explanation
 
 **The Core Task:**
@@ -4384,7 +4383,7 @@ Output: `["/a", "/c/d", "/c/f"]`
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-8"></a>
+
 ### 2. Solution Explanation
 
 An L5/L6 engineer recognizes that **structure facilitates speed**. If the data is chaotic, we have to compare everyone against everyone (). If we organize the data, we can solve it much faster.
@@ -4450,7 +4449,7 @@ We maintain a pointer (or variable) called `last_valid_parent`.
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-12"></a>
+
 ### 3. Time and Space Complexity Analysis
 
 At the Staff level, we don't just say "O(N log N)". We break it down by the number of paths () and the average length of the path string ().
@@ -4502,7 +4501,7 @@ GRAND TOTAL: O(N * L)
 
 ---
 
-<!-- TOC --><a name="4-solution-code-12"></a>
+
 ### 4. Solution Code
 
 **Python Solution**
@@ -4571,7 +4570,7 @@ var removeSubfolders = function(folder) {
 
 ---
 
-<!-- TOC --><a name="5-terminology-concepts"></a>
+
 ### 5. Terminology & Concepts
 
 **Lexicographical Sort:**
@@ -4582,12 +4581,12 @@ Although we used sorting, this problem is fundamentally about "prefixes." If Str
 
 ---
 
-<!-- TOC --><a name="6-real-world-interview-variations-google-meta-bloomberg"></a>
+
 ### 6. Real World & Interview Variations (Google / Meta / Bloomberg)
 
 This is the most important section for an L5/L6 candidate. It shows you understand how this algorithmic toy applies to real systems.
 
-<!-- TOC --><a name="variation-a-the-access-control-list-google-cloud-aws-iam"></a>
+
 #### Variation A: The "Access Control" List (Google Cloud / AWS IAM)
 
 **The Question:** "We have a list of file paths a user has explicit access to. If a user has access to a folder, they have access to everything inside it. Minimize the size of this policy list."
@@ -4595,7 +4594,7 @@ This is the most important section for an L5/L6 candidate. It shows you understa
 * **Why it's asked:** Storage optimization. Storing 1,000,000 paths is expensive. Storing 1 parent path is cheap.
 * **Solution Difference:** It is the exact same code as above. The "cleaning" reduces the policy document size.
 
-<!-- TOC --><a name="variation-b-the-infinite-stream-system-design-context"></a>
+
 #### Variation B: The "Infinite Stream" (System Design Context)
 
 **The Question:** "The folder paths are coming in as a never-ending stream (logs). You cannot sort them because the list never ends. How do you filter sub-folders?"
@@ -4609,7 +4608,7 @@ This is the most important section for an L5/L6 candidate. It shows you understa
 
 
 
-<!-- TOC --><a name="variation-c-hidden-api-bloomberg-meta"></a>
+
 #### Variation C: "Hidden API" (Bloomberg / Meta)
 
 **The Question:** "You are given a list of IDs. You have a helper function `is_child(id1, id2)` that returns true/false. You cannot see the strings themselves. Remove the children."
@@ -4622,7 +4621,7 @@ This is the most important section for an L5/L6 candidate. It shows you understa
 
 
 
-<!-- TOC --><a name="variation-d-the-s3-bucket-listing"></a>
+
 #### Variation D: The "S3 Bucket" Listing
 
 **The Question:** "S3 is a flat object store (no real folders). We have keys like `photos/2023/jan/dog.jpg`. We want to emulate a folder view for the UI. Given a flat list of 1 billion keys, how do we display just the top-level folders?"
@@ -4634,7 +4633,7 @@ This is the most important section for an L5/L6 candidate. It shows you understa
 * Set: `{"photos/", "documents/", "videos/"}`.
 * Return that list. (This is distinct from the main problem but is the standard follow-up).
 
-<!-- TOC --><a name="994-rotting-oranges"></a>
+
 # 994. Rotting Oranges
 
 Here is how a Senior Staff Engineer (L6) at Google would break down, analyze, and solve the "Rotting Oranges" problem.
@@ -4647,7 +4646,7 @@ At this level, we don't just look for "code that passes." We look for:
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-13"></a>
+
 ### 1. Problem Explanation
 
 Imagine a warehouse grid where boxes of oranges are stored.
@@ -4662,7 +4661,7 @@ Every minute, any **fresh orange** that is 4-directionally adjacent (up, down, l
 **The Goal:**
 Return the minimum number of minutes that must elapse until no cell has a fresh orange. If this is impossible (some fresh oranges are isolated), return **-1**.
 
-<!-- TOC --><a name="visualization-of-the-scenario"></a>
+
 #### Visualization of the Scenario
 
 Let's look at a  grid. `R` is Rotten, `F` is Fresh, `_` is Empty.
@@ -4690,10 +4689,10 @@ If there is a Fresh orange at (2,2) surrounded by Empty cells `_`, the rot can n
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-9"></a>
+
 ### 2. Solution Explanation
 
-<!-- TOC --><a name="the-intuition-why-breadth-first-search-bfs"></a>
+
 #### The Intuition: Why Breadth-First Search (BFS)?
 
 An L6 engineer immediately identifies this as a **shortest path problem** on a grid.
@@ -4701,14 +4700,14 @@ An L6 engineer immediately identifies this as a **shortest path problem** on a g
 * **Why not DFS (Depth First Search)?** DFS dives deep. It would trace one rotting path all the way to the end before checking neighbors. That doesn't match the physics of the problem; rotting happens *simultaneously* in all directions.
 * **Why BFS?** BFS explores "layer by layer." It processes everything at distance `1` (Minute 1), then everything at distance `2` (Minute 2). This perfectly mimics the passage of time.
 
-<!-- TOC --><a name="the-multi-source-twist"></a>
+
 #### The "Multi-Source" Twist
 
 Most basic BFS problems start from a single point (e.g., "Find the path from A to B").
 Here, we might have **multiple** rotten oranges at Minute 0.
 We don't run a separate BFS for each rotten orange (that would be inefficient and overlap). Instead, we put **ALL** initially rotten oranges into the Queue at the very beginning. This creates a "Multi-Source BFS."
 
-<!-- TOC --><a name="detailed-visual-walkthrough"></a>
+
 #### Detailed Visual Walkthrough
 
 **The Setup:**
@@ -4798,10 +4797,10 @@ TIME: 2
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-13"></a>
+
 ### 3. Time and Space Complexity Analysis
 
-<!-- TOC --><a name="time-complexity-or-c-1"></a>
+
 #### Time Complexity: O(R * C)
 
 * **R** = Number of Rows
@@ -4823,7 +4822,7 @@ Imagine the grid is a flat list of cells.
 `Initial Scan (R*C) + BFS Processing (R*C)`
 Since we drop constants in Big-O notation, the result is **O(R * C)** or **O(N)** where N is the total number of cells.
 
-<!-- TOC --><a name="space-complexity-or-c-1"></a>
+
 #### Space Complexity: O(R * C)
 
 **Visual Derivation:**
@@ -4848,10 +4847,10 @@ Specifically, for a filled grid, the queue size is roughly bounded by the perime
 
 ---
 
-<!-- TOC --><a name="4-solution-code-13"></a>
+
 ### 4. Solution Code
 
-<!-- TOC --><a name="python-solution-8"></a>
+
 #### Python Solution
 
 *Using `deque` for efficient O(1) pops from the left.*
@@ -4920,7 +4919,7 @@ def orangesRotting(grid):
 
 ```
 
-<!-- TOC --><a name="javascript-solution-8"></a>
+
 #### JavaScript Solution
 
 *Note on Array.shift(): In JS, `shift()` is O(K) where K is array length. In a strictly academic setting or very high-performance constraints, one might use a pointer or a Linked List. However, for most L5/L6 interviews, using an Array as a queue is accepted unless the interviewer specifically asks to optimize the Queue implementation.*
@@ -4994,7 +4993,7 @@ var orangesRotting = function(grid) {
 
 ---
 
-<!-- TOC --><a name="5-terminology-techniques"></a>
+
 ### 5. Terminology & Techniques
 
 **Technique: Multi-Source BFS**
@@ -5009,12 +5008,12 @@ Notice we didn't use a separate `visited` set (like `visited = set()`).
 
 ---
 
-<!-- TOC --><a name="6-real-world-interview-variations"></a>
+
 ### 6. Real World & Interview Variations
 
 Google, Meta, and Bloomberg love this problem because it tests graph traversal without explicitly looking like a graph. Here is how they disguise it:
 
-<!-- TOC --><a name="a-the-virus-propagation-google-meta"></a>
+
 #### A. The "Virus Propagation" (Google / Meta)
 
 **Question:** You have a computer network (represented as a grid or adjacency list). Some computers are infected with malware. The malware spreads to connected, unpatched computers every second. How long until the whole network is down?
@@ -5026,7 +5025,7 @@ Google, Meta, and Bloomberg love this problem because it tests graph traversal w
 
 
 
-<!-- TOC --><a name="b-the-fire-spreading-with-walls-amazon"></a>
+
 #### B. The "Fire Spreading" with Walls (Amazon)
 
 **Question:** A forest has trees (1) and rocks (0). A fire starts at multiple points (2). Return the time it takes to burn all trees.
@@ -5038,7 +5037,7 @@ Google, Meta, and Bloomberg love this problem because it tests graph traversal w
 
 
 
-<!-- TOC --><a name="c-the-server-updates-bloomberg-system-design"></a>
+
 #### C. The "Server Updates" (Bloomberg / System Design)
 
 **Question:** You need to push a software update to a cluster of servers. You have 3 master servers that have the update. In one "tick," a server can send the update to its direct neighbors. How many ticks to update the cluster?
@@ -5046,14 +5045,14 @@ Google, Meta, and Bloomberg love this problem because it tests graph traversal w
 * **Solution:** Multi-Source BFS starting from the 3 master servers.
 * **L6 Insight:** In a real distributed system, this is "Gossip Protocol" or "Epidemic Broadcasting." The BFS solution calculates the theoretical minimum latency for full propagation.
 
-<!-- TOC --><a name="127-word-ladder"></a>
+
 # 127. Word Ladder
 
 Here is a comprehensive breakdown of **LeetCode 127: Word Ladder**, structured as requested, with the depth and clarity expected of a senior engineering discussion.
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-14"></a>
+
 ### 1. Problem Explanation
 
 **The Goal:**
@@ -5097,7 +5096,7 @@ Result: 5
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-10"></a>
+
 ### 2. Solution Explanation
 
 **The Intuition (L5/L6 Perspective):**
@@ -5234,7 +5233,7 @@ Generate neighbors... matches `cog`.
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-14"></a>
+
 ### 3. Time and Space Complexity Analysis
 
 **Time Complexity Derivation**
@@ -5311,10 +5310,10 @@ Space: .
 
 ---
 
-<!-- TOC --><a name="4-solution-code-14"></a>
+
 ### 4. Solution Code
 
-<!-- TOC --><a name="python-solution-optimized-bfs"></a>
+
 #### Python Solution (Optimized BFS)
 
 ```python
@@ -5378,7 +5377,7 @@ def ladderLength(beginWord, endWord, wordList):
 
 ```
 
-<!-- TOC --><a name="javascript-solution-9"></a>
+
 #### JavaScript Solution
 
 ```javascript
@@ -5450,7 +5449,7 @@ var ladderLength = function(beginWord, endWord, wordList) {
 
 ---
 
-<!-- TOC --><a name="note-1-terminology-techniques"></a>
+
 ### Note 1: Terminology & Techniques
 
 **Breadth-First Search (BFS):**
@@ -5467,7 +5466,7 @@ While the solution above is , extremely large graphs can still be slow. An L6 en
 
 ---
 
-<!-- TOC --><a name="note-2-real-world-indirect-interview-variations-1"></a>
+
 ### Note 2: Real World & Indirect Interview Variations
 
 Companies like Google, Meta, and Bloomberg rarely ask "Solve Word Ladder" directly anymore. They wrap it in different narratives.
@@ -5499,14 +5498,14 @@ Companies like Google, Meta, and Bloomberg rarely ask "Solve Word Ladder" direct
 * **Edges:** Friendships.
 * *Implementation:* This is the purest form of BFS. You don't generate strings; you just iterate over the user's friend list. Bidirectional BFS is almost mandatory here due to the massive scale of social graphs.
 
-<!-- TOC --><a name="210-course-schedule-ii"></a>
+
 # 210. Course Schedule II
 
 Here is a breakdown of how a Senior (L5) or Staff (L6) Engineer would deconstruct and solve **LeetCode 210: Course Schedule II**.
 
 At this level, the focus shifts from "getting it to work" to "modeling the problem correctly" and "writing maintainable, production-grade logic."
 
-<!-- TOC --><a name="1-problem-explanation-15"></a>
+
 ### 1. Problem Explanation
 
 **The Core Concept: Dependency Resolution**
@@ -5523,7 +5522,7 @@ Find a linear ordering (a list) where every course appears *after* its prerequis
 **The "Impossible" Scenario (The Cycle):**
 If Course A requires Course B, and Course B requires Course A, you are stuck. This is a "Cyclic Dependency." You can never start. In this case, we must return an empty list.
 
-<!-- TOC --><a name="ascii-visualization-a-happy-path"></a>
+
 #### ASCII Visualization: A Happy Path
 
 Input: `numCourses = 4`, `prerequisites = [[1,0], [2,0], [3,1], [3,2]]`
@@ -5544,7 +5543,7 @@ Input: `numCourses = 4`, `prerequisites = [[1,0], [2,0], [3,1], [3,2]]`
 **Valid Order:** `[0, 1, 2, 3]` OR `[0, 2, 1, 3]`
 *Notice how the arrows always point "forward" in the list.*
 
-<!-- TOC --><a name="ascii-visualization-the-deadlock-cycle"></a>
+
 #### ASCII Visualization: The "Deadlock" (Cycle)
 
 Input: `[[1,0], [0,1]]`
@@ -5560,12 +5559,12 @@ Input: `[[1,0], [0,1]]`
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-11"></a>
+
 ### 2. Solution Explanation
 
 To solve this as an engineer, we use an algorithm called **Topological Sort**. Specifically, **Kahn's Algorithm** (Breadth-First Search approach) is often preferred in production systems because it is iterative (avoids stack overflow on deep graphs) and intuitively models "resolving dependencies."
 
-<!-- TOC --><a name="the-strategy-peeling-the-onion"></a>
+
 #### The Strategy: "Peeling the Onion"
 
 1. **Calculate Indegrees:** Count how many prerequisites each course has.
@@ -5578,7 +5577,7 @@ To solve this as an engineer, we use an algorithm called **Topological Sort**. S
 
 4. **Cycle Check:** If the final `Order` list contains fewer courses than the total, we hit a cycle (some courses never became free).
 
-<!-- TOC --><a name="detailed-walkthrough-with-ascii"></a>
+
 #### Detailed Walkthrough with ASCII
 
 **Input:** `numCourses = 4`, `prerequisites = [[1,0], [2,0], [3,1], [3,2]]`
@@ -5672,10 +5671,10 @@ Result size (4) == numCourses (4). **Success.**
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-15"></a>
+
 ### 3. Time and Space Complexity Analysis
 
-<!-- TOC --><a name="time-complexity-ov-e-1"></a>
+
 #### Time Complexity: O(V + E)
 
 * **V** = Number of Courses (Vertices)
@@ -5711,7 +5710,7 @@ TOTAL: O(V + E) + O(V + E) = O(V + E)
 
 ```
 
-<!-- TOC --><a name="space-complexity-ov-e-1"></a>
+
 #### Space Complexity: O(V + E)
 
 ```text
@@ -5740,10 +5739,10 @@ TOTAL: O(V + E)
 
 ---
 
-<!-- TOC --><a name="4-solution-code-15"></a>
+
 ### 4. Solution Code
 
-<!-- TOC --><a name="python-production-grade"></a>
+
 #### Python (Production Grade)
 
 *Uses `collections.deque` for O(1) pops, and clear variable naming.*
@@ -5798,7 +5797,7 @@ class Solution:
 
 ```
 
-<!-- TOC --><a name="javascript-es6-clean"></a>
+
 #### JavaScript (ES6+ Clean)
 
 ```javascript
@@ -5860,7 +5859,7 @@ var findOrder = function(numCourses, prerequisites) {
 
 ---
 
-<!-- TOC --><a name="note-1-terminology"></a>
+
 ### Note 1: Terminology
 
 * **Topological Sort:** A linear ordering of vertices in a graph such that for every directed edge from u to v, u comes before v. This is only possible in DAGs.
@@ -5869,12 +5868,12 @@ var findOrder = function(numCourses, prerequisites) {
 
 ---
 
-<!-- TOC --><a name="note-2-real-world-interview-variations-6"></a>
+
 ### Note 2: Real World & Interview Variations
 
 Big Tech companies rarely ask "Implement Topological Sort" directly. They mask it in practical scenarios. Here is how they ask it and how to adapt the solution:
 
-<!-- TOC --><a name="1-the-build-system-google-meta"></a>
+
 #### 1. The "Build System" (Google / Meta)
 
 **Question:** "Design a build system like Make, Maven, or Webpack. Given a list of files where file A imports file B, determine the order to compile them. Can we compile files in parallel?"
@@ -5894,7 +5893,7 @@ Queue: [C, D, E] <-- Launch 3 Threads...
 
 
 
-<!-- TOC --><a name="2-the-bad-package-version-bloomberg-npm"></a>
+
 #### 2. The "Bad Package Version" (Bloomberg / npm)
 
 **Question:** "We have a package manager. Package A depends on Package B. Sometimes circular dependencies happen (A->B->C->A). Write a function that detects which packages are part of the cycle."
@@ -5905,7 +5904,7 @@ Queue: [C, D, E] <-- Launch 3 Threads...
 * **Result:** If `result.length != total`, the items *not* in the result list are the ones stuck in the cycle (or stuck waiting on the cycle).
 * **L6 Detail:** You might need to use DFS (Depth First Search) with "coloring" (White=Unvisited, Gray=Visiting, Black=Visited) to explicitly print the exact path of the cycle (e.g., "Error: A->B->C->A").
 
-<!-- TOC --><a name="3-task-scheduling-with-aliasing-uber-doordash"></a>
+
 #### 3. Task Scheduling with Aliasing (Uber / DoorDash)
 
 **Question:** "You have tasks to complete. Some tasks are actually the same but named differently (aliasing). Determine order."
@@ -5915,14 +5914,14 @@ Queue: [C, D, E] <-- Launch 3 Threads...
 * **Preprocessing:** Before building the graph, you must use a **Union-Find** data structure to merge aliased tasks into single nodes.
 * **Then:** Run Topological Sort on the merged nodes.
 
-<!-- TOC --><a name="329-longest-increasing-path-in-a-matrix"></a>
+
 # 329. Longest Increasing Path in a Matrix
 
 Here is how a Senior Staff Software Engineer (L6) at Google would break down, solve, and optimize **LeetCode 329: Longest Increasing Path in a Matrix**.
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-16"></a>
+
 ### 1. Problem Explanation
 
 The goal is to find the length of the longest path in a grid where every step you take moves to a strictly larger number. You can move Up, Down, Left, or Right. You cannot move diagonally or wrap around the edges.
@@ -5964,12 +5963,12 @@ The "Answer" is the maximum length found among *all* possible paths starting fro
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-12"></a>
+
 ### 2. Solution Explanation
 
 An L5/L6 engineer recognizes this immediately as a graph traversal problem. Each cell is a node, and a directed edge exists from cell A to cell B if `Value(B) > Value(A)` and they are neighbors.
 
-<!-- TOC --><a name="approach-1-naive-dfs-do-not-implement-but-understand"></a>
+
 #### Approach 1: Naive DFS (Do not implement, but understand)
 
 If we run a pure Depth First Search (DFS) from every cell, we will do redundant work.
@@ -5982,7 +5981,7 @@ If we run a pure Depth First Search (DFS) from every cell, we will do redundant 
 
 This re-calculation is the bottleneck.
 
-<!-- TOC --><a name="approach-2-dfs-memoization-the-l5l6-standard"></a>
+
 #### Approach 2: DFS + Memoization (The L5/L6 Standard)
 
 We use **Memoization** (caching). If we have already computed the longest path starting from `Cell B`, we store it. If we ever reach `Cell B` again from a neighbor, we just look up the answer instead of re-walking the path.
@@ -6029,7 +6028,7 @@ Since the path must be *strictly increasing*, there are **no cycles**. You can n
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-16"></a>
+
 ### 3. Time and Space Complexity Analysis
 
 **Time Complexity Derivation:**
@@ -6092,10 +6091,10 @@ We need to store the computed results for every cell.
 
 ---
 
-<!-- TOC --><a name="4-solution-code-16"></a>
+
 ### 4. Solution Code
 
-<!-- TOC --><a name="python-solution-9"></a>
+
 #### Python Solution
 
 This implementation focuses on readability and caching, typical of production-grade code.
@@ -6148,7 +6147,7 @@ class Solution:
 
 ```
 
-<!-- TOC --><a name="javascript-solution-10"></a>
+
 #### Javascript Solution
 
 ```javascript
@@ -6208,7 +6207,7 @@ var longestIncreasingPath = function(matrix) {
 
 ---
 
-<!-- TOC --><a name="note-1-terminology-1"></a>
+
 ### Note 1: Terminology
 
 * **DFS (Depth First Search):** An algorithm that explores as far as possible along each branch before backtracking. In this problem, it's akin to walking down a path until you hit a dead end (a cell with no larger neighbors).
@@ -6216,18 +6215,18 @@ var longestIncreasingPath = function(matrix) {
 
 ---
 
-<!-- TOC --><a name="note-2-real-world-interview-variants-google-meta-bloomberg"></a>
+
 ### Note 2: Real World & Interview Variants (Google, Meta, Bloomberg)
 
 In senior interviews, you are rarely asked the raw LeetCode question. It is usually wrapped in a practical scenario.
 
-<!-- TOC --><a name="1-the-skiing-problem-common-at-googlemeta"></a>
+
 #### 1. The "Skiing" Problem (Common at Google/Meta)
 
 **Question:** "Given a topographical map where each cell represents elevation, find the longest run a skier can take. Skiers can only move downhill."
 **L6 Solution:** This is the exact same problem but reversed. Instead of `Strictly Increasing`, looking for `Strictly Decreasing` (or just invert the comparison logic). The "Elevation Map" is the matrix.
 
-<!-- TOC --><a name="2-the-dependency-build-order-google-build-tools-team"></a>
+
 #### 2. The Dependency Build Order (Google Build Tools Team)
 
 **Question:** "We have a grid of microservices. A service at `(r,c)` depends on neighbors if the neighbor has a strictly higher 'priority ID'. Find the longest chain of dependencies to determine the critical path latency."
@@ -6237,14 +6236,14 @@ In senior interviews, you are rarely asked the raw LeetCode question. It is usua
 * The "longest path in a DAG" is a classic application of this algorithm.
 * **Advanced Twist:** The interviewer might ask, "What if we can move diagonally?" (Update directions array). "What if two services have equal priority?" (If equality is allowed, cycles might appear, breaking the DAG assumption. You would then need a `visited` set for the current recursion stack to detect cycles).
 
-<!-- TOC --><a name="3-water-flow-drainage-bloomberg"></a>
+
 #### 3. Water Flow / Drainage (Bloomberg)
 
 **Question:** "Rain falls on a grid of varying heights. Water flows to neighbors with lower height. Calculate the longest distance a water droplet can travel."
 **L6 Solution:** Identical to the Skiing problem.
 **Optimization for Interview:** If the interviewer asks to find *all* cells that can flow into the Ocean (border of grid), that is a different problem (usually solved by starting DFS *from the ocean* inwards). But if they ask for the *longest flow path*, it's the `Longest Increasing Path` solution.
 
-<!-- TOC --><a name="947-most-stones-removed-with-same-row-or-column"></a>
+
 # 947. Most Stones Removed with Same Row or Column
 
 An L6 (Staff Engineer) at Google approaches this not just as a coding exercise, but as a modeling problem. They would immediately pivot from "simulating the removal" (which feels like a greedy algorithm) to "identifying structure" (Graph Theory).
@@ -6253,7 +6252,7 @@ Here is how I would break this down in an interview or design doc.
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-17"></a>
+
 ### 1. Problem Explanation
 
 **The Core Conflict:**
@@ -6313,12 +6312,12 @@ Therefore, the problem is actually:
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-13"></a>
+
 ### 2. Solution Explanation
 
 We need to group these stones. The most efficient tool for grouping items dynamically is **Union-Find (Disjoint Set Union - DSU)**.
 
-<!-- TOC --><a name="the-l6-optimization-coordinate-mapping"></a>
+
 #### The L6 Optimization (Coordinate Mapping)
 
 A naive approach compares every stone against every other stone.
@@ -6367,7 +6366,7 @@ Rows and Cols both use integers `0, 1, 2...`. To distinguish `Row 0` from `Col 0
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-17"></a>
+
 ### 3. Time and Space Complexity Analysis
 
 We are using Union-Find with Path Compression and Union by Rank.
@@ -6409,12 +6408,12 @@ Total Space: O(N) or O(Max_Coordinate_Value)
 
 ---
 
-<!-- TOC --><a name="4-solution-code-17"></a>
+
 ### 4. Solution Code
 
 I will provide the **Hash Map** based Union-Find. This is the preferred "Real World" solution because it handles sparse data (e.g., if a coordinate was 1,000,000, an array would be wasteful, but a map is efficient).
 
-<!-- TOC --><a name="python-solution-10"></a>
+
 #### Python Solution
 
 ```python
@@ -6470,7 +6469,7 @@ class Solution:
 
 ```
 
-<!-- TOC --><a name="javascript-solution-11"></a>
+
 #### JavaScript Solution
 
 ```javascript
@@ -6529,7 +6528,7 @@ var removeStones = function(stones) {
 
 ---
 
-<!-- TOC --><a name="note-1-terminology-techniques-1"></a>
+
 ### Note 1: Terminology & Techniques
 
 **1. Connected Components:**
@@ -6544,12 +6543,12 @@ It is "near constant time" -  - which makes it incredibly fast for connectivity 
 
 ---
 
-<!-- TOC --><a name="note-2-real-world-interview-variations-7"></a>
+
 ### Note 2: Real World Interview Variations
 
 This specific pattern (grouping items based on shared attributes) is very common in System Design and Algorithmic interviews at top-tier firms.
 
-<!-- TOC --><a name="1-bloomberg-user-identity-resolution"></a>
+
 #### 1. Bloomberg: "User Identity Resolution"
 
 **Problem:** You have a stream of login events. `[User_A, Device_1]`, `[User_B, Device_1]`, `[User_B, Device_2]`.
@@ -6566,7 +6565,7 @@ This specific pattern (grouping items based on shared attributes) is very common
 * Union(User, Device).
 * Count unique roots at the end.
 
-<!-- TOC --><a name="2-meta-facebook-friends-transitivity"></a>
+
 #### 2. Meta (Facebook): "Friends Transitivity"
 
 **Problem:** You are given a list of pairs `[A, B]` meaning A is friends with B. If A is friends with B, and B is friends with C, then A and C are indirectly connected.
@@ -6579,7 +6578,7 @@ This specific pattern (grouping items based on shared attributes) is very common
 * Use DSU. `Union(A, B)`.
 * Instead of just counting components, track the `size` of each component in the DSU class. Return `max(size)`.
 
-<!-- TOC --><a name="3-google-pixel-clustering-computer-vision"></a>
+
 #### 3. Google: "Pixel Clustering / Computer Vision"
 
 **Problem:** You have a large black and white image (grid of 0s and 1s).
@@ -6593,7 +6592,7 @@ This specific pattern (grouping items based on shared attributes) is very common
 * Union current pixel with its active neighbors.
 * `Count = Total Black Pixels - Unions Performed`.
 
-<!-- TOC --><a name="394-decode-string"></a>
+
 # 394. Decode String
 
 Here is how a Senior Software Engineer (L5/L6) would break down **LeetCode 394. Decode String**.
@@ -6602,7 +6601,7 @@ At this level, we aren't just solving the problem; we are demonstrating mastery 
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-18"></a>
+
 ### 1. Problem Explanation
 
 The core task is to uncompress a string that follows a specific encoding pattern: `k[encoded_string]`. This means the `encoded_string` inside the brackets is repeated exactly `k` times.
@@ -6629,7 +6628,7 @@ Think of this like an onion or a mathematical expression. You cannot solve the o
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-the-dual-stack-approach"></a>
+
 ### 2. Solution Explanation: The Dual-Stack Approach
 
 An L5 engineer recognizes this as a classic **parsing** problem. We need to remember "where we were" before diving into a nested bracket.
@@ -6722,7 +6721,7 @@ RESULT: "accaccacc"
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-18"></a>
+
 ### 3. Time and Space Complexity Analysis
 
 **Time Complexity: O(MaxK * N)**
@@ -6762,12 +6761,12 @@ Stack Depth: |
 
 ---
 
-<!-- TOC --><a name="4-solution-code-18"></a>
+
 ### 4. Solution Code
 
 The following code is written in a "Google Style"—clean variable names, modular logic, and clear separation of concerns.
 
-<!-- TOC --><a name="python-implementation"></a>
+
 #### Python Implementation
 
 ```python
@@ -6813,7 +6812,7 @@ class Solution:
 
 ```
 
-<!-- TOC --><a name="javascript-implementation"></a>
+
 #### JavaScript Implementation
 
 ```javascript
@@ -6864,7 +6863,7 @@ var decodeString = function(s) {
 
 ---
 
-<!-- TOC --><a name="note-1-terms-techniques"></a>
+
 ### Note 1: Terms & Techniques
 
 **1. Recursive Descent Parsing (Alternative View):**
@@ -6875,7 +6874,7 @@ The operation `prevStr + (currStr * count)` is essentially "flattening" a nested
 
 ---
 
-<!-- TOC --><a name="note-2-real-world-interview-variations-google-meta-bloomberg"></a>
+
 ### Note 2: Real World Interview Variations (Google, Meta, Bloomberg)
 
 At L5/L6, the interviewer will often pivot from the algorithmic solution to a "System Design" or "Real World Application" discussion.
@@ -6910,14 +6909,14 @@ At L5/L6, the interviewer will often pivot from the algorithmic solution to a "S
 * If the stack has items left, it means we have unclosed brackets.
 * Throw a descriptive `SyntaxError` showing exactly where the bracket was expected. This is "Developer Experience" (DX) thinking.
 
-<!-- TOC --><a name="399-evaluate-division"></a>
+
 # 399. Evaluate Division
 
 An L5/L6 engineer doesn’t just jump into coding. They treat this as a **Graph Modeling** problem. At this level, the goal is to identify that variables are nodes and ratios are directed, weighted edges.
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-19"></a>
+
 ## 1. Problem Explanation
 
 You are given equations like `a / b = 2.0`.
@@ -6928,7 +6927,7 @@ In your head, you should immediately translate that into a map:
 
 The problem asks you to find the result of new queries (e.g., `a / c = ?`) based on these known relationships. If there is no path between two variables, the answer is `-1.0`.
 
-<!-- TOC --><a name="the-hidden-logic"></a>
+
 ### The "Hidden" Logic
 
 If `a / b = 2.0` and `b / c = 3.0`, then `a / c` is just the chain: `(a / b) * (b / c)`.
@@ -6936,12 +6935,12 @@ Numerically: `2.0 * 3.0 = 6.0`.
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-14"></a>
+
 ## 2. Solution Explanation
 
 To an experienced engineer, this is a **Directed Weighted Graph**.
 
-<!-- TOC --><a name="step-1-building-the-graph"></a>
+
 ### Step 1: Building the Graph
 
 We represent the equations as an adjacency list. For every equation `u / v = value`, we store:
@@ -6949,12 +6948,12 @@ We represent the equations as an adjacency list. For every equation `u / v = val
 1. A path from `u` to `v` with weight `value`.
 2. A path from `v` to `u` with weight `1 / value`.
 
-<!-- TOC --><a name="step-2-the-traversal-bfs-or-dfs"></a>
+
 ### Step 2: The Traversal (BFS or DFS)
 
 To solve `a / d`, we start a search at `a` and try to reach `d`. As we move from node to node, we **multiply** the edge weights.
 
-<!-- TOC --><a name="ascii-visualization-of-the-logic"></a>
+
 ### ASCII Visualization of the Logic
 
 Let's say we have: `a/b = 2.0`, `b/c = 3.0`, `x/y = 5.0`
@@ -6988,12 +6987,12 @@ RESULT: -1.0
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-19"></a>
+
 ## 3. Time and Space Complexity Analysis
 
 At the L5/L6 level, we analyze complexity based on N (number of equations) and Q (number of queries).
 
-<!-- TOC --><a name="time-complexity-tc-1"></a>
+
 ### Time Complexity (TC)
 
 ```text
@@ -7010,7 +7009,7 @@ TOTAL TC: O(N + Q * V)
 
 ```
 
-<!-- TOC --><a name="space-complexity-sc-1"></a>
+
 ### Space Complexity (SC)
 
 ```text
@@ -7026,10 +7025,10 @@ TOTAL SC: O(N + V)
 
 ---
 
-<!-- TOC --><a name="4-solution-code-19"></a>
+
 ## 4. Solution Code
 
-<!-- TOC --><a name="python-implementation-1"></a>
+
 ### Python Implementation
 
 ```python
@@ -7069,7 +7068,7 @@ def calcEquation(equations, values, queries):
 
 ```
 
-<!-- TOC --><a name="javascript-implementation-1"></a>
+
 ### Javascript Implementation
 
 ```javascript
@@ -7116,7 +7115,7 @@ var calcEquation = function(equations, values, queries) {
 
 ---
 
-<!-- TOC --><a name="key-terms-techniques"></a>
+
 ## Key Terms & Techniques
 
 * **Adjacency List:** A way to represent a graph where each node stores a list of its neighbors. It's more space-efficient than a matrix for "sparse" data (where most variables aren't directly related).
@@ -7125,24 +7124,24 @@ var calcEquation = function(equations, values, queries) {
 
 ---
 
-<!-- TOC --><a name="real-world-interview-variations-1"></a>
+
 ## Real-World Interview Variations
 
-<!-- TOC --><a name="1-currency-exchange-googlebloomberg"></a>
+
 ### 1. Currency Exchange (Google/Bloomberg)
 
 **Scenario:** You have exchange rates (USD/EUR = 0.9). Find the best rate between two currencies.
 
 * **Solving it:** This is exactly the same problem, but if there are multiple paths, you might need **Dijkstra’s Algorithm** to find the *maximum* product path (best rate) instead of just *any* path.
 
-<!-- TOC --><a name="2-unit-conversion-tool-metagoogle"></a>
+
 ### 2. Unit Conversion Tool (Meta/Google)
 
 **Scenario:** Convert "feet" to "meters" given "feet to inches" and "inches to meters".
 
 * **Solving it:** This is the standard "Evaluate Division" problem. The "variables" are units (ft, in, m).
 
-<!-- TOC --><a name="3-build-system-dependencies-google"></a>
+
 ### 3. Build System Dependencies (Google)
 
 **Scenario:** To build library A, you need 2 units of library B. To build B, you need 3 units of C. How many C's for one A?
@@ -7151,14 +7150,14 @@ var calcEquation = function(equations, values, queries) {
 
 **Would you like me to walk through the Union-Find optimization for this problem to see how an L6 might over-engineer it for maximum performance?**
 
-<!-- TOC --><a name="robot-room-cleaner"></a>
+
 # Robot Room Cleaner
 
 A Google L5 (Senior) or L6 (Staff) engineer doesn't just look for a way to pass the test cases; they look for a **robust, modular, and mathematically sound** approach. For "Robot Room Cleaner," the challenge isn't just "moving around"—it's managing state in an environment where you have no map.
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-20"></a>
+
 ## 1. Problem Explanation
 
 Imagine you are a blindfolded robot in a messy room. You have a `clean()` function, but you don't know where the walls are until you bump into them. You can move forward, turn left, or turn right.
@@ -7169,7 +7168,7 @@ Imagine you are a blindfolded robot in a messy room. You have a `clean()` functi
 * You don't know your starting coordinates.
 * You must clean every reachable square.
 
-<!-- TOC --><a name="the-mental-model-the-grid"></a>
+
 ### The Mental Model (The Grid)
 
 Even though we don't have a map, we can **create one** as we go using a coordinate system where our starting point is `(0, 0)`.
@@ -7185,19 +7184,19 @@ Even though we don't have a map, we can **create one** as we go using a coordina
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-15"></a>
+
 ## 2. Solution Explanation
 
 An L6 engineer would identify this as a **Backtracking Depth-First Search (DFS)** on an implicit graph.
 
-<!-- TOC --><a name="the-strategy"></a>
+
 ### The Strategy
 
 1. **Mark and Clean:** As soon as you land on a cell `(x, y)`, add it to a `Set` of "visited" cells and call `robot.clean()`.
 2. **Explore 4 Directions:** From your current cell, try to move in all four directions (Up, Right, Down, Left).
 3. **The "Handshake" (Move & Backtrack):** This is the non-trivial part. If you move forward into a new cell and finish exploring it, you **must** return to your previous cell and face your previous direction to maintain the DFS integrity.
 
-<!-- TOC --><a name="visualization-of-the-dfs-path"></a>
+
 ### Visualization of the DFS Path
 
 Legend: `S` = Start, `.` = Cleaned, `W` = Wall, `R` = Robot, `*` = Target
@@ -7217,7 +7216,7 @@ STEP 4: Backtrack to (0,0)      STEP 5: Turn Right, Move (1,0)  STEP 6: Full Map
 
 ```
 
-<!-- TOC --><a name="the-non-trivial-part-the-go-back-maneuver"></a>
+
 ### The Non-Trivial Part: The "Go Back" Maneuver
 
 In a standard DFS (like on a 2D array), you just return from a function. But a physical robot is still in the new cell! You have to manually move it back.
@@ -7230,12 +7229,12 @@ In a standard DFS (like on a 2D array), you just return from a function. But a p
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-20"></a>
+
 ## 3. Time and Space Complexity Analysis
 
 Since we are avoiding LaTeX, here is the derivation in plain text:
 
-<!-- TOC --><a name="time-complexity-1"></a>
+
 ### Time Complexity
 
 ```text
@@ -7249,7 +7248,7 @@ Complexity: O(N)
 
 ```
 
-<!-- TOC --><a name="space-complexity-1"></a>
+
 ### Space Complexity
 
 ```text
@@ -7264,10 +7263,10 @@ Complexity: O(N)
 
 ---
 
-<!-- TOC --><a name="4-solution-code-20"></a>
+
 ## 4. Solution Code
 
-<!-- TOC --><a name="python-implementation-2"></a>
+
 ### Python Implementation
 
 ```python
@@ -7312,7 +7311,7 @@ class Solution:
 
 ```
 
-<!-- TOC --><a name="javascript-implementation-2"></a>
+
 ### JavaScript Implementation
 
 ```javascript
@@ -7358,7 +7357,7 @@ var cleanRoom = function(robot) {
 
 ---
 
-<!-- TOC --><a name="note-1-terms-and-techniques-4"></a>
+
 ## Note 1: Terms and Techniques
 
 * **DFS (Depth-First Search):** A strategy for traversing a tree or graph where you go as deep as possible along a branch before backtracking. In this problem, it ensures we don't get "lost" in the room.
@@ -7367,7 +7366,7 @@ var cleanRoom = function(robot) {
 
 ---
 
-<!-- TOC --><a name="note-2-real-world-interview-variations-8"></a>
+
 ## Note 2: Real-World Interview Variations
 
 Google, Meta, and Bloomberg often wrap this logic in different "skins":
@@ -7384,14 +7383,14 @@ Google, Meta, and Bloomberg often wrap this logic in different "skins":
 * **Solution:** This extends the Robot Room Cleaner to 3D. Instead of 4 directions, you have 6 (Up, Down, North, South, East, West). The "Go Back" logic remains the same.
 
 
-<!-- TOC --><a name="753-cracking-the-safe"></a>
+
 # 753. Cracking the Safe
 
 A Google L6 (Staff Engineer) doesn't just look for a solution; they look for the **underlying mathematical structure**. For "Cracking the Safe," that structure is a **De Bruijn sequence**.
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-21"></a>
+
 ## 1. Problem Explanation
 
 Imagine you have a safe with an -digit passcode. Each digit can be from  to .
@@ -7399,7 +7398,7 @@ You don't have to hit "Enter" after every  digits. The safe stays open if the **
 
 **The Goal:** Find the shortest possible string that contains every possible -digit combination as a substring.
 
-<!-- TOC --><a name="the-aha-moment"></a>
+
 ### The "Aha!" Moment
 
 If  and , our combinations are: `00, 01, 10, 11`.
@@ -7416,19 +7415,19 @@ If  and , our combinations are: `00, 01, 10, 11`.
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-16"></a>
+
 ## 2. Solution Explanation
 
 To solve this efficiently, we treat the problem as finding an **Eulerian Path** in a directed graph.
 
-<!-- TOC --><a name="the-graph-setup"></a>
+
 ### The Graph Setup
 
 * **Nodes:** All possible strings of length .
 * **Edges:** Represent adding a digit (0 to ) to a node to reach a new node.
 * **The Logic:** Each edge represents a full -digit code. To use every code exactly once, we need to visit every **edge** in the graph exactly once.
 
-<!-- TOC --><a name="ascii-visualization-n2-k2"></a>
+
 ### ASCII Visualization (n=2, k=2)
 
 Nodes are length  (length 1). Nodes: `0` and `1`.
@@ -7448,7 +7447,7 @@ Nodes are length  (length 1). Nodes: `0` and `1`.
 
 ```
 
-<!-- TOC --><a name="the-hierholzers-algorithm-dfs"></a>
+
 ### The Hierholzer’s Algorithm (DFS)
 
 We use a Depth First Search. As we "finish" visiting all edges from a node, we add the digit used to our result. This builds the sequence in reverse.
@@ -7465,10 +7464,10 @@ We use a Depth First Search. As we "finish" visiting all edges from a node, we a
 
 ---
 
-<!-- TOC --><a name="3-complexity-analysis"></a>
+
 ## 3. Complexity Analysis
 
-<!-- TOC --><a name="time-complexity-tc-2"></a>
+
 ### Time Complexity (TC)
 
 We visit every possible combination exactly once. There are  combinations.
@@ -7480,7 +7479,7 @@ TC = O(k^n)
 
 ```
 
-<!-- TOC --><a name="space-complexity-sc-2"></a>
+
 ### Space Complexity (SC)
 
 We store the visited combinations and the recursion stack.
@@ -7495,10 +7494,10 @@ SC = O(k^n)
 
 ---
 
-<!-- TOC --><a name="4-solution-code-21"></a>
+
 ## 4. Solution Code
 
-<!-- TOC --><a name="python-implementation-3"></a>
+
 ### Python Implementation
 
 ```python
@@ -7527,7 +7526,7 @@ class Solution:
 
 ```
 
-<!-- TOC --><a name="javascript-implementation-3"></a>
+
 ### Javascript Implementation
 
 ```javascript
@@ -7561,7 +7560,7 @@ var crackSafe = function(n, k) {
 
 ---
 
-<!-- TOC --><a name="terminology-deep-dive"></a>
+
 ## Terminology Deep Dive
 
 * **De Bruijn Sequence:** A specific sequence where every possible string of length  over an alphabet of size  appears exactly once as a contiguous substring.
@@ -7569,7 +7568,7 @@ var crackSafe = function(n, k) {
 
 ---
 
-<!-- TOC --><a name="real-world-interview-variants"></a>
+
 ## Real World / Interview Variants
 
 **1. The "Minimal Sensor Log" (Google/Meta)**
@@ -7588,7 +7587,7 @@ var crackSafe = function(n, k) {
 * *Solution:* This is often solved by building a De Bruijn graph where nodes are  overlaps.
 
 
-<!-- TOC --><a name="433-minimum-genetic-mutation"></a>
+
 # 433. Minimum Genetic Mutation
 
 A Google L5 or L6 engineer doesn't just look for *a* solution; they look for the most **robust**, **efficient**, and **scalable** pattern. For a problem like "Minimum Genetic Mutation," they immediately recognize this as a **Shortest Path problem in an unweighted graph.**
@@ -7597,7 +7596,7 @@ Here is how a top-tier engineer breaks this down.
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-22"></a>
+
 ## 1. Problem Explanation
 
 You have a starting gene string (`start`), an ending gene string (`end`), and a list of valid mutations (`bank`).
@@ -7606,22 +7605,22 @@ You have a starting gene string (`start`), an ending gene string (`end`), and a 
 * Each intermediate mutation **must** exist in the `bank`.
 * You need the **minimum** number of mutations to get from start to end.
 
-<!-- TOC --><a name="the-mental-model"></a>
+
 ### The "Mental Model"
 
 Think of each gene string as a **node** in a giant web (a graph). If two strings differ by only one letter, there is a **bridge** (edge) between them. We are looking for the shortest bridge-crossing path from Start to End.
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-17"></a>
+
 ## 2. Solution Explanation
 
-<!-- TOC --><a name="why-breadth-first-search-bfs"></a>
+
 ### Why Breadth-First Search (BFS)?
 
 An L5/L6 engineer chooses BFS because BFS explores the graph in "waves." It visits all neighbors 1 step away, then all neighbors 2 steps away, and so on. The moment we hit the `end` gene, we are **guaranteed** that the number of steps taken is the shortest possible path.
 
-<!-- TOC --><a name="the-non-trivial-part-building-the-neighbors"></a>
+
 ### The Non-Trivial Part: "Building the Neighbors"
 
 How do we find which genes in the bank are reachable from our current gene?
@@ -7629,7 +7628,7 @@ How do we find which genes in the bank are reachable from our current gene?
 1. **Naive approach:** Compare the current gene against every string in the bank (Slow if the bank is huge).
 2. **Engineer approach:** Iterate through all 8 positions of the current gene, swap the character with 'A', 'C', 'G', or 'T', and check if that new string is in the `bank` (Fast because the gene length is fixed at 8).
 
-<!-- TOC --><a name="ascii-visualization-of-the-bfs-flow"></a>
+
 ### ASCII Visualization of the BFS Flow
 
 ```text
@@ -7657,12 +7656,12 @@ AACCGGTT -> AACCGGTA -> AAACGGTA (2 Mutations)
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-21"></a>
+
 ## 3. Time and Space Complexity Analysis
 
 An L5 engineer avoids simple "Big O" and explains the **why** behind the constraints.
 
-<!-- TOC --><a name="time-complexity-tc-3"></a>
+
 ### Time Complexity (TC)
 
 We process each gene in the bank at most once. For each gene, we perform 8 (length) * 4 (ACGT) operations.
@@ -7683,7 +7682,7 @@ We process each gene in the bank at most once. For each gene, we perform 8 (leng
 
 ```
 
-<!-- TOC --><a name="space-complexity-sc-3"></a>
+
 ### Space Complexity (SC)
 
 We store the bank in a Set for O(1) lookups and maintain a Queue/Visited set.
@@ -7703,10 +7702,10 @@ We store the bank in a Set for O(1) lookups and maintain a Queue/Visited set.
 
 ---
 
-<!-- TOC --><a name="4-solution-code-22"></a>
+
 ## 4. Solution Code
 
-<!-- TOC --><a name="python-snippet-1"></a>
+
 ### Python Snippet
 
 ```python
@@ -7744,7 +7743,7 @@ def minMutation(startGene: str, endGene: str, bank: list[str]) -> int:
 
 ```
 
-<!-- TOC --><a name="javascript-snippet-1"></a>
+
 ### JavaScript Snippet
 
 ```javascript
@@ -7791,7 +7790,7 @@ var minMutation = function(startGene, endGene, bank) {
 
 ---
 
-<!-- TOC --><a name="key-terms-algorithm-logic"></a>
+
 ## Key Terms & Algorithm Logic
 
 * **Breadth-First Search (BFS):** An algorithm for traversing tree or graph data structures. It starts at the root and explores all neighbor nodes at the present depth prior to moving on to nodes at the next depth level.
@@ -7799,54 +7798,54 @@ var minMutation = function(startGene, endGene, bank) {
 
 ---
 
-<!-- TOC --><a name="real-world-interview-variations-2"></a>
+
 ### Real World / Interview Variations
 
-<!-- TOC --><a name="1-the-word-ladder-metagoogle"></a>
+
 ### 1. The "Word Ladder" (Meta/Google)
 
 * **Variation:** Given two words and a dictionary, find the shortest transformation sequence.
 * **Solution:** Identical logic. However, if the dictionary is massive, L6s suggest **Bidirectional BFS** (searching from both `start` and `end` simultaneously) to meet in the middle, which drastically reduces the search space.
 
-<!-- TOC --><a name="2-social-network-connectivity-bloomberg"></a>
+
 ### 2. Social Network Connectivity (Bloomberg)
 
 * **Variation:** Find the shortest "degrees of separation" between two users.
 * **Solution:** Users are nodes; friendships are edges. Use BFS. Since user "banks" are billions of rows, engineers use distributed processing or graph databases (like DGraph or Neo4j).
 
-<!-- TOC --><a name="3-microservice-dependency-mapping-google"></a>
+
 ### 3. Microservice Dependency Mapping (Google)
 
 * **Variation:** If Service A fails, what is the minimum number of "hops" to find the root cause or the impacted service?
 * **Solution:** This is a directed graph problem. BFS is used to map out the blast radius of a system failure.
 
-<!-- TOC --><a name="130-surrounded-regions"></a>
+
 # 130. Surrounded Regions
 
 A Google L5/L6 engineer doesn’t just look for *a* solution; they look for the most **robust**, **memory-efficient**, and **readable** solution. For "Surrounded Regions," an experienced engineer recognizes this as a connectivity problem disguised as a grid problem.
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-23"></a>
+
 ## 1. Problem Explanation
 
 Imagine a grid of 'X's and 'O's. An 'O' is "surrounded" if it is completely enclosed by 'X's. If an 'O' is connected to the **edge** of the board, it is "safe"—it cannot be captured because it has an "escape route" to the outside world.
 
 **The Goal:** Flip all 'O's that are NOT connected to the border into 'X's.
 
-<!-- TOC --><a name="the-mental-model-1"></a>
+
 ### The Mental Model
 
 Think of the border 'O's as **anchors**. Anything connected to an anchor is "safe." Everything else is "captured."
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-the-reverse-flood-strategy"></a>
+
 ### 2. Solution Explanation: The "Reverse Flood" Strategy
 
 Instead of trying to figure out which 'O's are surrounded (which is hard), we figure out which 'O's are **not** surrounded (which is easy).
 
-<!-- TOC --><a name="the-algorithm-steps"></a>
+
 #### The Algorithm Steps:
 
 1. **Traverse the Borders:** Iterate through the four edges of the grid.
@@ -7858,7 +7857,7 @@ Instead of trying to figure out which 'O's are surrounded (which is hard), we fi
 
 
 
-<!-- TOC --><a name="ascii-visualization-of-the-process"></a>
+
 #### ASCII Visualization of the Process
 
 **Step 1: The Initial State**
@@ -7896,12 +7895,12 @@ X O O X  <-- (3,1) and (3,2) restored to O
 
 ---
 
-<!-- TOC --><a name="3-complexity-analysis-1"></a>
+
 ### 3. Complexity Analysis
 
 A senior engineer explains complexity by showing how many times we touch each "node" or "cell."
 
-<!-- TOC --><a name="time-complexity-tc-4"></a>
+
 #### Time Complexity (TC)
 
 ```text
@@ -7918,7 +7917,7 @@ Simplified TC: O(M * N)
 
 ```
 
-<!-- TOC --><a name="space-complexity-sc-4"></a>
+
 ### Space Complexity (SC)
 
 ```text
@@ -7934,10 +7933,10 @@ Total SC: O(M * N)
 
 ---
 
-<!-- TOC --><a name="4-solution-code-23"></a>
+
 ### 4. Solution Code
 
-<!-- TOC --><a name="python-implementation-4"></a>
+
 #### Python Implementation
 
 ```python
@@ -7979,7 +7978,7 @@ class Solution:
 
 ```
 
-<!-- TOC --><a name="javascript-implementation-4"></a>
+
 #### JavaScript Implementation
 
 ```javascript
@@ -8027,7 +8026,7 @@ var solve = function(board) {
 
 ---
 
-<!-- TOC --><a name="technical-terms-context"></a>
+
 ### Technical Terms & Context
 
 * **DFS (Depth First Search):** An algorithm for traversing a tree or graph. In this problem, it treats the 2D grid as a graph where each cell is a node connected to its neighbors.
@@ -8036,7 +8035,7 @@ var solve = function(board) {
 
 ---
 
-<!-- TOC --><a name="real-world-interview-variations-3"></a>
+
 ### Real-World Interview Variations
 
 1. **Bloomberg: "Islands on the Edge"**
@@ -8053,7 +8052,7 @@ var solve = function(board) {
 * *Question:* Given a list of users and their friendships, identify "isolated clusters" that have no connection to a set of "verified influencers" (the border equivalent).
 * *Solution:* Start a Multi-source BFS from all influencers. Any user not reached by the BFS is part of an isolated cluster.
 
-<!-- TOC --><a name="684-redundant-connection"></a>
+
 # 684. Redundant Connection
 
 An L5/L6 engineer doesn't just solve the problem; they look for the most efficient **pattern match**. For "Redundant Connection," the pattern is "Cycle Detection in an Undirected Graph."
@@ -8062,12 +8061,12 @@ While you could use DFS or BFS, a senior engineer will immediately reach for **U
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-24"></a>
+
 ### 1. Problem Explanation
 
 You are given a graph that *started* as a tree with `n` nodes, but one extra edge was added. This extra edge created a **cycle**. Your job is to find that extra edge and remove it to turn the graph back into a tree. If there are multiple candidates, return the one that appears last in the input.
 
-<!-- TOC --><a name="what-is-a-tree-vs-a-cycle"></a>
+
 #### What is a Tree vs. a Cycle?
 
 * **Tree:** All nodes are connected, and there are **no cycles**. For `n` nodes, a tree has exactly `n - 1` edges.
@@ -8075,7 +8074,7 @@ You are given a graph that *started* as a tree with `n` nodes, but one extra edg
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-the-union-find-strategy"></a>
+
 ### 2. Solution Explanation: The Union-Find Strategy
 
 Think of Union-Find like a social network tracker.
@@ -8085,7 +8084,7 @@ Think of Union-Find like a social network tracker.
 3. **If NO:** We merge their groups (Union).
 4. **If YES:** We found our culprit! If they are already in the same group and we try to add another edge between them, we just created a cycle.
 
-<!-- TOC --><a name="visual-walkthrough"></a>
+
 #### Visual Walkthrough
 
 Input: `[[1,2], [2,3], [3,4], [1,4], [1,5]]`
@@ -8144,12 +8143,12 @@ ASCII Visualization of the Cycle:
 
 ---
 
-<!-- TOC --><a name="3-complexity-analysis-2"></a>
+
 ### 3. Complexity Analysis
 
 An L5 engineer optimizes for both speed and code maintainability. By using **Path Compression** (making nodes point directly to the root during searches), the operations become nearly "constant time."
 
-<!-- TOC --><a name="time-complexity-tc-5"></a>
+
 #### Time Complexity (TC)
 
 ```
@@ -8165,7 +8164,7 @@ Which effectively behaves like: O(n)
 
 ```
 
-<!-- TOC --><a name="space-complexity-sc-5"></a>
+
 #### Space Complexity (SC)
 
 ```
@@ -8177,10 +8176,10 @@ Total SC: O(n)
 
 ---
 
-<!-- TOC --><a name="4-solution-code-24"></a>
+
 ### 4. Solution Code
 
-<!-- TOC --><a name="python-snippet-2"></a>
+
 #### Python Snippet
 
 ```python
@@ -8213,7 +8212,7 @@ class Solution:
 
 ```
 
-<!-- TOC --><a name="javascript-snippet-2"></a>
+
 #### JavaScript Snippet
 
 ```javascript
@@ -8246,7 +8245,7 @@ var findRedundantConnection = function(edges) {
 
 ---
 
-<!-- TOC --><a name="terminology-deep-dive-1"></a>
+
 ### Terminology Deep Dive
 
 **Union-Find (DSU):** A data structure that keeps track of elements split into several non-overlapping sets.
@@ -8256,7 +8255,7 @@ var findRedundantConnection = function(edges) {
 
 ---
 
-<!-- TOC --><a name="real-world-interview-variations-4"></a>
+
 ### Real-World / Interview Variations
 
 **1. Google: "Cloud Network Stability"**
@@ -8274,7 +8273,7 @@ var findRedundantConnection = function(edges) {
 * **Scenario:** You have exchange pairs. If you can trade through a sequence and end back at your original currency, you've found a cycle.
 * **Solution:** While real arbitrage uses Bellman-Ford (for weights), a simplified "detect any cycle" version in a network uses Union-Find for undirected pairs or DFS for directed pairs.
 
-<!-- TOC --><a name="number-of-islands-ii"></a>
+
 # Number of islands II
 
 A Google L5 (Senior) or L6 (Staff) engineer doesn't just look for a "working" solution; they look for the most **extensible, robust, and performant** one. For "Number of Islands II," they immediately recognize this as a **dynamic connectivity problem**.
@@ -8283,21 +8282,21 @@ While "Number of Islands I" is usually solved with a simple BFS/DFS on a static 
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-25"></a>
+
 ## 1. Problem Explanation
 
 Imagine a vast ocean represented by a grid of `m x n` cells, all initially filled with water. You are given a list of operations. Each operation specifies a coordinate `(r, c)` where a new piece of land is "dropped" into the ocean.
 
 Your goal is to return an array of integers representing the **total number of distinct islands** after each operation.
 
-<!-- TOC --><a name="the-challenge"></a>
+
 ### The Challenge
 
 * **Dynamic:** The grid changes over time.
 * **Merging:** Adding one piece of land might connect two previously separate islands into one.
 * **Redundancy:** If you add land on a spot that is already land, nothing changes.
 
-<!-- TOC --><a name="ascii-visualization-the-merging-process"></a>
+
 ### ASCII Visualization: The Merging Process
 
 Initial State (3x3 Grid):
@@ -8338,12 +8337,12 @@ Operation 3: Add Land at (0, 1) -> **THE MERGE**
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-union-find-disjoint-set-union"></a>
+
 ## 2. Solution Explanation: Union-Find (Disjoint Set Union)
 
 An L5/L6 engineer would immediately reach for **Union-Find (DSU)** with **Path Compression** and **Union by Rank/Size**.
 
-<!-- TOC --><a name="the-core-logic"></a>
+
 ### The Core Logic
 
 1. **Initialize:** Treat every cell in the grid as its own potential set (or "parent").
@@ -8351,7 +8350,7 @@ An L5/L6 engineer would immediately reach for **Union-Find (DSU)** with **Path C
 3. **Check Neighbors:** Look at the 4 neighbors (Up, Down, Left, Right).
 4. **Union:** If a neighbor is already land, use the `union` operation. If they belong to different sets, merge them and **decrement** the global `island_count`.
 
-<!-- TOC --><a name="non-trivial-concept-path-compression-union-by-rank"></a>
+
 ### Non-Trivial Concept: Path Compression & Union by Rank
 
 Without these, Union-Find can become a slow "chain."
@@ -8361,12 +8360,12 @@ Without these, Union-Find can become a slow "chain."
 
 ---
 
-<!-- TOC --><a name="3-complexity-analysis-3"></a>
+
 ## 3. Complexity Analysis
 
 An L5 engineer provides a derivation that accounts for the **Inverse Ackermann Function**, denoted as `α(N)`. This function grows so slowly that for all practical purposes (even the number of atoms in the universe), it is less than 5.
 
-<!-- TOC --><a name="time-complexity-tc-derivation"></a>
+
 ### Time Complexity (TC) Derivation
 
 ```
@@ -8385,7 +8384,7 @@ Technically, since α(N) is near-constant, this is nearly linear.
 
 ```
 
-<!-- TOC --><a name="space-complexity-sc-derivation"></a>
+
 ### Space Complexity (SC) Derivation
 
 ```
@@ -8399,10 +8398,10 @@ Total SC: O(N + K)
 
 ---
 
-<!-- TOC --><a name="4-solution-code-25"></a>
+
 ## 4. Solution Code
 
-<!-- TOC --><a name="python-implementation-5"></a>
+
 ### Python Implementation
 
 ```python
@@ -8465,7 +8464,7 @@ def numIslands2(m, n, positions):
 
 ```
 
-<!-- TOC --><a name="javascript-implementation-5"></a>
+
 ### JavaScript Implementation
 
 ```javascript
@@ -8513,7 +8512,7 @@ class UnionFind {
 
 ---
 
-<!-- TOC --><a name="note-1-terms-and-techniques-5"></a>
+
 ## Note 1: Terms and Techniques
 
 * **Union-Find (DSU):** A data structure that keeps track of elements partitioned into a number of disjoint (non-overlapping) sets. It is the gold standard for connectivity problems.
@@ -8522,30 +8521,30 @@ class UnionFind {
 
 ---
 
-<!-- TOC --><a name="note-2-real-world-variations-google-meta-bloomberg"></a>
+
 ## Note 2: Real-World Variations (Google, Meta, Bloomberg)
 
 In top-tier interviews, they rarely ask the problem verbatim. Here is how they disguise it:
 
-<!-- TOC --><a name="1-the-social-network-connectivity-meta"></a>
+
 ### 1. The "Social Network Connectivity" (Meta)
 
 **The Problem:** You have a list of timestamps when users became friends. Find the earliest time at which everyone in the network is connected.
 **L5 Solution:** Use Union-Find. Each friendship is a `union` operation. When `uf.count == 1` (and you started with  users), you've found the timestamp.
 
-<!-- TOC --><a name="2-the-dynamic-water-flow-google"></a>
+
 ### 2. The "Dynamic Water Flow" (Google)
 
 **The Problem:** A grid of cells where some are blocked. If we unblock cells one by one, when does water flow from the top row to the bottom row?
 **L5 Solution:** Use Union-Find with two "virtual nodes": a **Virtual Top** connected to all cells in the first row and a **Virtual Bottom** for the last row. When `find(VirtualTop) == find(VirtualBottom)`, the path exists.
 
-<!-- TOC --><a name="3-the-stock-market-correlations-bloomberg"></a>
+
 ### 3. The "Stock Market Correlations" (Bloomberg)
 
 **The Problem:** Stocks are nodes. If two stocks move together, they share an edge. If the correlation threshold changes, groups of stocks merge or split.
 **L5 Solution:** This is "Number of Islands II" in a graph context. As correlation edges are added (as the threshold lowers), you use DSU to maintain sectors of correlated stocks.
 
-<!-- TOC --><a name="743-network-delay-time"></a>
+
 # 743. Network Delay Time
 
 A Google L6 (Staff Engineer) doesn't just look for a solution; they look for the **optimal, production-ready pattern** that scales. For "Network Delay Time," they immediately recognize this as a **Single-Source Shortest Path (SSSP)** problem.
@@ -8554,14 +8553,14 @@ Here is how an L-level engineer breaks this down.
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-26"></a>
+
 ## 1. Problem Explanation
 
 Imagine you are at a central signal tower (Node **K**). You send a "ping" to all other towers in a network of **n** nodes. Each connection between towers has a specific travel time (weight).
 
 **The Goal:** Find out how long it takes for the *last* tower to receive the signal. If even one tower is unreachable, return -1.
 
-<!-- TOC --><a name="the-visualization"></a>
+
 ### The Visualization
 
 Think of this like water flowing through pipes of different lengths.
@@ -8583,17 +8582,17 @@ Result: The last node (4) got the signal at time 2. Total time = 2.
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-dijkstras-algorithm"></a>
+
 ## 2. Solution Explanation: Dijkstra’s Algorithm
 
 For a Staff Engineer, the "go-to" for non-negative weights is **Dijkstra's Algorithm** using a **Min-Priority Queue**.
 
-<!-- TOC --><a name="the-strategy-greedy-relaxation"></a>
+
 ### The Strategy: "Greedy Relaxation"
 
 We maintain a list of the shortest known distances to every node. We always pick the "closest" node we haven't processed yet and see if we can use it to find a faster path to its neighbors.
 
-<!-- TOC --><a name="ascii-walkthrough-the-mental-model"></a>
+
 ### ASCII Walkthrough (The "Mental Model")
 
 Let's use: `n=4, times=[[2,1,1],[2,3,10],[3,4,1]], K=2`
@@ -8643,12 +8642,12 @@ The maximum value in our map (excluding infinity) is **11**. Since we reached al
 
 ---
 
-<!-- TOC --><a name="3-complexity-analysis-4"></a>
+
 ## 3. Complexity Analysis
 
 An L5/L6 engineer will explain complexity by describing the behavior of the data structures used (Adjacency List + Min-Heap).
 
-<!-- TOC --><a name="time-complexity-tc-6"></a>
+
 ### Time Complexity (TC)
 
 ```text
@@ -8665,7 +8664,7 @@ TOTAL TC: O(E * log V)
 
 ```
 
-<!-- TOC --><a name="space-complexity-sc-6"></a>
+
 ### Space Complexity (SC)
 
 ```text
@@ -8679,10 +8678,10 @@ TOTAL SC: O(E + V)
 
 ---
 
-<!-- TOC --><a name="4-solution-code-26"></a>
+
 ## 4. Solution Code
 
-<!-- TOC --><a name="python-the-interview-standard"></a>
+
 ### Python (The "Interview Standard")
 
 ```python
@@ -8722,7 +8721,7 @@ def networkDelayTime(times, n, k):
 
 ```
 
-<!-- TOC --><a name="javascript-the-modern-frontendfullstack-approach"></a>
+
 ### JavaScript (The "Modern Frontend/Fullstack" Approach)
 
 Since JS doesn't have a built-in Priority Queue (until very recently in some environments), an L5 would likely mention using a Min-Heap class.
@@ -8771,7 +8770,7 @@ var networkDelayTime = function(times, n, k) {
 
 ---
 
-<!-- TOC --><a name="note-1-terms-and-techniques-6"></a>
+
 ## Note 1: Terms and Techniques
 
 * **Dijkstra's Algorithm:** A greedy algorithm for finding the shortest paths between nodes in a graph. It works by always expanding the "cheapest" known node.
@@ -8780,7 +8779,7 @@ var networkDelayTime = function(times, n, k) {
 
 ---
 
-<!-- TOC --><a name="note-2-real-world-variations-google-meta-bloomberg-1"></a>
+
 ## Note 2: Real-World Variations (Google, Meta, Bloomberg)
 
 1. **Google (Data Center Latency):** "You have a cluster of servers. If one server fails and sends a broadcast, how long until all servers are aware of the failure?"
@@ -8794,12 +8793,12 @@ var networkDelayTime = function(times, n, k) {
 3. **Bloomberg (Stock Ticker Latency):** "Market data is sent from an exchange. Multiple relay stations exist. Which station is the 'bottleneck' for the furthest subscriber?"
 * **Solution:** After running Dijkstra to find all shortest paths, identify the edge (u, v) that lies on the path to the node with the maximum distance.
 
-<!-- TOC --><a name="787-cheapest-flights-within-k-stops"></a>
+
 # 787. Cheapest Flights Within K Stops
 
 An L5/L6 engineer doesn't just look for *any* solution; they look for the **most robust** one that handles edge cases (like cycles) while maintaining optimal performance. For "Cheapest Flights Within K Stops," we are dealing with a **Shortest Path problem with a constraint** (the number of stops).
 
-<!-- TOC --><a name="1-problem-explanation-27"></a>
+
 ### 1. Problem Explanation
 
 Imagine you are booking a flight from **Source (S)** to **Destination (D)**. You want the absolute cheapest price, but you have a rule: you cannot have more than **K intermediate stops**.
@@ -8812,12 +8811,12 @@ Imagine you are booking a flight from **Source (S)** to **Destination (D)**. You
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-modified-breadth-first-search-bfs"></a>
+
 ### 2. Solution Explanation: Modified Breadth-First Search (BFS)
 
 While you could use Dijkstra with a modified state, a **Level-order BFS** is often more intuitive for "step-limited" problems. Each "level" in our BFS represents exactly one flight (one edge).
 
-<!-- TOC --><a name="the-mental-model-2"></a>
+
 #### The Mental Model
 
 We track the minimum cost to reach each city within a certain number of flights. We use a `min_costs` array to keep track of the best price found **so far** for each city.
@@ -8858,7 +8857,7 @@ The BFS stops here because we reached K stops. The answer is `min_costs[3]`, whi
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-22"></a>
+
 ### 3. Time and Space Complexity Analysis
 
 For an L5/L6 review, we analyze this based on the number of Vertices (V) and Edges (E).
@@ -8897,10 +8896,10 @@ For an L5/L6 review, we analyze this based on the number of Vertices (V) and Edg
 
 ---
 
-<!-- TOC --><a name="4-solution-code-27"></a>
+
 ### 4. Solution Code
 
-<!-- TOC --><a name="javascript"></a>
+
 #### JavaScript
 
 ```javascript
@@ -8954,7 +8953,7 @@ function findCheapestPrice(n, flights, src, dst, k) {
 
 ```
 
-<!-- TOC --><a name="python"></a>
+
 #### Python
 
 ```python
@@ -8994,7 +8993,7 @@ def find_cheapest_price(n, flights, src, dst, k):
 
 ---
 
-<!-- TOC --><a name="terminology-table"></a>
+
 ### Terminology Table
 
 | Term | Why it helps | Application here |
@@ -9005,7 +9004,7 @@ def find_cheapest_price(n, flights, src, dst, k):
 
 ---
 
-<!-- TOC --><a name="real-world-interview-variations-5"></a>
+
 ### Real-World Interview Variations
 
 1. **Google (Resource Constrained Routing):**
@@ -9022,21 +9021,21 @@ def find_cheapest_price(n, flights, src, dst, k):
 * *Question:* "Execute a currency trade between USD and BTC using at most 2 intermediate currencies (e.g., USD -> EUR -> JPY -> BTC) to minimize exchange fees."
 * *Solution:* This is the exact "Cheapest Flights" problem. Currencies are nodes, exchange rates/fees are edge weights, and intermediate currencies are stops.
 
-<!-- TOC --><a name="778-swim-in-rising-water"></a>
+
 # 778. Swim in Rising Water
 
 An L5/L6 engineer at Google doesn't just look for *any* solution; they look for the most **robust** and **optimal** one while considering edge cases and alternative approaches. For "Swim in Rising Water," they would immediately recognize this as a **Shortest Path problem in a weighted grid**, where the "cost" isn't a sum, but a **maximum threshold**.
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-28"></a>
+
 ## 1. Problem Explanation
 
 Imagine a square grid (N x N). Each cell has a "height" representing the water level at that spot. At time `t`, you can only step on a cell if the water level there is less than or equal to `t`. You start at the top-left `(0, 0)` and want to reach the bottom-right `(N-1, N-1)`.
 
 **The Goal:** Find the minimum time `t` such that there exists a path from start to finish.
 
-<!-- TOC --><a name="the-mental-model-visualization"></a>
+
 ### The "Mental Model" Visualization
 
 Imagine the grid as a terrain of pillars. As time passes, the "sea level" rises. You are waiting for the water to rise high enough so that a continuous "pool" connects the start to the end, allowing you to swim across.
@@ -9057,12 +9056,12 @@ Result: 3
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-18"></a>
+
 ## 2. Solution Explanation
 
 An L5+ engineer would likely propose **Modified Dijkstra’s Algorithm**. While you could use Binary Search + BFS, Dijkstra is more elegant for finding the "minimum of maximums" (Minimax path).
 
-<!-- TOC --><a name="the-logic-1"></a>
+
 ### The Logic
 
 Instead of minimizing the *sum* of weights (like standard Dijkstra), we minimize the *maximum* height encountered so far.
@@ -9072,7 +9071,7 @@ Instead of minimizing the *sum* of weights (like standard Dijkstra), we minimize
 3. **State Tracking:** Keep a `visited` set to avoid infinite loops.
 4. **The "Ah-ha!" Moment:** When you move from cell A to cell B, the time required to be at B is `max(time_at_A, height_at_B)`.
 
-<!-- TOC --><a name="step-by-step-visualization-4x4-grid"></a>
+
 ### Step-by-Step Visualization (4x4 Grid)
 
 Grid:
@@ -9102,10 +9101,10 @@ PQ: `[(9, 2, 0), (10, 0, 3)]`
 
 ---
 
-<!-- TOC --><a name="3-complexity-analysis-5"></a>
+
 ## 3. Complexity Analysis
 
-<!-- TOC --><a name="time-complexity-tc-7"></a>
+
 ### Time Complexity (TC)
 
 We visit each of the N * N cells once. For each cell, we perform heap operations (push/pop) which take logarithmic time relative to the number of elements in the heap.
@@ -9120,7 +9119,7 @@ Simplified      = O(N^2 * log(N))
 
 ```
 
-<!-- TOC --><a name="space-complexity-sc-7"></a>
+
 ### Space Complexity (SC)
 
 We need to store the visited status of each cell and the Priority Queue can grow to the size of the grid in the worst case.
@@ -9134,10 +9133,10 @@ Simplified      = O(N^2)
 
 ---
 
-<!-- TOC --><a name="4-solution-code-28"></a>
+
 ## 4. Solution Code
 
-<!-- TOC --><a name="python-snippet-3"></a>
+
 ### Python Snippet
 
 ```python
@@ -9172,7 +9171,7 @@ def swimInWater(grid):
 
 ```
 
-<!-- TOC --><a name="javascript-snippet-3"></a>
+
 ### JavaScript Snippet
 
 ```javascript
@@ -9212,7 +9211,7 @@ var swimInWater = function(grid) {
 
 ---
 
-<!-- TOC --><a name="technical-terms-algorithms"></a>
+
 ## Technical Terms & Algorithms
 
 * **Dijkstra's Algorithm:** Traditionally used to find the shortest path (sum of weights). Here, we modify the "relaxation" step to find the path that minimizes the **maximum** edge weight (Minimax).
@@ -9221,22 +9220,22 @@ var swimInWater = function(grid) {
 
 ---
 
-<!-- TOC --><a name="real-world-interview-variations-6"></a>
+
 ## Real-World Interview Variations
 
-<!-- TOC --><a name="1-google-network-latency-with-packet-loss"></a>
+
 ### 1. Google: "Network Latency with Packet Loss"
 
 * **Scenario:** You have a network of nodes. Each connection has a "stability" rating (0-1). You want to find a path from A to B that maximizes the *minimum* stability of any link in the path.
 * **L5 Solution:** This is exactly the same problem but inverted (Max-Min instead of Min-Max). Use a **Max-Heap** and keep track of the `min_stability` encountered.
 
-<!-- TOC --><a name="2-meta-path-with-minimum-effort"></a>
+
 ### 2. Meta: "Path with Minimum Effort"
 
 * **Scenario:** You are hiking a 2D map. The effort to move between two cells is the *absolute difference* in their heights. Find a path where the *maximum* effort of any single step is minimized.
 * **L5 Solution:** Use Dijkstra. Instead of `max(max_h, grid[nr][nc])`, your "weight" for an edge is `abs(grid[r][c] - grid[nr][nc])`. You keep track of the max weight seen on the path.
 
-<!-- TOC --><a name="3-bloomberg-reliable-message-routing"></a>
+
 ### 3. Bloomberg: "Reliable Message Routing"
 
 * **Scenario:** Routing a message through servers where each server has a "load" (0-100). You need to find a route where the most congested server you pass through is as empty as possible.
@@ -9244,7 +9243,7 @@ var swimInWater = function(grid) {
 
 Would you like me to walk through the **Binary Search + BFS** alternative approach to see how it compares in performance?
 
-<!-- TOC --><a name="909-snakes-and-ladders"></a>
+
 # 909. Snakes and Ladders
 
 Hello there. I'm an L6 Staff Engineer at Google. When we look at a problem like **"Snakes and Ladders" (LeetCode 909)**, we don't just see a board game. We see a **Shortest Path problem on a Directed Unweighted Graph**.
@@ -9255,7 +9254,7 @@ Let's break this down with the rigor and clarity expected at the top level.
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-29"></a>
+
 ### 1. Problem Explanation
 
 **The Goal:**
@@ -9268,7 +9267,7 @@ You are given an `n x n` integer matrix representing a Snakes and Ladders board.
 3. **One Jump Only:** If a ladder takes you to a square that holds *another* ladder, you do **not** take the second one. You stay there.
 4. **Objective:** Return the **least number of moves** to reach the last square. If impossible, return `-1`.
 
-<!-- TOC --><a name="visualizing-the-board-the-tricky-part"></a>
+
 #### Visualizing the Board (The Tricky Part)
 
 The board layout is "Boustrophedon" (ox-turning). It winds back and forth.
@@ -9296,10 +9295,10 @@ We need a helper function to convert a linear square number (like `15`) into `(r
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-19"></a>
+
 ### 2. Solution Explanation
 
-<!-- TOC --><a name="the-approach-breadth-first-search-bfs"></a>
+
 #### The Approach: Breadth-First Search (BFS)
 
 Why BFS?
@@ -9308,7 +9307,7 @@ Why BFS?
 * The "cost" of every move is the same (1 die roll = 1 move).
 * DFS (Depth-First Search) would explore deep paths that might be incredibly long before finding a short one. BFS explores layer by layer: all squares reachable in 1 move, then all in 2 moves, etc.
 
-<!-- TOC --><a name="the-algorithm"></a>
+
 #### The Algorithm
 
 1. **Queue:** Initialize a queue with `[StartSquare, Moves]`. `Q = [[1, 0]]`.
@@ -9326,7 +9325,7 @@ Why BFS?
 
 
 
-<!-- TOC --><a name="detailed-visualization-of-a-move"></a>
+
 #### Detailed Visualization of a Move
 
 Imagine we are at Square `2`. The board has a **Ladder at 4 pointing to 14**.
@@ -9348,7 +9347,7 @@ Does the jump happen *before* or *after* checking the visited set?
 * You visit the **destination**, not necessarily the square you rolled.
 * If you rolled a 4, but the ladder takes you to 14, you effectively "visited" 14. You define the edge in the graph as `2 -> 14`.
 
-<!-- TOC --><a name="execution-flow-diagram"></a>
+
 #### Execution Flow Diagram
 
 Let's trace a small 4x4 board where 16 is the target.
@@ -9385,12 +9384,12 @@ Return (Moves + 1) which is 2.
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-23"></a>
+
 ### 3. Time and Space Complexity Analysis
 
 This is an L5/L6 level analysis. We don't just say "O(N)", we visualize the consumption.
 
-<!-- TOC --><a name="time-complexity-onn"></a>
+
 #### Time Complexity: O(N*N)
 
 We view the board as a Graph.
@@ -9419,7 +9418,7 @@ Total Time = O(N * N)
 
 ```
 
-<!-- TOC --><a name="space-complexity-onn"></a>
+
 #### Space Complexity: O(N*N)
 
 We need to store the board and the BFS structures.
@@ -9440,12 +9439,12 @@ Total Space = O(N * N)
 
 ---
 
-<!-- TOC --><a name="4-solution-code-29"></a>
+
 ### 4. Solution Code
 
 Here is how I would write this in production. Clean, separated concerns, and self-documenting.
 
-<!-- TOC --><a name="python-solution-11"></a>
+
 #### Python Solution
 
 ```python
@@ -9518,7 +9517,7 @@ class Solution:
 
 ```
 
-<!-- TOC --><a name="javascript-solution-12"></a>
+
 #### JavaScript Solution
 
 ```javascript
@@ -9583,7 +9582,7 @@ var snakesAndLadders = function(board) {
 
 ---
 
-<!-- TOC --><a name="note-1-concepts-used"></a>
+
 ### Note 1: Concepts Used
 
 **Breadth-First Search (BFS):**
@@ -9591,12 +9590,12 @@ This is the "Gold Standard" algorithm for finding the shortest path in an unweig
 
 ---
 
-<!-- TOC --><a name="note-2-real-world-interview-variations-9"></a>
+
 ### Note 2: Real World & Interview Variations
 
 At companies like Google, Meta, and Bloomberg, we rarely ask the problem exactly as it appears on LeetCode. We add constraints to test your adaptability.
 
-<!-- TOC --><a name="1-the-weighted-dice-cost-to-move-variation"></a>
+
 #### 1. The "Weighted Dice" / "Cost to Move" Variation
 
 **The Twist:** Moving to the next square costs `$1`, but using a ladder costs `$5` (toll fee), and using a snake gives you `$2` back. Find the path with the minimum *cost*, not minimum moves.
@@ -9605,7 +9604,7 @@ At companies like Google, Meta, and Bloomberg, we rarely ask the problem exactly
 * This is no longer a standard BFS because edges have different weights.
 * **Technique:** Use **Dijkstra’s Algorithm**. Use a Priority Queue (Min-Heap) instead of a standard Queue. Order the queue by current accumulated cost.
 
-<!-- TOC --><a name="2-the-must-avoid-snakes-variation"></a>
+
 #### 2. The "Must Avoid Snakes" Variation
 
 **The Twist:** You must reach the end, but you are absolutely not allowed to touch a snake.
@@ -9614,7 +9613,7 @@ At companies like Google, Meta, and Bloomberg, we rarely ask the problem exactly
 * Inside the loop where we calculate `destination`, add a check: `if (is_snake(destination)) continue;`.
 * This prunes the graph, effectively removing edges that lead to snakes.
 
-<!-- TOC --><a name="3-the-k-ladders-only-variation-meta-specific"></a>
+
 #### 3. The "K-Ladders Only" Variation (Meta specific)
 
 **The Twist:** You can use at most `K` ladders in your entire path.
@@ -9625,7 +9624,7 @@ At companies like Google, Meta, and Bloomberg, we rarely ask the problem exactly
 * Your state in the queue becomes `(square, moves, ladders_count)`.
 * You can visit the same square twice if you arrive there with a different `ladders_count`.
 
-<!-- TOC --><a name="4-the-teleport-maze-google-specific"></a>
+
 #### 4. The "Teleport Maze" (Google specific)
 
 **The Twist:** Instead of a 1-6 die, you have a list of available jumps (e.g., `[2, 5, -1]`). And the board is a maze where `0` is a wall.
@@ -9635,7 +9634,7 @@ At companies like Google, Meta, and Bloomberg, we rarely ask the problem exactly
 * Instead of `for i in range(1, 7)`, you iterate through the specific jump list provided.
 * Wall check: `if board[next] == WALL: continue`.
 
-<!-- TOC --><a name="1584-min-cost-to-connect-all-points"></a>
+
 # 1584. Min Cost to Connect All Points
 
 Here is a breakdown of how a Senior (L5) or Staff (L6) Engineer at Google would approach "Min Cost to Connect All Points" (LeetCode 1584).
@@ -9644,7 +9643,7 @@ At this level, the expectation isn't just getting *a* solution; it's about recog
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-30"></a>
+
 ### 1. Problem Explanation
 
 **The Core Task:**
@@ -9704,7 +9703,7 @@ We want the "skeleton" that holds everything together with the least wire.
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-prims-algorithm"></a>
+
 ### 2. Solution Explanation: Prim's Algorithm
 
 **Why Prim's Algorithm? (The L5 Insight)**
@@ -9846,7 +9845,7 @@ All nodes visited.
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-24"></a>
+
 ### 3. Time and Space Complexity Analysis
 
 **Time Complexity: O(N^2)**
@@ -9892,10 +9891,10 @@ Where N is the number of points.
 
 ---
 
-<!-- TOC --><a name="4-solution-code-30"></a>
+
 ### 4. Solution Code
 
-<!-- TOC --><a name="python-solution-optimized-prims"></a>
+
 #### Python Solution (Optimized Prim's)
 
 ```python
@@ -9963,7 +9962,7 @@ def minCostConnectPoints(points):
 
 ```
 
-<!-- TOC --><a name="javascript-solution-13"></a>
+
 #### JavaScript Solution
 
 ```javascript
@@ -10027,7 +10026,7 @@ var minCostConnectPoints = function(points) {
 
 ---
 
-<!-- TOC --><a name="note-1-terminology-clarification"></a>
+
 ### Note 1: Terminology Clarification
 
 **MST (Minimum Spanning Tree):**
@@ -10041,7 +10040,7 @@ Also known as "Taxicab geometry". Unlike Euclidean distance (straight line/hypot
 
 ---
 
-<!-- TOC --><a name="note-2-real-world-interview-variations-google-meta-bloomberg-1"></a>
+
 ### Note 2: Real World & Interview Variations (Google, Meta, Bloomberg)
 
 In an L5/L6 interview, the interviewer will rarely stop at "solve this Leetcode problem." They will pivot to real-world scenarios:
@@ -10071,14 +10070,14 @@ In an L5/L6 interview, the interviewer will rarely stop at "solve this Leetcode 
 * You would discuss using dynamic graph algorithms or treating it as a kinetic data structure problem.
 * For a practical approximation (L5 answer), you might discuss re-running the algorithm only on the "local neighborhood" of the new point or using a spatial index (QuadTree) to limit the number of edges you consider.
 
-<!-- TOC --><a name="walls-and-gates"></a>
+
 # Walls and Gates
 
 Here is how a Senior Software Engineer (L5/L6) at Google would approach, analyze, and solve "Walls and Gates".
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-31"></a>
+
 ### 1. Problem Explanation
 
 Imagine a dungeon map represented by a grid.
@@ -10122,7 +10121,7 @@ G  .  .  .
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-the-multi-source-bfs"></a>
+
 ### 2. Solution Explanation: The "Multi-Source BFS"
 
 A Junior engineer might try to start at every single Empty Room and search for a gate. That works, but it is incredibly slow because you re-calculate the same paths over and over.
@@ -10134,7 +10133,7 @@ Imagine the Gates are sources of water. If we turn on the water at all Gates sim
 
 This technique is called **Multi-Source Breadth-First Search (BFS)**.
 
-<!-- TOC --><a name="step-by-step-visualization-2"></a>
+
 #### Step-by-Step Visualization
 
 **Setup:**
@@ -10221,12 +10220,12 @@ Queue is Empty. Algorithm finishes.
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-25"></a>
+
 ### 3. Time and Space Complexity Analysis
 
 I will explain this using grid visual logic rather than just formulas.
 
-<!-- TOC --><a name="time-complexity-om-n-1"></a>
+
 #### Time Complexity: O(M * N)
 
 Why? Because we touch every cell essentially once.
@@ -10253,7 +10252,7 @@ Imagine a grid of size M x N.
 **Total Work** ≈ 2 * (M * N)
 **Big O** = O(M * N)
 
-<!-- TOC --><a name="space-complexity-om-n-1"></a>
+
 #### Space Complexity: O(M * N)
 
 Space is determined by the maximum size of our Queue.
@@ -10277,10 +10276,10 @@ Queue Memory: [ (r,c), (r,c) ... ] <-- Can grow up to O(M * N) in worst case.
 
 ---
 
-<!-- TOC --><a name="4-solution-code-31"></a>
+
 ### 4. Solution Code
 
-<!-- TOC --><a name="python-solution-12"></a>
+
 #### Python Solution
 
 ```python
@@ -10336,7 +10335,7 @@ def wallsAndGates(rooms: List[List[int]]) -> None:
 
 ```
 
-<!-- TOC --><a name="javascript-solution-14"></a>
+
 #### JavaScript Solution
 
 ```javascript
@@ -10400,7 +10399,7 @@ var wallsAndGates = function(rooms) {
 
 ---
 
-<!-- TOC --><a name="note-1-new-terms-techniques"></a>
+
 ### Note 1: New Terms & Techniques
 
 **Multi-Source BFS:**
@@ -10411,7 +10410,7 @@ Standard BFS starts from a single root node (like a tree). Multi-Source BFS init
 
 ---
 
-<!-- TOC --><a name="note-2-real-world-interview-variations-10"></a>
+
 ### Note 2: Real World & Interview Variations
 
 Big tech companies rarely ask "Walls and Gates" verbatim. They wrap it in a scenario.
@@ -10454,7 +10453,7 @@ Always identify:
 2. **The Medium**: Where can it travel? (Empty cells).
 3. **The Blocker**: Where can it NOT travel? (Walls).
 
-<!-- TOC --><a name="1514-path-with-maximum-probability"></a>
+
 # 1514. Path with Maximum Probability
 
 Here is a comprehensive breakdown of **Leetcode 1514. Path with Maximum Probability**, structured from the perspective of a Senior (L5/L6) Engineer.
@@ -10463,7 +10462,7 @@ An L5/L6 engineer looks past the immediate "get it working" phase. They look for
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-32"></a>
+
 ### 1. Problem Explanation
 
 Imagine you are building a communication network for a distributed system. You have several servers (nodes), and the connection between them isn't perfect. Each connection (edge) has a specific **success probability** (a number between 0 and 1).
@@ -10474,7 +10473,7 @@ If you send a message from Server A to Server B, it has an 80% chance of arrivin
 **The Goal:**
 Given a starting node (`start_node`) and an ending node (`end_node`), find the path that yields the **highest** total probability of success. If there is no path, return 0.
 
-<!-- TOC --><a name="visualization-of-the-problem"></a>
+
 #### Visualization of the Problem
 
 Let's look at a simple network.
@@ -10518,10 +10517,10 @@ Let's look at a simple network.
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-20"></a>
+
 ### 2. Solution Explanation
 
-<!-- TOC --><a name="the-intuition-why-a-specific-algorithm"></a>
+
 #### The Intuition (Why a specific algorithm?)
 
 A naive approach might be "Breadth-First Search" (BFS). BFS finds the path with the *fewest hops*. In the example above, BFS would choose the direct path (0 -> 2) because it's only 1 hop. However, that path has a lower probability (0.2) than the 2-hop path (0.25). **BFS fails here.**
@@ -10541,7 +10540,7 @@ Because probabilities are essentially "costs" (where a lower probability is a "h
 1. **Max-Heap:** Instead of a Min-Heap (used in standard Dijkstra to find the smallest distance), we use a **Max-Heap**. This allows us to always process the path with the *highest probability* found so far.
 2. **Greedy Approach:** At every step, we look at the node reachable with the highest probability. We then check all its neighbors to see if we can reach *them* with a higher probability than we previously thought.
 
-<!-- TOC --><a name="step-by-step-visualization-3"></a>
+
 #### Step-by-Step Visualization
 
 **Scenario:**
@@ -10624,10 +10623,10 @@ Because probabilities are essentially "costs" (where a lower probability is a "h
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-26"></a>
+
 ### 3. Time and Space Complexity Analysis
 
-<!-- TOC --><a name="time-complexity-oe-log-v"></a>
+
 #### Time Complexity: O(E * log V)
 
 * **V**: Number of vertices (nodes).
@@ -10666,7 +10665,7 @@ Why? The complexity is dominated by the Priority Queue (Heap) operations.
 
 ```
 
-<!-- TOC --><a name="space-complexity-ov-e-2"></a>
+
 #### Space Complexity: O(V + E)
 
 ```text
@@ -10695,10 +10694,10 @@ Why? The complexity is dominated by the Priority Queue (Heap) operations.
 
 ---
 
-<!-- TOC --><a name="4-solution-code-32"></a>
+
 ### 4. Solution Code
 
-<!-- TOC --><a name="python-solution-13"></a>
+
 #### Python Solution
 
 **Engineer's Note:** Python's `heapq` module implements a **Min-Heap**. To simulate a **Max-Heap** (needed to pop the *highest* probability first), we store probabilities as negative numbers. `-0.8` is smaller than `-0.5`, so `-0.8` pops first. We then flip the sign back to positive.
@@ -10772,7 +10771,7 @@ class Solution:
 
 ```
 
-<!-- TOC --><a name="javascript-solution-15"></a>
+
 #### JavaScript Solution
 
 **Engineer's Note:** JavaScript does not have a built-in Priority Queue in the standard library. In a Leetcode environment, `MinPriorityQueue` from the `datastructures-js/priority-queue` library is available. We use that here. If this were a raw environment (like a browser console), we would need to implement a Binary Heap class manually.
@@ -10843,7 +10842,7 @@ var maxProbability = function(n, edges, succProb, start_node, end_node) {
 
 ---
 
-<!-- TOC --><a name="note-1-terminology-breakdown-2"></a>
+
 ### Note 1: Terminology Breakdown
 
 **Algorithm Used: Dijkstra's Algorithm (Modified)**
@@ -10858,12 +10857,12 @@ var maxProbability = function(n, edges, succProb, start_node, end_node) {
 
 ---
 
-<!-- TOC --><a name="note-2-real-world-interview-variations-11"></a>
+
 ### Note 2: Real World Interview Variations
 
 Top-tier tech companies (Google, Meta, Bloomberg) rarely ask the exact Leetcode question. They wrap it in a real-world scenario.
 
-<!-- TOC --><a name="1-google-the-most-reliable-network-path"></a>
+
 #### 1. Google: "The Most Reliable Network Path"
 
 * **Scenario:** You are routing data packets between data centers. Links have "packet loss rates." Find the path with the least packet loss.
@@ -10873,7 +10872,7 @@ Top-tier tech companies (Google, Meta, Bloomberg) rarely ask the exact Leetcode 
 
 
 
-<!-- TOC --><a name="2-bloomberg-currency-arbitrage-exchange"></a>
+
 #### 2. Bloomberg: "Currency Arbitrage / Exchange"
 
 * **Scenario:** You have exchange rates between currencies (USD to EUR, EUR to JPY). You want to convert USD to JPY to get the *maximum* amount of JPY.
@@ -10884,20 +10883,20 @@ Top-tier tech companies (Google, Meta, Bloomberg) rarely ask the exact Leetcode 
 
 
 
-<!-- TOC --><a name="3-meta-social-trust-score"></a>
+
 #### 3. Meta: "Social Trust Score"
 
 * **Scenario:** User A trusts User B (0.8 score). User B trusts User C (0.5 score). How much should User A implicitly trust User C?
 * **Mapping:** Trust propagates via multiplication (trust degrades over hops).
 * **Solution:** Same as the solution above. Find the path that maintains the highest "trust chain."
 
-<!-- TOC --><a name="4-system-design-critical-service-dependency"></a>
+
 #### 4. System Design: "Critical Service Dependency"
 
 * **Scenario:** Service A depends on B, which depends on C. If any service fails, the chain fails. Given availability SLAs (Service B is 99.9% up, C is 99.5% up), calculate the availability of the entire dependency chain.
 * **Solution:** Availability = `0.999 * 0.995`. To optimize architecture, you treat this as a graph problem to find the dependency chain with the highest composite availability.
 
-<!-- TOC --><a name="the-maze-ii"></a>
+
 # The Maze II
 
 This is a classic "shortest path in a weighted graph" problem, but with a unique twist: the movement mechanics.
@@ -10908,7 +10907,7 @@ Here is the deep dive solution.
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-33"></a>
+
 ### 1. Problem Explanation
 
 **The Core Concept:**
@@ -10952,10 +10951,10 @@ The distance traveled is **4**. You are now "at" the cell right before the wall.
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-21"></a>
+
 ### 2. Solution Explanation
 
-<!-- TOC --><a name="why-not-standard-bfs"></a>
+
 #### Why not standard BFS?
 
 Standard Breadth-First Search (BFS) finds the *shortest path* in an **unweighted** graph. It finds the path with the "fewest steps/decisions".
@@ -10966,7 +10965,7 @@ Standard Breadth-First Search (BFS) finds the *shortest path* in an **unweighted
 
 Since "edges" (slides) have different weights (distances), we must use **Dijkstra's Algorithm**.
 
-<!-- TOC --><a name="the-algorithm-dijkstras"></a>
+
 #### The Algorithm: Dijkstra's
 
 1. **Distance Table:** Create a 2D array `distance[row][col]` initialized to `Infinity`. This stores the shortest distance found *so far* to reach that cell and **stop** there.
@@ -10980,7 +10979,7 @@ Since "edges" (slides) have different weights (distances), we must use **Dijkstr
 
 
 
-<!-- TOC --><a name="detailed-ascii-walkthrough-1"></a>
+
 #### Detailed ASCII Walkthrough
 
 **Maze:**
@@ -11061,10 +11060,10 @@ We reached `D` with distance 5. Since Dijkstra guarantees the first time we pop 
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-27"></a>
+
 ### 3. Time and Space Complexity Analysis
 
-<!-- TOC --><a name="time-complexity-om-n-maxm-n"></a>
+
 #### Time Complexity: O(M * N * max(M, N))
 
 Let's derive this using the Grid Visualization logic you requested.
@@ -11103,7 +11102,7 @@ The Grid (M rows, N cols):
 
 ```
 
-<!-- TOC --><a name="space-complexity-om-n-2"></a>
+
 #### Space Complexity: O(M * N)
 
 ```text
@@ -11125,10 +11124,10 @@ The Grid (M rows, N cols):
 
 ---
 
-<!-- TOC --><a name="4-solution-code-33"></a>
+
 ### 4. Solution Code
 
-<!-- TOC --><a name="python-solution-14"></a>
+
 #### Python Solution
 
 Using the standard `heapq` module to implement the Min-Heap.
@@ -11189,7 +11188,7 @@ class Solution:
 
 ```
 
-<!-- TOC --><a name="javascript-solution-16"></a>
+
 #### JavaScript Solution
 
 In a standard Interview environment, you often don't have a built-in Priority Queue in JS.
@@ -11262,7 +11261,7 @@ var shortestDistance = function(maze, start, destination) {
 
 ---
 
-<!-- TOC --><a name="note-1-new-terms-techniques-1"></a>
+
 ### Note 1: New Terms / Techniques
 
 **Dijkstra's Algorithm:**
@@ -11275,7 +11274,7 @@ This is the core step of Dijkstra. It means: "I found a path to Node B through N
 
 ---
 
-<!-- TOC --><a name="note-2-real-world-interview-variants-google-meta-bloomberg-1"></a>
+
 ### Note 2: Real World & Interview Variants (Google, Meta, Bloomberg)
 
 At the L5/L6 level, the interviewer will often pivot the question to see if you can adapt the core algorithm to new constraints.
@@ -11313,14 +11312,14 @@ At the L5/L6 level, the interviewer will often pivot the question to see if you 
 * Moving in a new direction = Cost 1 + 5.
 * We run Dijkstra on this expanded state graph.
 
-<!-- TOC --><a name="the-maze-iii"></a>
+
 # The Maze III
 
 Here is how a Senior Staff Engineer (L6) at Google would break down, solve, and optimize "The Maze III".
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-34"></a>
+
 ### 1. Problem Explanation
 
 **The Setup:**
@@ -11375,7 +11374,7 @@ The ball does NOT continue to (2,3). It falls in at (2,2).
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-22"></a>
+
 ### 2. Solution Explanation
 
 **The "Google L6" Perspective:**
@@ -11457,7 +11456,7 @@ We need to track more than just cost. We need to track the instructions string t
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-28"></a>
+
 ### 3. Time and Space Complexity Analysis
 
 **Time Complexity Derivation:**
@@ -11519,10 +11518,10 @@ Space = `O(M * N * (M * N))` = `O((M * N)^2)` in worst case string storage.
 
 ---
 
-<!-- TOC --><a name="4-solution-code-34"></a>
+
 ### 4. Solution Code
 
-<!-- TOC --><a name="python-solution-the-gold-standard"></a>
+
 #### Python Solution (The Gold Standard)
 
 *Uses `heapq` for an efficient Priority Queue.*
@@ -11610,7 +11609,7 @@ class Solution:
 
 ```
 
-<!-- TOC --><a name="javascript-solution-17"></a>
+
 #### Javascript Solution
 
 *Note: JavaScript does not have a built-in Priority Queue in standard libraries. In a real interview, you would either use a provided `MinPriorityQueue` (common in Leetcode env) or implement a simple array-based queue (less efficient) and explain the trade-off. Below, I use a simplified array with sorting to simulate the PQ behavior for clarity.*
@@ -11731,7 +11730,7 @@ var findShortestWay = function(maze, ball, hole) {
 
 ---
 
-<!-- TOC --><a name="note-1-terms-and-techniques-7"></a>
+
 ### Note 1: Terms and Techniques
 
 **Lexicographical Order:**
@@ -11747,7 +11746,7 @@ If yes, we update (relax) the value of B.
 
 ---
 
-<!-- TOC --><a name="note-2-real-world-variations-google-meta-bloomberg-2"></a>
+
 ### Note 2: Real World Variations (Google, Meta, Bloomberg)
 
 **1. Google: The Robot Vacuum Cleaner (Coverage vs Path)**
@@ -11770,14 +11769,14 @@ If yes, we update (relax) the value of B.
 * Distance = Latency
 * **Twist:** They might ask "What if some links are slower?" Then your "Distance" calculation changes from `+1` per step to `+cost[cell]`. Dijkstra handles this naturally.
 
-<!-- TOC --><a name="1631-path-with-minimum-effort"></a>
+
 # 1631. Path With Minimum Effort
 
 Here is how a Senior Staff Engineer (L6) at Google would break down, analyze, and solve LeetCode 1631: "Path With Minimum Effort".
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-35"></a>
+
 ### 1. Problem Explanation
 
 **The Core Concept**
@@ -11845,7 +11844,7 @@ Our goal: Find the path where this "Max value" is as small as possible.
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-23"></a>
+
 ### 2. Solution Explanation
 
 As an L6 engineer, my first thought isn't just "how to code this," but "what class of problem is this?"
@@ -11861,7 +11860,7 @@ However, the "cost function" is different from standard problems.
 * **Standard Shortest Path:** Sum of weights (e.g., Google Maps distance).
 * **This Problem:** Minimax (Minimize the Maximum edge weight in the path).
 
-<!-- TOC --><a name="the-algorithm-modified-dijkstra"></a>
+
 #### The Algorithm: Modified Dijkstra
 
 Dijkstra's algorithm is the gold standard for finding shortest paths in graphs with non-negative weights. We can adapt it easily.
@@ -11881,7 +11880,7 @@ When moving from a current cell `(r, c)` to a neighbor `(nr, nc)`:
 3. **Update Rule:**
 If `new_path_effort` is smaller than the value we already found for `dist[nr][nc]`, we update it and add the neighbor to our Priority Queue.
 
-<!-- TOC --><a name="step-by-step-visualization-4"></a>
+
 #### Step-by-Step Visualization
 
 Let's solve a 2x2 grid.
@@ -11987,10 +11986,10 @@ Effort Matrix:
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-29"></a>
+
 ### 3. Time and Space Complexity Analysis
 
-<!-- TOC --><a name="time-complexity-derivation"></a>
+
 #### Time Complexity Derivation
 
 We are using **Dijkstra's Algorithm** with a Min-Heap.
@@ -12020,7 +12019,7 @@ We are using **Dijkstra's Algorithm** with a Min-Heap.
 
 *Comparison:* This is much faster than Bellman-Ford or a naive DFS which could be exponential.
 
-<!-- TOC --><a name="space-complexity-derivation"></a>
+
 #### Space Complexity Derivation
 
 ```text
@@ -12038,10 +12037,10 @@ We are using **Dijkstra's Algorithm** with a Min-Heap.
 
 ---
 
-<!-- TOC --><a name="4-solution-code-35"></a>
+
 ### 4. Solution Code
 
-<!-- TOC --><a name="python-solution-clean-robust"></a>
+
 #### Python Solution (Clean & Robust)
 
 ```python
@@ -12102,7 +12101,7 @@ def minimumEffortPath(heights):
 
 ```
 
-<!-- TOC --><a name="javascript-solution-18"></a>
+
 #### Javascript Solution
 
 ```javascript
@@ -12163,7 +12162,7 @@ var minimumEffortPath = function(heights) {
 
 ---
 
-<!-- TOC --><a name="note-1-terminology-techniques-2"></a>
+
 ### Note 1: Terminology & Techniques
 
 **1. Modified Dijkstra / Minimax Path**
@@ -12182,40 +12181,40 @@ We can binary search on the answer.
 
 ---
 
-<!-- TOC --><a name="note-2-real-world-interview-variations-12"></a>
+
 ### Note 2: Real World & Interview Variations
 
 Leading tech companies (Google, Meta, Bloomberg) rarely ask the exact LeetCode question. They wrap it in a real-world scenario.
 
-<!-- TOC --><a name="1-the-heavy-cargo-problem-bloomberg-uber"></a>
+
 #### 1. The "Heavy Cargo" Problem (Bloomberg / Uber)
 
 * **Scenario:** You are driving a truck from City A to City B. The road network has bridges, and each bridge has a **maximum weight limit**. You want to route a truck with the maximum possible weight.
 * **Relation:** This is the inverse of the "Effort" problem. Instead of *minimizing* the *maximum* difference, you want to *maximize* the *minimum* capacity along the path (Maximin path).
 * **Solution:** Use Modified Dijkstra (Max-Heap) or Union-Find (sort edges descending).
 
-<!-- TOC --><a name="2-network-latency-bottleneck-bandwidth-google-meta"></a>
+
 #### 2. Network Latency / Bottleneck Bandwidth (Google / Meta)
 
 * **Scenario:** You have a network of servers. Each cable between servers has a specific bandwidth (speed). You want to send a file from Server A to Server B. The speed of the transfer is limited by the slowest cable in the path. Find the path that gives the highest bandwidth.
 * **Relation:** This is the "Widest Path Problem".
 * **Solution:** Same as "Heavy Cargo". You are looking for the path where the minimum edge weight is maximized.
 
-<!-- TOC --><a name="3-topographic-hiker-with-oxygen-tank-google"></a>
+
 #### 3. Topographic Hiker with Oxygen Tank (Google)
 
 * **Scenario:** Same as LeetCode 1631, but you have an oxygen tank that allows you to ignore *one* massive jump (make one edge cost 0).
 * **Relation:** Shortest path on a "Layered Graph".
 * **Solution:** Run Dijkstra where the state is `(row, col, used_oxygen_tank)`. `used_oxygen_tank` is a boolean (0 or 1). This doubles the number of nodes in your graph but solves the constraint elegantly.
 
-<!-- TOC --><a name="1334-find-the-city-with-the-smallest-number-of-neighbors-at-a-threshold-distance"></a>
+
 # 1334. Find the City With the Smallest Number of Neighbors at a Threshold Distance
 
 Here is a comprehensive breakdown of **LeetCode 1334: Find the City With the Smallest Number of Neighbors at a Threshold Distance**, written from the perspective of a Senior (L5/L6) Engineer.
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-36"></a>
+
 ### 1. Problem Explanation
 
 At its core, this is a **network optimization problem**. We are trying to find the "most isolated" node within a specific travel radius, but with a twist: if multiple nodes are equally isolated, we pick the one with the highest ID (perhaps implying it was added last or has higher priority).
@@ -12232,7 +12231,7 @@ At its core, this is a **network optimization problem**. We are trying to find t
 2. Find the city with the **minimum** number of these reachable neighbors.
 3. **Tie-Breaker:** If City 2 and City 4 both have only 1 neighbor reachable, return **City 4**.
 
-<!-- TOC --><a name="visual-example-1"></a>
+
 #### Visual Example
 
 Imagine `n = 4` cities with `distanceThreshold = 4`.
@@ -12335,7 +12334,7 @@ Tie-Breaker Rule: Return the largest ID.
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-24"></a>
+
 ### 2. Solution Explanation
 
 To solve this, we need the **Shortest Path from Every Node to Every Other Node**. This is known as the **All-Pairs Shortest Path (APSP)** problem.
@@ -12345,7 +12344,7 @@ As an L6 engineer, I look at the constraints immediately.
 * `n <= 100`.
 * This is very small.
 
-<!-- TOC --><a name="algorithm-selection"></a>
+
 #### Algorithm Selection
 
 1. **Floyd-Warshall Algorithm:**
@@ -12361,7 +12360,7 @@ As an L6 engineer, I look at the constraints immediately.
 
 
 
-<!-- TOC --><a name="the-floyd-warshall-approach-the-matrix-method"></a>
+
 #### The Floyd-Warshall Approach (The "Matrix" Method)
 
 We maintain a 2D matrix `dist` where `dist[i][j]` represents the shortest distance from `i` to `j`.
@@ -12380,7 +12379,7 @@ Formula: `dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])`
 **Phase 3: Counting & Tie-Breaking**
 Iterate through the final matrix row by row. Count valid neighbors. Update the result if we find a smaller count (or equal count with higher ID).
 
-<!-- TOC --><a name="ascii-visualization-of-floyd-warshall"></a>
+
 #### ASCII Visualization of Floyd-Warshall
 
 Let's trace `dist[i][j]` update using an intermediate node `k`.
@@ -12412,7 +12411,7 @@ Updated State:
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-30"></a>
+
 ### 3. Time and Space Complexity Analysis
 
 **Time Complexity: O(N^3)**
@@ -12463,12 +12462,12 @@ For N=100 -> 10,000 integers. (Negligible memory)
 
 ---
 
-<!-- TOC --><a name="4-solution-code-36"></a>
+
 ### 4. Solution Code
 
 Here is the implementation. I've separated the graph building and the solving logic for clarity, a practice common in production code.
 
-<!-- TOC --><a name="python-solution-15"></a>
+
 #### Python Solution
 
 ```python
@@ -12530,7 +12529,7 @@ class Solution:
 
 ```
 
-<!-- TOC --><a name="javascript-solution-19"></a>
+
 #### Javascript Solution
 
 ```javascript
@@ -12593,7 +12592,7 @@ var findTheCity = function(n, edges, distanceThreshold) {
 
 ---
 
-<!-- TOC --><a name="note-1-terminology-2"></a>
+
 ### Note 1: Terminology
 
 **Floyd-Warshall Algorithm:**
@@ -12607,12 +12606,12 @@ The process of taking an edge (or path) and seeing if it provides a shorter rout
 
 ---
 
-<!-- TOC --><a name="note-2-real-world-interview-variations-13"></a>
+
 ### Note 2: Real World & Interview Variations
 
 Big Tech companies (Google, Meta, Bloomberg) rarely ask raw LeetCode questions. They wrap them in real-world scenarios. Here is how this problem appears in the wild:
 
-<!-- TOC --><a name="1-the-supply-chain-hub-amazon-bloomberg"></a>
+
 #### 1. The "Supply Chain Hub" (Amazon / Bloomberg)
 
 **Scenario:** You have a list of warehouses and the driving time between them. You want to build a new regional HQ. The HQ must reach the *fewest* number of warehouses within 4 hours because we want to place it in an underserved region to boost coverage.
@@ -12620,7 +12619,7 @@ Big Tech companies (Google, Meta, Bloomberg) rarely ask raw LeetCode questions. 
 * **The Twist:** The graph is massive (N = 10,000).
 * **L6 Solution:** Floyd-Warshall (O(N^3)) will timeout. You must use **Dijkstra's Algorithm** (or SPFA) running from each node. If the graph is sparse, Dijkstra is much faster. You might also use **Parallelization**—run Dijkstra for each source node on different threads/machines (MapReduce style).
 
-<!-- TOC --><a name="2-the-network-latency-problem-google-meta"></a>
+
 #### 2. The "Network Latency" Problem (Google / Meta)
 
 **Scenario:** We have a network of data centers. We want to decommission a data center that is most "redundant" (connected to the most other centers with low latency) or finding a center that is most "isolated" to upgrade its lines.
@@ -12628,7 +12627,7 @@ Big Tech companies (Google, Meta, Bloomberg) rarely ask raw LeetCode questions. 
 * **The Twist:** Edges are directed (Latency A->B != B->A).
 * **Solution:** Floyd-Warshall still works perfectly for directed graphs. The initialization just changes: `dist[u][v] = w` does not imply `dist[v][u] = w`.
 
-<!-- TOC --><a name="3-the-influencer-propagation-meta-tiktok"></a>
+
 #### 3. The "Influencer Propagation" (Meta / TikTok)
 
 **Scenario:** In a social graph, who can reach the *fewest* people within `k` degrees of separation? (Usually they ask for *most*, but asking for *fewest* detects niche communities).
@@ -12636,14 +12635,14 @@ Big Tech companies (Google, Meta, Bloomberg) rarely ask raw LeetCode questions. 
 * **The Twist:** Unweighted edges (all weights = 1), but huge N.
 * **Solution:** Since weights are 1, you don't need Dijkstra or Floyd-Warshall. You use **Breadth-First Search (BFS)** starting from each node. BFS is O(V+E), much faster than Dijkstra for unweighted graphs.
 
-<!-- TOC --><a name="4-the-sparse-matrix-constraint"></a>
+
 #### 4. The "Sparse Matrix" constraint
 
 If the interviewer says "The graph is extremely sparse (Edges approx equal to Nodes)", an L6 engineer should pivot to **SPFA (Shortest Path Faster Algorithm)** or simply Dijkstra with a Fibonacci heap, explaining that `O(N * E log N)` is better than `O(N^3)` when `E` is small.
 
 For the specific constraints of this LeetCode problem (N<=100), the Floyd-Warshall approach is the canonical, expected, and most elegant solution.
 
-<!-- TOC --><a name="1568-minimum-number-of-days-to-disconnect-island"></a>
+
 # 1568. Minimum Number of Days to Disconnect Island
 
 Hello! I’d be happy to help you tackle this problem. As a Staff Engineer (L6) at a company like Google, I approach problems not just by looking for *an* answer, but by looking for the most *robust* and *logical* answer that minimizes complexity.
@@ -12654,7 +12653,7 @@ Let's break this down systematically.
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-37"></a>
+
 ### 1. Problem Explanation
 
 **The Goal:**
@@ -12693,7 +12692,7 @@ We need to find the **minimum number of days** (where 1 day = turning one `1` ce
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-25"></a>
+
 ### 2. Solution Explanation
 
 Here is the secret insight that an L6 engineer would immediately look for: **The answer is small.**
@@ -12758,7 +12757,7 @@ If step 1 and step 2 failed, the answer must be **2**.
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-31"></a>
+
 ### 3. Time and Space Complexity Analysis
 
 Let:
@@ -12811,12 +12810,12 @@ Total Space Complexity: O(M * N)
 
 ---
 
-<!-- TOC --><a name="4-solution-code-37"></a>
+
 ### 4. Solution Code
 
 I will provide the solution in Python and JavaScript. Both implementations use the 3-step logic described above.
 
-<!-- TOC --><a name="python-solution-16"></a>
+
 #### Python Solution
 
 ```python
@@ -12873,7 +12872,7 @@ class Solution:
 
 ```
 
-<!-- TOC --><a name="javascript-solution-20"></a>
+
 #### JavaScript Solution
 
 ```javascript
@@ -12948,7 +12947,7 @@ var minDays = function(grid) {
 
 ---
 
-<!-- TOC --><a name="note-1-terms-techniques-articulation-points"></a>
+
 ### Note 1: Terms & Techniques (Articulation Points)
 
 While the solution above checks every cell (`O((MN)^2)`), there is a more advanced graph theory concept called **Articulation Points** (or Cut Vertices).
@@ -12960,12 +12959,12 @@ While the solution above checks every cell (`O((MN)^2)`), there is a more advanc
 
 ---
 
-<!-- TOC --><a name="note-2-real-world-interview-variations-14"></a>
+
 ### Note 2: Real-World Interview Variations
 
 When companies like Google, Meta, or Bloomberg ask this, they often wrap it in a "system design" or "infrastructure" narrative. They aren't just checking if you know BFS; they are checking if you understand **resiliency** and **single points of failure (SPOF)**.
 
-<!-- TOC --><a name="1-the-server-cluster-resilience-googlemeta"></a>
+
 #### 1. The "Server Cluster Resilience" (Google/Meta)
 
 **The Question:** "You have a map of servers in a data center connected by cables (the grid). What is the minimum number of servers that can crash before the cluster gets partitioned into isolated networks?"
@@ -12978,7 +12977,7 @@ When companies like Google, Meta, or Bloomberg ask this, they often wrap it in a
 
 
 
-<!-- TOC --><a name="2-the-virus-containment-bloomberghealthcare-tech"></a>
+
 #### 2. The "Virus Containment" (Bloomberg/Healthcare Tech)
 
 **The Question:** "We have a biological sample on a grid. We want to cut the sample into two separate pieces to stop growth. What is the minimum cuts needed?"
@@ -12990,7 +12989,7 @@ When companies like Google, Meta, or Bloomberg ask this, they often wrap it in a
 
 
 
-<!-- TOC --><a name="3-the-enemy-territory-infiltration-gaminggeneral"></a>
+
 #### 3. The "Enemy Territory Infiltration" (Gaming/General)
 
 **The Question:** "You are playing a strategy game. You want to break the enemy's supply line. The map is a grid. Find the critical path."
@@ -12999,7 +12998,7 @@ When companies like Google, Meta, or Bloomberg ask this, they often wrap it in a
 * **L6 Approach:**
 * Focus on the visualization. If the map is dynamic (changing over time), how do you re-calculate this quickly? (Union-Find data structures might be discussed for dynamic connectivity).
 
-<!-- TOC --><a name="924-minimize-malware-spread"></a>
+
 # 924. Minimize Malware Spread
 
 This is a classic graph theory problem that tests your ability to model "connected components" and analyze the impact of node removal on the connectivity of a network. An L5/L6 engineer at Google would look past the brute-force simulation and identify the underlying structural property: **Union-Find (Disjoint Set Union)** or **Connected Components analysis via DFS/BFS**.
@@ -13008,7 +13007,7 @@ Here is the deep dive solution.
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-38"></a>
+
 ### 1. Problem Explanation
 
 Imagine a computer network where some computers are directly connected by cables. If a computer gets a virus (malware), it immediately infects all its direct neighbors. Those neighbors then infect their neighbors, and so on.
@@ -13031,7 +13030,7 @@ Eventually, the malware spreads to every computer in the "connected group" (comp
 2. If removing Computer A saves 10 machines, and removing Computer B also saves 10 machines, choose the one with the smaller ID number (e.g., if A is node `2` and B is node `5`, choose `2`).
 3. **Crucial Edge Case:** If removing *any* node saves **0** machines (meaning the infection is unstoppable regardless of your choice), you must still return the node with the smallest ID from the `initial` list.
 
-<!-- TOC --><a name="visualizing-the-problem-1"></a>
+
 #### Visualizing the Problem
 
 Imagine this network. Nodes with `*` are in the `initial` infected list.
@@ -13079,14 +13078,14 @@ Imagine this network. Nodes with `*` are in the `initial` infected list.
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-the-l5l6-approach"></a>
+
 ### 2. Solution Explanation (The L5/L6 Approach)
 
 A junior engineer might try to simulate the spread for every possible removal. That is slow ( or ).
 
 A senior engineer realizes we don't need to simulate the spread. We just need to count **Connected Components**.
 
-<!-- TOC --><a name="the-algorithm-1"></a>
+
 #### The Algorithm
 
 1. **Identify Components:** Use BFS, DFS, or Union-Find to group all nodes into "Connected Components".
@@ -13104,7 +13103,7 @@ A senior engineer realizes we don't need to simulate the spread. We just need to
 
 5. **Select Winner:** Pick the node that yields the highest savings. If there's a tie (or if all savings are 0), pick the node with the smallest index.
 
-<!-- TOC --><a name="step-by-step-visualization-5"></a>
+
 #### Step-by-Step Visualization
 
 **Input:**
@@ -13154,7 +13153,7 @@ A senior engineer realizes we don't need to simulate the spread. We just need to
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-32"></a>
+
 ### 3. Time and Space Complexity Analysis
 
 Let **N** be the number of nodes in the graph.
@@ -13200,12 +13199,12 @@ Let **N** be the number of nodes in the graph.
 
 ---
 
-<!-- TOC --><a name="4-solution-code-38"></a>
+
 ### 4. Solution Code
 
 We will use **DFS** to find components because it is intuitive to implement.
 
-<!-- TOC --><a name="python-solution-17"></a>
+
 #### Python Solution
 
 ```python
@@ -13274,7 +13273,7 @@ class Solution:
 
 ```
 
-<!-- TOC --><a name="javascript-solution-21"></a>
+
 #### JavaScript Solution
 
 ```javascript
@@ -13349,7 +13348,7 @@ var minMalwareSpread = function(graph, initial) {
 
 ---
 
-<!-- TOC --><a name="note-1-terms-and-techniques-8"></a>
+
 ### Note 1: Terms and Techniques
 
 **Connected Components (Disjoint Sets):**
@@ -13359,33 +13358,33 @@ This is the core concept used here. It basically implies looking at a graph not 
 
 ---
 
-<!-- TOC --><a name="note-2-real-world-interview-context-google-meta-bloomberg"></a>
+
 ### Note 2: Real World & Interview Context (Google, Meta, Bloomberg)
 
 This question is a favorite because it mimics "Cascading Failure" scenarios.
 
-<!-- TOC --><a name="1-google-network-reliability-the-kill-switch-question"></a>
+
 #### 1. Google: Network Reliability (The "Kill Switch" Question)
 
 **Context:** Google has massive data centers. If a specific cluster of servers (a component) starts failing due to a bad config push (the "malware"), the failure spreads to dependent servers.
 **Interview Variation:** "You have a map of service dependencies. Several services just alerted for critical errors. You can only rollback **one** service's config immediately. Which rollback prevents the most total services from crashing?"
 **Solution:** Identical to this problem. Identify the dependency graph components. Find the component where the error originated from a *single* source and rollback that one.
 
-<!-- TOC --><a name="2-meta-viral-misinformation-the-super-spreader-question"></a>
+
 #### 2. Meta: Viral Misinformation (The "Super-Spreader" Question)
 
 **Context:** A piece of fake news is spreading. It has been shared by several "seed" users (the `initial` array).
 **Interview Variation:** "We have identified 5 accounts sharing a banned URL. We have the capacity to ban only one account instantly (due to manual review constraints). Which ban prevents the content from reaching the largest number of unique users?"
 **Solution:** Treat users as nodes and "friendships" as edges. Find the user who is the *sole* bridge to a massive community (a large component). If a community has multiple people already sharing the link, banning one won't stop the community from seeing it. You look for the unique vector.
 
-<!-- TOC --><a name="3-bloomberg-financial-contagion"></a>
+
 #### 3. Bloomberg: Financial Contagion
 
 **Context:** Banks lend money to each other. If Bank A fails, it defaults on loans to Bank B, causing Bank B to fail.
 **Interview Variation:** "We have detected liquidity stress in 3 major banks. We have enough federal reserve budget to bail out exactly one bank. Which bailout saves the maximum number of subsidiary banks from defaulting?"
 **Solution:** The "malware" is the default status. The graph is the lending network. You find the connected component of financial liability. You save the bank that is the single point of failure for the largest cluster of banks.
 
-<!-- TOC --><a name="928-minimize-malware-spread-ii"></a>
+
 # 928. Minimize Malware Spread II
 
 Here is a breakdown of **Leetcode 928: Minimize Malware Spread II** from the perspective of a Senior Staff Engineer (L6).
@@ -13394,7 +13393,7 @@ An L6 engineer approaches this not just as a graph traversal problem, but as a *
 
 ---
 
-<!-- TOC --><a name="1-problem-explanation-39"></a>
+
 ### 1. Problem Explanation
 
 Imagine a computer network. Some nodes are already infected with malware (`initial` list).
@@ -13436,7 +13435,7 @@ Think of the network as a set of "Clean Islands" and "Infected Sources."
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-the-clean-component-approach"></a>
+
 ### 2. Solution Explanation (The "Clean Component" Approach)
 
 A junior engineer might try a "Brute Force" simulation: "Remove node 1, run BFS, count. Remove node 2, run BFS, count..."
@@ -13528,7 +13527,7 @@ We verify which components have exactly **one** infected parent.
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-33"></a>
+
 ### 3. Time and Space Complexity Analysis
 
 **Time Complexity Derivation**
@@ -13579,10 +13578,10 @@ TOTAL SPACE: O(N)
 
 ---
 
-<!-- TOC --><a name="4-solution-code-39"></a>
+
 ### 4. Solution Code
 
-<!-- TOC --><a name="python-solution-18"></a>
+
 #### Python Solution
 
 ```python
@@ -13680,7 +13679,7 @@ class Solution:
 
 ```
 
-<!-- TOC --><a name="javascript-solution-22"></a>
+
 #### Javascript Solution
 
 ```javascript
@@ -13785,7 +13784,7 @@ var minMalwareSpread = function(graph, initial) {
 
 ---
 
-<!-- TOC --><a name="new-terms-concepts"></a>
+
 ### New Terms / Concepts
 
 **Single Point of Failure (SPOF):**
@@ -13793,7 +13792,7 @@ In our solution, a clean component that is connected to *only one* infected node
 
 ---
 
-<!-- TOC --><a name="real-world-interview-variations-7"></a>
+
 ### Real World Interview Variations
 
 Top-tier companies (Google, Meta, Bloomberg) rarely ask the "Malware" question with this exact virus phrasing. They wrap it in domain-specific scenarios:
@@ -13817,12 +13816,12 @@ Top-tier companies (Google, Meta, Bloomberg) rarely ask the "Malware" question w
 * **Goal:** Identify the Supplier who is the sole provider for the largest cluster of factories. If this supplier goes bankrupt (is removed), those factories halt.
 * **Solving it:** Treat Suppliers as `initial` and Factories as `clean nodes`. Use the exact Component + Unique Parent approach described above to find the most critical supplier.
 
-<!-- TOC --><a name="815-bus-routes"></a>
+
 # 815. Bus Routes
 
 Here is a breakdown of how a senior engineer would approach **LeetCode 815. Bus Routes**.
 
-<!-- TOC --><a name="1-problem-explanation-40"></a>
+
 ### 1. Problem Explanation
 
 Imagine a city with several bus lines. Each bus line follows a specific loop of bus stops.
@@ -13869,7 +13868,7 @@ If we want to go from Stop `1` to Stop `6`:
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-26"></a>
+
 ### 2. Solution Explanation
 
 **The L5/L6 Perspective: Modeling the Graph**
@@ -13965,7 +13964,7 @@ Bus Count: 2 (Return this)
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-34"></a>
+
 ### 3. Time and Space Complexity Analysis
 
 **Definitions:**
@@ -14023,10 +14022,10 @@ Total BFS work = Sum of lengths of all buses
 
 ---
 
-<!-- TOC --><a name="4-solution-code-40"></a>
+
 ### 4. Solution Code
 
-<!-- TOC --><a name="python-solution-19"></a>
+
 #### Python Solution
 
 ```python
@@ -14082,7 +14081,7 @@ def numBusesToDestination(routes, source, target):
 
 ```
 
-<!-- TOC --><a name="javascript-solution-23"></a>
+
 #### JavaScript Solution
 
 ```javascript
@@ -14156,7 +14155,7 @@ var numBusesToDestination = function(routes, source, target) {
 
 ---
 
-<!-- TOC --><a name="note-1-new-terms-techniques-2"></a>
+
 ### Note 1: New Terms / Techniques
 
 **Inverted Index (Graph Adjacency List):**
@@ -14167,12 +14166,12 @@ While we started with one source, when we hop onto a bus, we effectively "expand
 
 ---
 
-<!-- TOC --><a name="note-2-real-world-interview-variations-15"></a>
+
 ### Note 2: Real World & Interview Variations
 
 Big tech companies rarely ask the exact LeetCode question. They mask it in "real world" scenarios.
 
-<!-- TOC --><a name="1-the-bloomberg-subway-map-variation"></a>
+
 #### 1. The "Bloomberg Subway Map" Variation
 
 **The Question:** "Design a feature for the NYC Subway app. Given a start station and end station, calculate the route with the minimum number of line transfers."
@@ -14186,7 +14185,7 @@ This is identical to Bus Routes.
 
 
 
-<!-- TOC --><a name="2-the-google-build-system-variation"></a>
+
 #### 2. The "Google Build System" Variation
 
 **The Question:** "You have a list of libraries. Each library depends on a set of other files. If you change a core file, how many 'layers' of dependencies up the chain need to be rebuilt?"
@@ -14197,7 +14196,7 @@ This is a BFS, but the direction is reversed.
 * **Routes:** Libraries (groupings of files).
 * **Approach:** Start BFS from the changed file. The "Bus Count" becomes the "Dependency Depth". This ensures you rebuild the minimum necessary layers.
 
-<!-- TOC --><a name="3-the-meta-facebook-introduction-variation"></a>
+
 #### 3. The "Meta (Facebook) Introduction" Variation
 
 **The Question:** "You are User A. You want to be introduced to User B. You can only be introduced by someone who shares a 'Group' with you. What is the minimum number of Groups you need to hop through?"
@@ -14215,12 +14214,12 @@ This is a BFS, but the direction is reversed.
 * *Constraint:* Meta cares about scale. Since a group can have 1 million users, iterating all users in a group (like we did `for nextStop in routes[busId]`) is too slow.
 * *Modification:* You would need **Bi-directional BFS**. Start searching from User A and User B simultaneously. When the searches collide, you sum the paths. This drastically reduces the search space.
 
-<!-- TOC --><a name="1293-shortest-path-in-a-grid-with-obstacles-elimination"></a>
+
 # 1293. Shortest Path in a Grid with Obstacles Elimination
 
 Here is a comprehensive breakdown of **LeetCode 1293: Shortest Path in a Grid with Obstacles Elimination**, explained from the perspective of a Senior Staff Engineer (L6) who values clarity, scalability, and deep understanding of state-space search.
 
-<!-- TOC --><a name="1-problem-explanation-41"></a>
+
 ### 1. Problem Explanation
 
 **The Core Task:**
@@ -14234,7 +14233,7 @@ You are navigating a robot through a grid (2D matrix).
 
 **The Goal:** Find the **minimum** number of steps to reach the target. If it's impossible, return `-1`.
 
-<!-- TOC --><a name="visualizing-the-problem-2"></a>
+
 #### Visualizing the Problem
 
 Imagine a small `3x3` grid where you can break `k=1` wall.
@@ -14269,7 +14268,7 @@ The challenge is deciding **when** to use your limited `k`. Should you break the
 
 ---
 
-<!-- TOC --><a name="2-solution-explanation-27"></a>
+
 ### 2. Solution Explanation
 
 **The Engineering Intuition (Why BFS?):**
@@ -14284,7 +14283,7 @@ In this problem, arriving at `(2, 2)` with `3` hammers left is **different** (an
 Therefore, our "node" in the graph isn't just `(row, col)`.
 It is: `(row, col, remaining_k)`.
 
-<!-- TOC --><a name="the-algorithm-2"></a>
+
 #### The Algorithm
 
 1. **Queue:** Initialize a queue for BFS.
@@ -14309,7 +14308,7 @@ It is: `(row, col, remaining_k)`.
 
 
 
-<!-- TOC --><a name="step-by-step-visualization-ascii"></a>
+
 #### Step-by-Step Visualization (ASCII)
 
 Let's solve the `3x3` example above.
@@ -14363,12 +14362,12 @@ When you hit a wall and have `k`, you "fall" down a level to cross it. The goal 
 
 ---
 
-<!-- TOC --><a name="3-time-and-space-complexity-analysis-35"></a>
+
 ### 3. Time and Space Complexity Analysis
 
 This is the part where candidates often fail to be precise.
 
-<!-- TOC --><a name="time-complexity-om-n-k"></a>
+
 #### Time Complexity: O(M * N * K)
 
 Why? Let's verify with an ASCII Logic Tree.
@@ -14401,7 +14400,7 @@ For each state, we perform a constant number of operations (checking 4 neighbors
 **Note on Optimization:** If `k` is large enough to walk the "Manhattan Distance" (straight line path `m + n - 2`) without caring about walls, we can return the result immediately. This caps `K` at `O(M+N)`.
 So strictly speaking, TC is `O(M * N * min(K, M+N))`.
 
-<!-- TOC --><a name="space-complexity-om-n-k"></a>
+
 #### Space Complexity: O(M * N * K)
 
 We need to store the `visited` information.
@@ -14427,10 +14426,10 @@ The frontier in this 3D state space can be proportional to `O(M * N * K)`.
 
 ---
 
-<!-- TOC --><a name="4-solution-code-41"></a>
+
 ### 4. Solution Code
 
-<!-- TOC --><a name="python-solution-20"></a>
+
 #### Python Solution
 
 This solution uses a `deque` for efficient O(1) pops and a `visited` dictionary to track state validity.
@@ -14491,7 +14490,7 @@ def shortestPath(grid, k):
 
 ```
 
-<!-- TOC --><a name="javascript-solution-24"></a>
+
 #### Javascript Solution
 
 This implementation mirrors the logic but handles the queue and visited set using JS structures.
@@ -14556,7 +14555,7 @@ var shortestPath = function(grid, k) {
 
 ---
 
-<!-- TOC --><a name="note-1-terms-and-techniques-9"></a>
+
 ### Note 1: Terms and Techniques
 
 **State-Space Expansion:**
@@ -14567,7 +14566,7 @@ The logic `new_k > visited[(nr, nc)]` is a pruning technique. In BFS, we usually
 
 ---
 
-<!-- TOC --><a name="note-2-real-world-interview-variations-16"></a>
+
 ### Note 2: Real World / Interview Variations
 
 Top-tier companies (Google, Meta, Bloomberg) rarely ask the exact LeetCode question. They wrap it in a scenario. Here are the common variations:
@@ -17277,3 +17276,1478 @@ var criticalConnections = function(n, connections) {
 * **The Catch:** Two parts: identify bridges, then find alternative shortest paths if it's not a bridge.
 * **The Solution:** Use Tarjan's to pre-compute bridges. If the queried edge is in the bridge list, it's isolated. If not, temporarily remove the edge and run an unweighted BFS from source to destination to find the new shortest path distance, then restore the edge.
 
+# 547. Number of Provinces
+
+To a Google L5/L6 engineer, "Number of Provinces" is a classic **Graph Connectivity** problem. While a junior might see this as a matrix manipulation task, a senior engineer recognizes it as finding **Connected Components** in an undirected graph. 
+
+The goal is to demonstrate that you can model abstract relationships (friendships) as a network and use efficient traversal algorithms to "count the islands."
+
+---
+
+### 1. Problem Explanation
+
+**The Goal:**
+You are given a group of $n$ cities. Some are connected directly, and some are not. If City A is connected to City B, and City B is connected to City C, then City A is indirectly connected to City C. A **Province** is a group of cities that are all connected to each other, either directly or indirectly. You need to find the total number of such provinces.
+
+**The Input Format:**
+You receive an $n \times n$ matrix `isConnected`.
+* `isConnected[i][j] = 1` means city $i$ and city $j$ are direct friends.
+* `isConnected[i][j] = 0` means they are not direct friends.
+* Note: A city is always connected to itself (`isConnected[i][i] = 1`).
+
+**The Intuition:**
+Imagine $n$ people in a room. If two people shake hands, they belong to the same "social circle." If a third person shakes hands with either of them, they are all part of the same circle. We want to count how many separate circles there are.
+
+---
+
+### 2. Solution Explanation
+
+**The Strategy: Depth-First Search (DFS)**
+
+We use a "Search and Tag" strategy. We walk through every city one by one. If we haven't visited a city yet, it must belong to a **new province**. We then use DFS to find every single city connected to it and mark them all as "Visited" so we don't count them again.
+
+
+
+**The Algorithm (The "How"):**
+1.  Keep a `visited` set (or array) to track which cities we've already assigned to a province.
+2.  Start a `province_count` at 0.
+3.  Loop through every city from $0$ to $n-1$:
+    * If the city has **NOT** been visited:
+        * Increment `province_count` by 1.
+        * Launch a **DFS** from this city to find all its friends, and their friends, marking everyone "Visited."
+4.  Return the final `province_count`.
+
+**Detailed ASCII Walkthrough:**
+
+Input Matrix:
+```text
+      C0 C1 C2
+  C0 [1, 1, 0]
+  C1 [1, 1, 0]
+  C2 [0, 0, 1]
+```
+(This means City 0 is friends with City 1. City 2 is alone.)
+
+```text
+[ INITIAL STATE ]
+Cities: 0, 1, 2
+Visited: [F, F, F]
+Count: 0
+
+--------------------------------------------------
+[ STEP 1: Check City 0 ]
+- Is City 0 visited? NO.
+- Action: New Province found! Count = 1.
+- Action: Launch DFS(0) to mark friends.
+
+    DFS(0):
+    - Mark City 0 as Visited. [T, F, F]
+    - Look at City 0's friends:
+        - City 1 is a friend? YES (isConnected[0][1] == 1)
+        - Is City 1 visited? NO.
+        - Action: Call DFS(1)
+            
+            DFS(1):
+            - Mark City 1 as Visited. [T, T, F]
+            - Look at City 1's friends:
+                - City 0 is a friend? YES.
+                - Is City 0 visited? YES. Skip.
+            - End DFS(1)
+    - End DFS(0)
+
+Current State: Visited: [T, T, F], Count: 1
+
+--------------------------------------------------
+[ STEP 2: Check City 1 ]
+- Is City 1 visited? YES.
+- Action: Skip. (We already counted this circle).
+
+--------------------------------------------------
+[ STEP 3: Check City 2 ]
+- Is City 2 visited? NO.
+- Action: New Province found! Count = 2.
+- Action: Launch DFS(2).
+
+    DFS(2):
+    - Mark City 2 as Visited. [T, T, T]
+    - Look at City 2's friends:
+        - No friends other than self.
+    - End DFS(2)
+
+FINAL RESULT: 2
+```
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+```text
+TIME COMPLEXITY: O(N^2)
+--------------------------------------------------
+- We iterate through the list of cities (N).
+- For each unvisited city, we potentially visit all other 
+  cities via DFS.
+- In the worst case (no one is friends), we check every 
+  cell in the NxN matrix to see if a connection exists.
+- Therefore, the time is bound by the number of elements 
+  in the matrix.
+
+[ TC Visual Derivation ]
+Matrix: 
+* * * * * * * * <-- Total cells = N * N
+* * * *
+* * * *
+Total operations: O(N^2)
+--------------------------------------------------
+
+SPACE COMPLEXITY: O(N)
+--------------------------------------------------
+- We use a 'visited' array of size N to track city status.
+- In the worst case (all cities in one line: 0-1-2-3), the 
+  recursion stack for DFS will go N levels deep.
+- Both the array and the stack scale linearly with the 
+  number of cities.
+
+[ Space Visual ]
+Visited Array: [][][][] (Size N)
+Recursion Stack: 
+| City 3 |
+| City 2 |
+| City 1 |
+| City 0 | (Size N)
+Total Space: O(N)
+--------------------------------------------------
+```
+
+---
+
+### 4. Solution Code
+
+A senior engineer will present DFS as the standard, but might mention **Union-Find** as an alternative if the graph is "dynamic" (connections are added over time).
+
+#### Python Snippet (DFS Approach)
+
+```python
+def findCircleNum(isConnected):
+    n = len(isConnected)
+    visited = [False] * n
+    provinces = 0
+
+    # Recursive helper to explore a whole province
+    def dfs(city_index):
+        # Mark current city as visited
+        visited[city_index] = True
+        
+        # Check all possible neighbors for this city
+        for neighbor in range(n):
+            # If there is a connection AND neighbor hasn't been visited
+            if isConnected[city_index][neighbor] == 1 and not visited[neighbor]:
+                dfs(neighbor)
+
+    # Main loop: Iterate through each city
+    for i in range(n):
+        if not visited[i]:
+            # If we find an unvisited city, it's a new province
+            provinces += 1
+            dfs(i)
+            
+    return provinces
+```
+
+#### JavaScript Snippet (DFS Approach)
+
+```javascript
+function findCircleNum(isConnected) {
+    const n = isConnected.length;
+    const visited = new Array(n).fill(false);
+    let provinces = 0;
+
+    /**
+     * Standard Depth First Search to explore the component
+     */
+    function dfs(i) {
+        visited[i] = true;
+        for (let j = 0; j < n; j++) {
+            // If city 'i' is connected to 'j' and we haven't visited 'j'
+            if (isConnected[i][j] === 1 && !visited[j]) {
+                dfs(j);
+            }
+        }
+    }
+
+    for (let i = 0; i < n; i++) {
+        if (!visited[i]) {
+            // Found a start of a new connected component
+            provinces++;
+            dfs(i);
+        }
+    }
+
+    return provinces;
+}
+```
+
+---
+
+### Note 1: Terminology Addendum
+
+**Connected Components:**
+* **What it is:** In graph theory, these are sub-graphs where every pair of nodes is connected by a path, and no other nodes in the rest of the graph are connected to them.
+* **How it applies:** Each "Province" is a connected component.
+
+**Adjacency Matrix:**
+* **What it is:** A way to represent a graph using a 2D grid. The `isConnected` input is an adjacency matrix.
+
+---
+
+### Note 2: Real-World Interview Variations
+
+**Variation 1: "Number of Islands" (Google/Meta/Bloomberg)**
+* **Prompt:** Given a 2D grid of '1' (land) and '0' (water), count the number of islands.
+* **The L5 Solve:** This is exactly the same problem. The difference is the "neighbors" are the cells above, below, left, and right (4 directions), whereas in "Provinces," neighbors are defined by the matrix values.
+
+**Variation 2: "Redundant Connection" (Google)**
+* **Prompt:** You have a tree (connected graph with no cycles). Someone adds one extra edge, creating a cycle. Find the edge to remove.
+* **The L5 Solve:** This is best solved with **Union-Find**. You process edges one by one. If you find an edge where both cities are already in the same province (set), that edge is redundant.
+
+**Variation 3: "Account Merge" (Meta)**
+* **Prompt:** Given lists of emails belonging to names, merge accounts that share the same email.
+* **The L5 Solve:** This is a hidden graph problem. Each email is a node. If two emails appear in the same account, there is an edge between them. You find the **Connected Components** (Provinces) of emails to identify which emails belong to the same person. This demonstrates a senior engineer's ability to "see" a graph where it isn't explicitly mentioned.
+
+# 752. Open the Lock
+
+This is a classic "Shortest Path in an Unweighted Graph" problem. A Google L5/L6 engineer recognizes this immediately as a **Breadth-First Search (BFS)** task. In a production environment, this is exactly how a GPS finds the shortest route or how a social network finds "degrees of separation" between users.
+
+---
+
+### 1. Problem Explanation
+
+**The Premise:**
+You have a 4-wheel combination lock. Each wheel has digits 0-9. The wheels are circular, meaning '9' can roll forward to '0', and '0' can roll backward to '9'.
+- You start at `"0000"`.
+- You want to reach a `target` combination.
+- There are `deadends`: if the lock hits any of these combinations, it freezes, and you lose.
+
+**The Goal:**
+Find the **minimum number of moves** to reach the target. One move is defined as rotating one wheel one slot up or down.
+
+**The Intuition (The "Why"):**
+Imagine the lock combinations as rooms in a giant building. 
+- `"0000"` is the starting room.
+- From any room, you can move to 8 other rooms (4 wheels, each can go up or down).
+- Deadends are rooms with "Lava"—you cannot enter them.
+- Since every move (edge) has the exact same "cost" (1 turn), **BFS** is the mathematically optimal way to find the shortest path. If we used DFS (Depth-First Search), we might find *a* way to the target, but it might be 100 moves longer than the shortest way.
+
+
+
+---
+
+### 2. Solution Explanation
+
+#### The Strategy:
+1.  **Deadend Check:** Put all `deadends` into a Hash Set for O(1) lookups. If `"0000"` is a deadend, return -1 immediately.
+2.  **The Queue:** Use a Queue to store combinations to visit, starting with `("0000", 0)` where 0 is the move count.
+3.  **Visited Set:** Maintain a `visited` set so you don't spin the wheels in circles (e.g., rotating 0 -> 1 -> 0 forever).
+4.  **Level-by-Level Expansion:** * Pull a combination from the queue.
+    * If it's the `target`, return the current moves.
+    * Otherwise, generate all 8 possible next combinations.
+    * If a combination isn't a deadend and hasn't been visited, add it to the queue.
+
+#### Detailed ASCII Walkthrough
+
+Let's say `target = "0202"` and `deadends = ["0102", "0201"]`.
+
+```text
+Step 0: Start
+Queue: [("0000", 0)]
+Visited: {"0000"}
+
+---------------------------------------------------------
+Step 1: Level 0
+Pop "0000". It's not target. Generate neighbors:
+Wheel 1: 1000, 9000
+Wheel 2: 0100, 0900
+Wheel 3: 0010, 0090
+Wheel 4: 0001, 0009
+
+Queue: [("1000", 1), ("9000", 1), ("0100", 1), ("0900", 1) ...]
+Visited: {"0000", "1000", "9000", "0100" ...}
+
+---------------------------------------------------------
+Step 2: Exploring Level 1
+Eventually, we pop "0100" from the queue. 
+Neighbors of "0100":
+... 0200, 0000 (already visited), 0110, 0190, 0101, 0109 ...
+
+Queue now includes ("0200", 2)
+
+---------------------------------------------------------
+Step 3: Reach Level 2
+Eventually, we pop "0200" from the queue.
+Neighbors of "0200":
+- 1200, 9200
+- 0300, 0100 (visited)
+- 0210, 0290
+- 0201, 0209
+
+"0201" is a DEADEND. Skip it.
+"0202" is generated from "0201" or "0212" etc.
+When we generate "0202" from "0201" neighbors? No.
+Actually, from "0201" we can't move.
+But from "0102" we can't move.
+
+Let's look at Wheel 4 again: 
+If we had "0201" in queue (level 3), neighbors: "0202" and "0200".
+But "0201" is a deadend. 
+
+We must find another path! 
+Path: 0000 -> 0001 -> 0002 -> 0102(Dead!) -> NO.
+Path: 0000 -> 0100 -> 0200 -> 0201(Dead!) -> NO.
+Path: 0000 -> 0001 -> 0002 -> 0102(Dead!) -> NO.
+Wait: 0000 -> 1000 -> 1100 -> 1200 -> 0200 -> 0201... 
+
+BFS will find the path: 0000 -> 0100 -> 1100 -> 1200 -> 1201 -> 1202 -> 0202...
+Total Moves: 4 (0000 -> 0100 -> 0200 -> 0201 is 3 moves, but 0201 is blocked).
+Actual shortest path to 0202 might be 0000 -> 0100 -> 0200 -> 0201(X)
+Try: 0000 -> 0001 -> 0002 -> 0102(X)
+Try: 0000 -> 0100 -> 0101 -> 0102(X)
+Correct Path: 0000 -> 0001 -> 1001 -> 1101 -> 1201 -> 1202 -> 0202... 
+BFS ensures we check all 2-move paths before 3-move paths.
+```
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+**Time Complexity: O(A^W * W^2 + D)**
+Where A is the alphabet size (10), W is the number of wheels (4), and D is the number of deadends.
+
+```text
+Visual Derivation:
+1. Total possible states: 10 * 10 * 10 * 10 = 10,000 (A^W)
+2. For each state, we do W wheels * 2 directions = 8 neighbors (W)
+3. For each neighbor, we create a new string (W)
+
+Total Operations:
+[States] * [W neighbors] * [String Creation Cost W]
+(10^4)   * (4)           * (4)
+= 160,000 operations.
+
+Since A and W are fixed (10 and 4), this is technically O(1) 
+for a fixed lock size, but O(A^W * W^2) generally.
+Deadends (D) are processed once into a set.
+
+TC: O(10,000 * 16 + D)
+```
+
+**Space Complexity: O(A^W + D)**
+
+```text
+Visual Derivation:
+1. Visited Set: Stores up to every possible state.
+   [0000, 0001, ... 9999] -> 10,000 entries.
+   
+2. Queue: In the widest part of the BFS, stores many states.
+   Max states = 10,000.
+
+3. Deadends Set: 
+   Stores D strings.
+
+Total Space: O(10,000 + D)
+```
+
+---
+
+### 4. Solution Code
+
+#### Python Implementation
+
+```python
+from collections import deque
+
+def openLock(deadends, target):
+    # Use a set for O(1) lookup time
+    dead = set(deadends)
+    if "0000" in dead:
+        return -1
+    
+    # Queue stores (current_combination, moves_count)
+    queue = deque([("0000", 0)])
+    visited = {"0000"}
+    
+    while queue:
+        current, dist = queue.popleft()
+        
+        if current == target:
+            return dist
+            
+        # Try all 8 possible rotations
+        for i in range(4):
+            # Extract digit at current wheel
+            digit = int(current[i])
+            
+            # Roll forward (1) and backward (-1)
+            for move in [1, -1]:
+                # % 10 handles the wrap around (9+1=0, 0-1=9)
+                new_digit = (digit + move) % 10
+                
+                # Construct the new string
+                nxt = current[:i] + str(new_digit) + current[i+1:]
+                
+                if nxt not in visited and nxt not in dead:
+                    visited.add(nxt)
+                    queue.append((nxt, dist + 1))
+                    
+    return -1
+```
+
+#### JavaScript Implementation
+
+```javascript
+var openLock = function(deadends, target) {
+    const dead = new Set(deadends);
+    if (dead.has("0000")) return -1;
+    
+    const queue = [["0000", 0]];
+    const visited = new Set(["0000"]);
+    
+    // Using simple array as queue (Shift is O(N), for L5 interview 
+    // mention you'd use a real Queue/Deque for O(1) shift)
+    while (queue.length > 0) {
+        const [current, dist] = queue.shift();
+        
+        if (current === target) return dist;
+        
+        for (let i = 0; i < 4; i++) {
+            const digit = parseInt(current[i]);
+            
+            // Move wheel up (1) and down (9 in mod 10 is -1)
+            for (let move of [1, 9]) {
+                const newDigit = (digit + move) % 10;
+                const nxt = current.substring(0, i) + newDigit + current.substring(i + 1);
+                
+                if (!visited.has(nxt) && !dead.has(nxt)) {
+                    visited.add(nxt);
+                    queue.push([nxt, dist + 1]);
+                }
+            }
+        }
+    }
+    
+    return -1;
+};
+```
+
+---
+
+### Note 1: Terms and Techniques
+
+* **BFS (Breadth-First Search):** An algorithm for traversing a graph where you explore all neighbors at the current depth before moving to the next level. It is the go-to algorithm for finding the shortest path in unweighted graphs.
+* **Implicit Graph:** This problem doesn't give you a list of nodes and edges. Instead, the "nodes" are combinations and the "edges" are the possible rotations. You generate the graph as you go.
+* **Modulo Operator (%):** Used here to create "Circular" logic. `(9 + 1) % 10` is `0`, and `(0 - 1 + 10) % 10` is `9`.
+
+---
+
+### Note 2: Real-World Interview Variations
+
+**1. Google: "Word Ladder" (LeetCode 127)**
+* **The Setup:** Start with a word "hit", target "cog". You can change one letter at a time, but every intermediate word must be in the dictionary.
+* **L5 Solution:** Exactly the same BFS. The "wheels" are the character positions in the word. The "digits" are the 26 letters of the alphabet. The "deadends" are any words NOT in the dictionary.
+
+**2. Bloomberg: "Min Moves to Configure a System"**
+* **The Setup:** You have 4 system parameters that can be adjusted. Certain combinations of parameters cause a system crash. What is the fastest way to get to the desired configuration?
+* **L5 Solution:** This is "Open the Lock" with potentially different ranges for each parameter (not just 0-9). The BFS approach remains the most robust.
+
+**3. Meta: "Sliding Puzzle" (LeetCode 773)**
+* **The Setup:** A 2x3 board with tiles 1-5 and an empty space 0. Find the min moves to reach the solved state `123450`.
+* **L5 Solution:** Treat the entire board configuration as a single string (a node). The "moves" are the possible swaps of the '0' tile with its neighbors. Use BFS to find the shortest path from the initial configuration to the target.
+
+# 2812. Find the Safest Path in a Grid
+
+To an L5 or L6 engineer at Google, this problem is a masterclass in **Multi-Stage Graph Theory**. It isn't just one problem; it is two distinct problems chained together. 
+
+First, you have to define the "danger" of every cell, and second, you have to find a path that maximizes the "minimum danger" encountered. A senior engineer identifies that the second part is similar to a **Minimax** problem, often solved using **Dijkstra** or **Binary Search + BFS**.
+
+---
+
+### 1. Problem Explanation
+
+**The Goal:**
+You are in a grid. Some cells have thieves (marked as 1), and others are empty (0). 
+1.  **Safeness Factor of a Cell:** The Manhattan distance to the nearest thief.
+2.  **Safeness Factor of a Path:** The **minimum** safeness factor of all cells on that path.
+3.  **Your Task:** Find the path from `(0,0)` to `(n-1, n-1)` that has the **maximum possible** safeness factor.
+
+**The "Why" it's tricky:**
+You aren't looking for the shortest path. You are looking for the path that stays as far away from thieves as possible. If a path is long but stays 3 cells away from all thieves, it is "safer" than a short path that passes right next to a thief.
+
+**Visualizing Safeness:**
+If `T` is a thief:
+```text
+Grid:         Safeness Map (Distance to T):
+0  0  0       2  1  2
+0  T  0  -->  1  0  1
+0  0  0       2  1  2
+```
+
+---
+
+### 2. Solution Explanation
+
+A senior engineer breaks this into two phases:
+
+#### Phase 1: Precompute the Safeness Map
+We need to know the distance to the nearest thief for *every* cell.
+* **Bad Way:** For every cell, search for the nearest thief. (Too slow).
+* **Senior Way: Multi-Source BFS.** Put all thieves into a queue at once. Start "rippling" out from all of them simultaneously. The first time the "ripple" hits a cell, that distance is guaranteed to be the shortest.
+
+
+
+#### Phase 2: Find the Best Path
+Now we have a grid of numbers (Safeness Factors). We want to go from start to end, and we want to keep our "minimum number encountered" as high as possible.
+* **Senior Way: Modified Dijkstra (Max-Priority Queue).**
+  Instead of finding the "shortest" distance (sum of weights), we use a Priority Queue to always explore the "safest" available next cell. We keep track of the `min_safeness` seen so far on the path.
+
+#### ASCII Diagram Walkthrough: 3x3 Grid
+`grid = [[0,0,1], [0,0,0], [0,0,0]]` (Thief at 0,2)
+
+**Step 1: Multi-Source BFS (Safeness Map)**
+```text
+Queue: [(0,2)] Dist: 0
+Dist Map:
+INF INF  0
+INF INF INF
+INF INF INF
+
+Next layer (distance 1):
+ 1   0   1
+ 2   1   2
+INF INF INF
+
+Final Safeness Map (Manhattan distance to nearest thief):
+ 2   1   0
+ 3   2   1
+ 4   3   2
+```
+
+**Step 2: Pathfinding with Max-Heap**
+We want the path that keeps our safeness value high.
+1. Start at (0,0). Safeness = 2. Heap: `[(safeness: 2, x: 0, y: 0)]`
+2. Pop (0,0). Neighbors: (0,1) safeness 1, (1,0) safeness 3.
+3. Heap: `[(3, 1, 0), (1, 0, 1)]` (Max-heap prioritizes 3).
+4. Pop (1,0). Neighbors: (2,0) safeness 4, (1,1) safeness 2.
+5. Heap: `[(4, 2, 0), (2, 1, 1), (1, 0, 1)]`
+6. Continue until we reach the target (n-1, n-1).
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+```text
++-----------------------------------------------------------------------+
+| TIME COMPLEXITY DERIVATION                                            |
++-----------------------------------------------------------------------+
+| N = Grid dimension (Total cells = N * N)                              |
+|                                                                       |
+| 1. Multi-Source BFS:                                                  |
+|    Every cell is visited once.                                        |
+|    Cost: O(N * N)                                                     |
+|                                                                       |
+| 2. Max-Heap Pathfinding (Dijkstra-like):                              |
+|    Each cell is pushed/popped from the heap once.                     |
+|    Each heap operation is log(N * N).                                 |
+|    Cost: O(N * N * log(N))                                            |
+|                                                                       |
+| TOTAL TIME: O(N * N * log(N))                                         |
++-----------------------------------------------------------------------+
+
++-----------------------------------------------------------------------+
+| SPACE COMPLEXITY DERIVATION                                           |
++-----------------------------------------------------------------------+
+| 1. Safeness Map: O(N * N) to store distances.                         |
+| 2. BFS Queue/Heap: O(N * N) in the worst case.                        |
+|                                                                       |
+| TOTAL SPACE: O(N * N)                                                 |
++-----------------------------------------------------------------------+
+```
+
+---
+
+### 4. Solution Code
+
+**Python Snippet**
+```python
+import heapq
+from collections import deque
+
+def maximumSafenessFactor(grid):
+    n = len(grid)
+    # If start or end has a thief, it's game over immediately
+    if grid[0][0] == 1 or grid[n-1][n-1] == 1:
+        return 0
+
+    # Phase 1: Multi-Source BFS to find distance to nearest thief
+    safeness = [[-1] * n for _ in range(n)]
+    queue = deque()
+    
+    for r in range(n):
+        for c in range(n):
+            if grid[r][c] == 1:
+                safeness[r][c] = 0
+                queue.append((r, c))
+                
+    while queue:
+        r, c = queue.popleft()
+        for dr, dc in [(0,1),(0,-1),(1,0),(-1,0)]:
+            nr, nc = r + dr, c + dc
+            if 0 <= nr < n and 0 <= nc < n and safeness[nr][nc] == -1:
+                safeness[nr][nc] = safeness[r][c] + 1
+                queue.append((nr, nc))
+
+    # Phase 2: Max-Heap Dijkstra to find the safest path
+    # We store (-min_safeness_on_path, r, c) to simulate Max-Heap with Python's Min-Heap
+    max_heap = [(-safeness[0][0], 0, 0)]
+    visited = set([(0, 0)])
+    
+    while max_heap:
+        d, r, c = heapq.heappop(max_heap)
+        d = -d # Convert back to positive
+        
+        if r == n - 1 and c == n - 1:
+            return d
+            
+        for dr, dc in [(0,1),(0,-1),(1,0),(-1,0)]:
+            nr, nc = r + dr, c + dc
+            if 0 <= nr < n and 0 <= nc < n and (nr, nc) not in visited:
+                visited.add((nr, nc))
+                # The safeness of this path is the minimum of current safeness 
+                # and the new cell's safeness
+                new_safeness = min(d, safeness[nr][nc])
+                heapq.heappush(max_heap, (-new_safeness, nr, nc))
+                
+    return 0
+```
+
+**JavaScript Snippet**
+```javascript
+/**
+ * @param {number[][]} grid
+ * @return {number}
+ */
+var maximumSafenessFactor = function(grid) {
+    const n = grid.length;
+    if (grid[0][0] === 1 || grid[n-1][n-1] === 1) return 0;
+
+    const safeness = Array.from({ length: n }, () => Array(n).fill(-1));
+    const queue = [];
+
+    // Multi-source BFS
+    for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+            if (grid[r][c] === 1) {
+                safeness[r][c] = 0;
+                queue.push([r, c]);
+            }
+        }
+    }
+
+    let head = 0;
+    while (head < queue.length) {
+        const [r, c] = queue[head++];
+        const dirs = [[0,1],[0,-1],[1,0],[-1,0]];
+        for (const [dr, dc] of dirs) {
+            const nr = r + dr, nc = c + dc;
+            if (nr >= 0 && nr < n && nc >= 0 && nc < n && safeness[nr][nc] === -1) {
+                safeness[nr][nc] = safeness[r][c] + 1;
+                queue.push([nr, nc]);
+            }
+        }
+    }
+
+    // Phase 2: Max-Heap Dijkstra 
+    // Using a simple MaxPriorityQueue (standard in many JS interview environments)
+    const pq = new MaxPriorityQueue({ priority: x => x.s });
+    pq.enqueue({s: safeness[0][0], r: 0, c: 0});
+    
+    const visited = Array.from({ length: n }, () => Array(n).fill(false));
+    visited[0][0] = true;
+
+    while (!pq.isEmpty()) {
+        const {s, r, c} = pq.dequeue().element;
+
+        if (r === n - 1 && c === n - 1) return s;
+
+        const dirs = [[0,1],[0,-1],[1,0],[-1,0]];
+        for (const [dr, dc] of dirs) {
+            const nr = r + dr, nc = c + dc;
+            if (nr >= 0 && nr < n && nc >= 0 && nc < n && !visited[nr][nc]) {
+                visited[nr][nc] = true;
+                pq.enqueue({
+                    s: Math.min(s, safeness[nr][nc]), 
+                    r: nr, 
+                    c: nc
+                });
+            }
+        }
+    }
+    return 0;
+};
+```
+
+---
+
+### Note 1: Terminology and Techniques
+
+* **Multi-Source BFS:** A technique where you initialize a BFS queue with multiple nodes simultaneously. This treats all "source" nodes as being at distance 0 and is the most efficient way to compute a distance field from multiple points.
+* **Minimax / Maximin:** This problem asks for the *maximum* of a *minimum* value. These problems are almost always solved using Dijkstra with a Max-Heap or Binary Search on the answer.
+* **Manhattan Distance:** The distance between two points measured along axes at right angles. `|x1 - x2| + |y1 - y2|`.
+
+---
+
+### Note 2: Real-World Interview Variations
+
+**1. Google: "The Signal Strength Problem"**
+* **Prompt:** You have a grid representing a city. Some cells have cell towers (Signal 10). The signal drops by 1 for every cell you move away. Find a path from A to B that keeps the signal strength above a certain threshold.
+* **Solution:** This is the same problem. Use Multi-source BFS to calculate signal strength everywhere. Then use BFS/DFS to see if a path exists using only cells >= Threshold.
+
+**2. Meta: "The Content Moderation Path"**
+* **Prompt:** A user is navigating through a graph of content. Some nodes are "disturbing." Every node has a "disturbing score" based on proximity to bad content. Find a path that minimizes the exposure to the most disturbing node.
+* **Solution:** This is the inverse. You want to *minimize* the *maximum* value. Use a Min-Priority Queue Dijkstra.
+
+**3. Bloomberg: "The Reliable Network Route"**
+* **Prompt:** You have a network of routers. Each link has a probability of failure (0 to 1). Find a path where the probability of the *entire path* failing is minimized.
+* **Solution:** Since path reliability is the product of individual link reliabilities, you want to **maximize the product**. This is the same as finding a path that maximizes the "minimum reliability" if we assume the bottleneck link determines the quality. Use the Dijkstra/Max-Heap approach.
+
+# 827. Making A Large Island
+
+Solving "Making A Large Island" (LeetCode 827) at a senior level (L5/L6) requires moving past simple grid traversal. A junior engineer might try to flip every 0 to a 1 and run a full search each time—which is far too slow. 
+
+A senior engineer recognizes this as a **Graph Labeling** and **Area Pre-calculation** problem. We want to do the heavy lifting once, store the results, and then perform "constant-time" lookups to find the best flip.
+
+---
+
+### 1. Problem Explanation
+
+**The Goal:** You are given an `n x n` grid of 0s (water) and 1s (land). You are allowed to change at most **one** 0 into a 1. After this change, what is the size of the largest connected island? 
+
+**Constraints:**
+* Two 1s are connected if they are neighbors (Up, Down, Left, Right).
+* `n` can be up to 500, meaning a total of 250,000 cells.
+
+**Visualizing the "Bridge" Concept:**
+
+```text
+INITIAL GRID:           FLIP (0,1) TO 1:      THE RESULT:
+[ 1, 0, 1 ]             [ 1, 1, 1 ]           [ I, I, I ]
+[ 1, 0, 0 ]     ===>    [ 1, 0, 0 ]    ===>   [ I, 0, 0 ]
+[ 0, 0, 1 ]             [ 0, 0, 1 ]           [ 0, 0, J ]
+
+Two separate islands (sizes 2 and 1) were joined by the flip to create 
+an island of size 4. Note the island on the bottom right (J) stayed 
+separate because it wasn't touching the flipped cell.
+```
+
+---
+
+### 2. Solution Explanation
+
+To solve this efficiently, we follow a two-pass strategy: **Labeling** then **Evaluating**.
+
+#### Step 1: Pre-calculate Island Sizes (The Labeling Pass)
+We traverse the grid. Every time we hit a 1 that hasn't been visited, we explore the whole island (using DFS or BFS). 
+* We give each unique island a unique **ID** (starting from 2, since 0 and 1 are taken).
+* We calculate the total **Area** of that island.
+* We store this in a Map: `{ island_id: area }`.
+
+
+
+**ASCII Labeling Example:**
+```text
+INPUT GRID:             LABELED GRID:         AREA MAP:
+[ 1, 1, 0 ]             [ 2, 2, 0 ]           {
+[ 1, 0, 1 ]     ===>    [ 2, 0, 3 ]     ===>    2: 3,
+[ 0, 0, 1 ]             [ 0, 0, 3 ]             3: 2
+                                              }
+```
+
+#### Step 2: Try Every Flip (The Evaluation Pass)
+Now, we look at every `0` in the grid. For each `0`, we check its 4 neighbors.
+* If a neighbor is land, we look up its **ID** in our grid and its **Area** in our map.
+* **CRITICAL:** Use a Set to store the IDs of neighbors. If two neighbors belong to the same island, we only count that area **once**.
+* Total potential area = 1 (the flipped cell) + sum of unique neighboring island areas.
+
+**ASCII Evaluation Example:**
+```text
+Looking at 0 at (1,1):
+Neighbors:
+- Above: ID 2 (Area 3)
+- Below: ID 0 (Water)
+- Left:  ID 2 (Area 3) -> Already counted!
+- Right: ID 3 (Area 2)
+
+Unique IDs: {2, 3}
+Total Area = 1 + Area(2) + Area(3) = 1 + 3 + 2 = 6.
+```
+
+#### Step 3: Handle Edge Cases
+* If the grid is all 1s: Return `n * n`.
+* If the grid is all 0s: Return 1.
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+Let N be the side length of the grid. The total number of cells is N * N.
+
+```text
+========================================================================
+TIME COMPLEXITY: O(N * N)
+========================================================================
+Derivation Diagram:
+
+[ PHASE 1: DFS Labeling ]
+Each cell is visited exactly once. 
+Total work = O(Total Cells) = O(N * N)
+          |
+          V
+[ PHASE 2: Checking Zeros ]
+We iterate through every cell (N * N).
+For each 0, we check 4 neighbors (Constant work).
+Total work = O(N * N)
+          |
+          V
+Combined Time = O(N*N) + O(N*N) = O(N*N)
+
+========================================================================
+SPACE COMPLEXITY: O(N * N)
+========================================================================
+Derivation Diagram:
+
+[ Island Map ]
+In worst case, N*N / 2 separate islands. 
+Space = O(N * N)
+
+[ Recursion Stack (DFS) ]
+Worst case (one big snake-like island) = O(N * N)
+
+[ Labeled Grid ]
+We reuse the input grid or copy it = O(N * N)
+
+Combined Space = O(N * N)
+========================================================================
+```
+
+---
+
+### 4. Solution Code
+
+#### Python
+
+```python
+def largestIsland(grid: list[list[int]]) -> int:
+    n = len(grid)
+    # island_id starts at 2 to distinguish from original 0 and 1
+    island_id = 2
+    area_map = {0: 0} # Water has 0 area
+    
+    # helper to explore islands and label them
+    def get_area(r, c, current_id):
+        if not (0 <= r < n and 0 <= c < n and grid[r][c] == 1):
+            return 0
+        grid[r][c] = current_id
+        return 1 + get_area(r+1, c, current_id) + \
+                   get_area(r-1, c, current_id) + \
+                   get_area(r, c+1, current_id) + \
+                   get_area(r, c-1, current_id)
+
+    # Step 1: Label Islands
+    for r in range(n):
+        for c in range(n):
+            if grid[r][c] == 1:
+                area_map[island_id] = get_area(r, c, island_id)
+                island_id += 1
+                
+    # Step 2: Try flipping every 0
+    # Initialize max_area with the largest existing island (in case no 0s exist)
+    max_area = max(area_map.values())
+    
+    for r in range(n):
+        for c in range(n):
+            if grid[r][c] == 0:
+                # Use a set to avoid double-counting the same island
+                seen_islands = set()
+                # Check neighbors: Up, Down, Left, Right
+                for dr, dc in [(r+1, c), (r-1, c), (r, c+1), (r, c-1)]:
+                    if 0 <= dr < n and 0 <= dc < n:
+                        seen_islands.add(grid[dr][dc])
+                
+                # Calculate new area: 1 (the flip) + areas of unique neighbor islands
+                potential_area = 1 + sum(area_map[id] for id in seen_islands)
+                max_area = max(max_area, potential_area)
+                
+    return max_area
+```
+
+#### JavaScript
+
+```javascript
+/**
+ * L5/L6 Approach: Two-pass Graph Labeling
+ * Time: O(N^2), Space: O(N^2)
+ */
+function largestIsland(grid) {
+    const n = grid.length;
+    let islandId = 2;
+    const areaMap = { 0: 0 };
+
+    // DFS to label islands and return size
+    const getArea = (r, c, id) => {
+        if (r < 0 || r >= n || c < 0 || c >= n || grid[r][c] !== 1) return 0;
+        grid[r][c] = id;
+        return 1 + getArea(r + 1, c, id) + getArea(r - 1, c, id) + 
+                   getArea(r, c + 1, id) + getArea(r, c - 1, id);
+    };
+
+    // Step 1: Label existing islands
+    for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+            if (grid[r][c] === 1) {
+                areaMap[islandId] = getArea(r, c, islandId);
+                islandId++;
+            }
+        }
+    }
+
+    // Default max is the largest island found or 0
+    let maxArea = Math.max(...Object.values(areaMap), 0);
+
+    // Step 2: Evaluate every 0
+    for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+            if (grid[r][c] === 0) {
+                const uniqueIslands = new Set();
+                const neighbors = [[r + 1, c], [r - 1, c], [r, c + 1], [r, c - 1]];
+                
+                for (const [nr, nc] of neighbors) {
+                    if (nr >= 0 && nr < n && nc >= 0 && nc < n) {
+                        uniqueIslands.add(grid[nr][nc]);
+                    }
+                }
+
+                let currentTotal = 1;
+                uniqueIslands.forEach(id => {
+                    currentTotal += areaMap[id];
+                });
+                maxArea = Math.max(maxArea, currentTotal);
+            }
+        }
+    }
+
+    // Special case: If maxArea is 0 and grid wasn't empty, return n*n
+    return maxArea === 0 ? (n > 0 ? 1 : 0) : maxArea;
+}
+```
+
+---
+
+### Note 1: Terms and Techniques
+
+* **Connected Components:** In graph theory, these are subgraphs in which any two vertices are connected to each other by paths. Here, our islands are connected components.
+* **Flood Fill:** The algorithm used to "color" the island with a specific ID. We used DFS, but BFS works just as well.
+* **Preprocessing:** The strategy of doing heavy computation once (calculating areas) so that subsequent queries (checking flips) are extremely fast.
+
+---
+
+### Note 2: Real-World & Interview Variations
+
+**1. Google: "Minimum Days to Disconnect Island" (LeetCode 1568)**
+* **The Variation:** Instead of adding land, you remove it. What is the minimum land units to remove to split an island in two?
+* **Solution:** This uses **Articulation Points** (Tarjan's Algorithm). You look for a "bottleneck" cell. If you remove it, the graph splits.
+
+**2. Meta: "Island Perimeter" (LeetCode 463)**
+* **The Variation:** Calculate the total perimeter of the islands.
+* **Solution:** Much simpler—iterate through every 1. For each 1, check its 4 neighbors. For every neighbor that is water (0) or out of bounds, add 1 to the perimeter.
+
+**3. Bloomberg: "Number of Islands II" (LeetCode 305)**
+* **The Variation:** Land is added dynamically one by one. After each add, return the current number of islands.
+* **Solution:** This requires **Union-Find (Disjoint Set Union)**. When land is added, check its neighbors. If they are land, "union" the new land with the neighboring island sets. This keeps the island count updated in near-constant time per addition.
+
+# 721. Accounts Merge
+
+An L5 or L6 engineer at Google views "Accounts Merge" as a **Connected Components** problem in a graph. While a junior candidate might try to use complex nested loops or hash maps to "merge" lists manually, a senior engineer recognizes that emails are nodes and a shared account is an edge connecting those nodes.
+
+The industry-standard way to solve this at scale is using **Union-Find (Disjoint Set Union)**.
+
+---
+
+### 1. Problem Explanation
+
+**The Scenario:**
+You have a list of accounts. Each account has a Name and a list of Emails. 
+* Two accounts belong to the same person if they share **at least one common email**.
+* Note: Two people can have the same Name, but emails are unique identifiers.
+
+**The Goal:**
+Merge the accounts and return them with the emails sorted alphabetically.
+
+**The Complexity:**
+The "chain reaction" is the hard part. 
+Account 1: A, B
+Account 2: B, C
+Account 3: C, D
+Even though Account 1 and Account 3 don't share an email directly, they are connected through Account 2. They all belong to the same person.
+
+---
+
+### 2. Solution Explanation (Union-Find)
+
+We treat each account index as a "set." If two accounts share an email, we "Union" their indices together.
+
+#### Step 1: Mapping Emails to Account IDs
+We create a map where the key is the email and the value is the index of the first account we saw it in.
+
+#### Step 2: The Union-Find Process
+As we iterate through the accounts, if we see an email that has already been mapped to a different Account ID, we "Union" the current Account ID with the previously stored ID.
+
+#### Step 3: Grouping
+After processing all accounts, we group all emails by their "Ultimate Parent" ID (found via the Find operation).
+
+
+
+#### Step-by-Step Visualization
+Input: 
+`[[John, a, b], [John, b, c], [Mary, d], [John, e, f], [John, a, e]]`
+
+```text
+========================================================================
+ INITIAL STATE
+========================================================================
+Index 0: [John, a, b]
+Index 1: [John, b, c]
+Index 2: [Mary, d]
+Index 3: [John, e, f]
+Index 4: [John, a, e]
+
+Parent Array: [0, 1, 2, 3, 4] (Everyone is their own boss)
+Email_To_ID: {}
+
+========================================================================
+ PROCESSING ACCOUNTS
+========================================================================
+
+Account 0: [a, b]
+- 'a' is new. Email_To_ID: {a: 0}
+- 'b' is new. Email_To_ID: {a: 0, b: 0}
+
+Account 1: [b, c]
+- 'b' is ALREADY in Email_To_ID pointing to ID 0.
+- ACTION: Union(1, 0). 
+  Parent Array: [0, 0, 2, 3, 4] (Account 1 now reports to 0)
+- 'c' is new. Email_To_ID: {a: 0, b: 0, c: 1}
+
+Account 2: [Mary, d]
+- 'd' is new. Email_To_ID: {..., d: 2}
+- Parent Array: [0, 0, 2, 3, 4]
+
+Account 3: [John, e, f]
+- 'e', 'f' are new. Email_To_ID: {..., e: 3, f: 3}
+
+Account 4: [John, a, e]
+- 'a' is in ID 0. ACTION: Union(4, 0).
+- 'e' is in ID 3. ACTION: Union(3, 0). (Since 4 is now part of 0)
+  
+  Parent Array Update:
+  Before: [0, 0, 2, 3, 4]
+  After Union(4,0): [0, 0, 2, 3, 0]
+  After Union(3,0): [0, 0, 2, 0, 0]
+
+========================================================================
+ FINAL GRAPH STRUCTURE (The "Why")
+========================================================================
+
+  Group 0 (John):        Group 2 (Mary):
+    0 --- 1                2
+    |     |
+    4 --- 3
+
+Indices {0, 1, 3, 4} all share the root 0. 
+Index {2} stands alone.
+
+Result: 
+- John: sorted(a, b, c, e, f)
+- Mary: sorted(d)
+```
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+Let N be the number of accounts and K be the maximum number of emails in an account.
+
+```text
+TIME COMPLEXITY DERIVATION: O(N * K * alpha(N) + N * K log(N * K))
+--------------------------------------------------------------
+1. Building Email_To_ID Map:
+   N * K emails processed.             ---> O(N * K)
+
+2. Union-Find Operations:
+   Each union/find takes alpha(N) 
+   (Inverse Ackermann function, 
+    effectively constant).             ---> O(N * K * alpha(N))
+
+3. Sorting Emails:
+   In the worst case, one person has 
+   all emails. Sorting M emails 
+   takes M log M.                      ---> O(N * K log(N * K))
+
+Total Time: O(N * K log(N * K)) (Sorting is the bottleneck)
+--------------------------------------------------------------
+
+SPACE COMPLEXITY DERIVATION: O(N * K)
+--------------------------------------------------------------
+1. Parent Array:                       ---> O(N)
+2. Email_To_ID Map:                    ---> O(N * K)
+3. Disjoint Sets for Result:           ---> O(N * K)
+
+Total Space: O(N * K)
+```
+
+---
+
+### 4. Solution Code
+
+#### Union-Find Implementation
+
+##### Python
+```python
+class UnionFind:
+    def __init__(self, n):
+        # Every account index starts as its own parent
+        self.parent = list(range(n))
+
+    def find(self, i):
+        # Path compression: jump directly to the root boss
+        if self.parent[i] == i:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+
+    def union(self, i, j):
+        root_i = self.find(i)
+        root_j = self.find(j)
+        if root_i != root_j:
+            self.parent[root_i] = root_j
+
+def accountsMerge(accounts):
+    uf = UnionFind(len(accounts))
+    email_to_id = {} # email -> index of account
+
+    for i, (_, *emails) in enumerate(accounts):
+        for email in emails:
+            if email in email_to_id:
+                # If seen before, union current account with that account
+                uf.union(i, email_to_id[email])
+            else:
+                email_to_id[email] = i
+
+    # Group emails by their ultimate root parent
+    components = {}
+    for email, id in email_to_id.items():
+        root = uf.find(id)
+        if root not in components:
+            components[root] = []
+        components[root].append(email)
+
+    # Format the output
+    merged = []
+    for root, emails in components.items():
+        name = accounts[root][0]
+        merged.append([name] + sorted(emails))
+    
+    return merged
+```
+
+##### JavaScript
+```javascript
+class UnionFind {
+    constructor(n) {
+        this.parent = Array.from({length: n}, (_, i) => i);
+    }
+    
+    find(i) {
+        if (this.parent[i] === i) return i;
+        // Path compression
+        return this.parent[i] = this.find(this.parent[i]);
+    }
+    
+    union(i, j) {
+        let rootI = this.find(i);
+        let rootJ = this.find(j);
+        if (rootI !== rootJ) this.parent[rootI] = rootJ;
+    }
+}
+
+var accountsMerge = function(accounts) {
+    const uf = new UnionFind(accounts.length);
+    const emailToId = new Map();
+    
+    for (let i = 0; i < accounts.length; i++) {
+        for (let j = 1; j < accounts[i].length; j++) {
+            let email = accounts[i][j];
+            if (emailToId.has(email)) {
+                uf.union(i, emailToId.get(email));
+            } else {
+                emailToId.set(email, i);
+            }
+        }
+    }
+    
+    const components = new Map();
+    for (let [email, id] of emailToId.entries()) {
+        let root = uf.find(id);
+        if (!components.has(root)) components.set(root, []);
+        components.get(root).push(email);
+    }
+    
+    return Array.from(components.entries()).map(([root, emails]) => {
+        return [accounts[root][0], ...emails.sort()];
+    });
+};
+```
+
+---
+
+### Note 1: Terminology & Techniques
+
+* **Union-Find (DSU):** A data structure that keeps track of elements partitioned into a number of disjoint (non-overlapping) sets. It provides two near-constant time operations: `Find` (which set is this in?) and `Union` (merge two sets).
+* **Path Compression:** During the `Find` operation, we make every node in the path point directly to the root. This flattens the structure and makes future operations incredibly fast.
+
+---
+
+### Note 2: Real-World Interview Variations
+
+**1. Variation: Friend Circles / Number of Provinces (Google/Meta)**
+* **The Problem:** Given a matrix of who is friends with whom, find the total number of distinct friend groups.
+* **The Solution:** Identical to Accounts Merge, but simpler because there are no names or email strings—just indices `i` and `j`.
+
+**2. Variation: Redundant Connection (Bloomberg)**
+* **The Problem:** You have a graph that should be a tree, but one extra edge was added creating a cycle. Find that edge.
+* **The Solution:** Iterate through edges. For each edge `(u, v)`, check `Find(u)` and `Find(v)`. If they are already the same, adding this edge creates a cycle. Return this edge.
+
+**3. Variation: Synonymous Sentences (Google/L6 level)**
+* **The Problem:** Given pairs of synonyms (big, large), (large, huge), and a sentence, find all possible variations of the sentence.
+* **The Solution:** Use Union-Find to group synonyms. For each word in the sentence, if it belongs to a group, replace it with all other words in that set to generate permutations. This is how Google Search handles queries (searching "huge shoes" also finds "big shoes").
+
+# 953. Verifying an Alien Dictionary
+
+Solving "Verifying an Alien Dictionary" at an L5/L6 level is about recognizing that "sorting" is relative. A senior engineer understands that computers usually use the ASCII table to sort, but for this problem, we must replace that global standard with a custom, high-performance lookup table (a Hash Map or Array) to redefine the "alphabetical" rules.
+
+---
+
+### 1. Problem Explanation
+
+**The Core Goal:**
+You are given a list of `words` and a string `order`. The `order` string is a permutation of the 26 lowercase English letters, representing the "alphabet" of an alien language. You must determine if the list of words is sorted lexicographically according to this new alien alphabet.
+
+**What is Lexicographical Order?**
+It is exactly how a physical dictionary works. To compare two words, you look at them letter by letter from left to right:
+1. At the first position where the letters differ, the word with the "earlier" letter in the alphabet comes first.
+2. If one word is a prefix of the other (like "apple" and "app"), the shorter word must always come first.
+
+**The Challenge:**
+The computer thinks 'a' < 'b' < 'c'. But in this alien language, the `order` might be "z y x ... a". We need to map every alien letter to its "rank" (its index in the `order` string) so we can compare them using numbers.
+
+---
+
+### 2. Solution Explanation
+
+The L5/L6 approach focuses on efficiency and early exit. We don't need to check every word against every other word; we only need to check **adjacent pairs**. If `Word A <= Word B` and `Word B <= Word C`, then `Word A <= Word C` is guaranteed.
+
+#### Phase 1: Build the Translation Table
+We create a lookup table (an array of size 26) where the index is the character and the value is its rank.
+
+
+#### Phase 2: Compare Adjacent Pairs
+We iterate through the words list and compare `words[i]` with `words[i+1]`.
+
+#### Phase 3: Letter-by-Letter Comparison
+For each pair, we look at characters one by one. 
+- If letters are different: Compare their ranks. If the first word's letter has a higher rank, return `False`. If it has a lower rank, this pair is valid; move to the next pair.
+- If letters are the same: Keep moving to the next letter.
+- **The "Prefix" Edge Case:** If we finish the loop and haven't found a difference, check the lengths. If the first word is longer (e.g., "apple" vs "app"), it is NOT sorted.
+
+**Step-by-Step ASCII Visualization:**
+
+```text
+Input: words = ["hello", "leetcode"], order = "hlabc..."
+
+========================================================================
+STEP 1: BUILD RANK MAP
+========================================================================
+Order: h l a b c ...
+Rank:  0 1 2 3 4 ...
+
+Map: {h:0, l:1, a:2, b:3, c:4 ...}
+
+========================================================================
+STEP 2: COMPARE "hello" vs "leetcode"
+========================================================================
+Index 0:
+'h' (Rank 0) vs 'l' (Rank 1)
+Is 0 < 1? YES.
+This pair is sorted. Move to next pair of words.
+
+========================================================================
+STEP 3: COMPARE "apple" vs "app" (Edge Case)
+========================================================================
+Index 0: 'a' vs 'a' (Same)
+Index 1: 'p' vs 'p' (Same)
+Index 2: 'p' vs 'p' (Same)
+
+Loop ends for "app". 
+"apple" still has "le" left.
+Check: len("apple") > len("app")? YES.
+RESULT: FALSE (Shorter word must be first).
+```
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+Let N be the number of words and L be the average length of the words.
+
+```text
+TIME COMPLEXITY DERIVATION: Order of (N * L)
+--------------------------------------------------------------
+1. Build Rank Map:
+   Iterate through 26 characters.          ---> O(26) = O(1)
+
+2. Pairwise Comparison:
+   We check (N - 1) pairs of words.        ---> O(N)
+   For each pair, we compare letters.      ---> O(L)
+
+Total Time = O(26) + O(N * L)
+In Big O, we drop the constant 26.
+Total Time = Order of (N * L)
+
+
+SPACE COMPLEXITY DERIVATION: Order of 1
+--------------------------------------------------------------
+What are we storing?
+- Rank Map: Always size 26.                ---> O(26)
+- Loop variables: i, j.                    ---> O(1)
+
+The space used does not grow if the input list 
+grows from 10 words to 1 million words.
+
+Total Space = Order of 1 (Constant Space)
+```
+
+---
+
+### 4. Solution Code
+
+#### Python Solution
+
+```python
+def isAlienSorted(words, order):
+    # Create a lookup table for the rank of each character
+    # We use an array of size 26 for O(1) access
+    rank = [0] * 26
+    for i, char in enumerate(order):
+        # ord(char) - ord('a') maps 'a'->0, 'b'->1...
+        rank[ord(char) - ord('a')] = i
+        
+    # Check every adjacent pair
+    for i in range(len(words) - 1):
+        word1 = words[i]
+        word2 = words[i+1]
+        
+        # Compare letters of the two words
+        found_difference = False
+        for j in range(min(len(word1), len(word2))):
+            char1 = word1[j]
+            char2 = word2[j]
+            
+            if char1 != char2:
+                # If the rank of the first word's char is higher, it's not sorted
+                if rank[ord(char1) - ord('a')] > rank[ord(char2) - ord('a')]:
+                    return False
+                # If it's lower, we are done with this pair
+                found_difference = True
+                break
+        
+        # If no difference was found and word1 is longer than word2,
+        # it means word2 is a prefix of word1 (e.g., "apple", "app")
+        if not found_difference and len(word1) > len(word2):
+            return False
+            
+    return True
+```
+
+#### JavaScript Solution
+
+```javascript
+/**
+ * @param {string[]} words
+ * @param {string} order
+ * @return {boolean}
+ */
+var isAlienSorted = function(words, order) {
+    // Build the rank map
+    const rankMap = new Array(26);
+    for (let i = 0; i < order.length; i++) {
+        rankMap[order.charCodeAt(i) - 97] = i;
+    }
+
+    // Compare adjacent pairs
+    for (let i = 0; i < words.length - 1; i++) {
+        const w1 = words[i];
+        const w2 = words[i + 1];
+        let sortedPair = false;
+
+        for (let j = 0; j < Math.min(w1.length, w2.length); j++) {
+            const charCode1 = w1.charCodeAt(j) - 97;
+            const charCode2 = w2.charCodeAt(j) - 97;
+
+            if (w1[j] !== w2[j]) {
+                if (rankMap[charCode1] > rankMap[charCode2]) {
+                    return false;
+                }
+                sortedPair = true;
+                break;
+            }
+        }
+
+        // Handle the prefix case
+        if (!sortedPair && w1.length > w2.length) {
+            return false;
+        }
+    }
+
+    return true;
+};
+```
+
+---
+
+### Note 1: Terminology and Techniques
+
+* **Lookup Table / Rank Mapping:** Instead of doing `order.indexOf(char)` inside the loop (which is slow), we pre-calculate the positions. This turns a potentially O(N * L * 26) operation into O(N * L).
+* **Early Exit:** A critical optimization where we stop comparing characters of a pair as soon as we find a difference.
+
+---
+
+### Note 2: Real-World / Interview Variations
+
+**1. "Alien Dictionary" (Hard Version) (Google / Meta)**
+* **The Twist:** You are given the sorted words, but you DON'T know the alphabet `order`. You must derive the order yourself.
+* **L5 Solution:** This is a **Topological Sort** problem. You build a directed graph where an edge `A -> B` exists if 'A' comes before 'B' in a pair of words. You then use Kahn's Algorithm or DFS to find the linear ordering of the graph.
+
+**2. Custom Sort for Search Results (Bloomberg)**
+* **The Context:** You are building a financial terminal. Users want to sort stocks based on a custom priority list of sectors (e.g., Tech > Finance > Energy).
+* **L5 Solution:** Use the exact same Rank Map logic. When the sorting algorithm asks "Is Sector A < Sector B?", you look up their ranks in the user's priority map and return the result.
+
+**3. Version Number Sorting (Google)**
+* **The Context:** Sort versions like "1.10.2" and "1.2.1". Standard string sorting would put "1.2.1" after "1.10.2" because '2' > '1'.
+* **L5 Solution:** This is lexicographical sorting with a twist. You split the strings by "." and convert each part to an integer. You compare the integers at each index, similar to how we compared characters in the Alien Dictionary problem.
