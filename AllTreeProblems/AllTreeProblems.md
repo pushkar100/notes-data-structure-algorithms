@@ -1,454 +1,3 @@
-<!-- TOC start (generated with https://github.com/derlin/bitdowntoc) -->
-
-- [Trees](#trees)
-- [104. Maximum Depth of Binary Tree](#104-maximum-depth-of-binary-tree)
-      + [1. Problem Explanation](#1-problem-explanation)
-      + [2. Solution Explanation](#2-solution-explanation)
-         - [Visual Walkthrough (Step-by-Step)](#visual-walkthrough-step-by-step)
-      + [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis)
-         - [Time Complexity: O(N)](#time-complexity-on)
-         - [Space Complexity: O(H) (or O(N) worst case)](#space-complexity-oh-or-on-worst-case)
-      + [4. Solution Code](#4-solution-code)
-         - [Python Solution](#python-solution)
-         - [JavaScript Solution](#javascript-solution)
-      + [Note 1: Terms & Techniques](#note-1-terms-techniques)
-      + [Note 2: Real-World Interview Variations](#note-2-real-world-interview-variations)
-- [100. Same Tree](#100-same-tree)
-      + [1. Problem Explanation](#1-problem-explanation-1)
-      + [2. Solution Explanation](#2-solution-explanation-1)
-      + [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-1)
-      + [4. Solution Code](#4-solution-code-1)
-         - [Python Solution](#python-solution-1)
-         - [Javascript Solution](#javascript-solution-1)
-      + [Note 1: Terminology Breakdown](#note-1-terminology-breakdown)
-      + [Note 2: Real World Interview Variations](#note-2-real-world-interview-variations-1)
-- [226. Invert Binary Tree](#226-invert-binary-tree)
-      + [1. Problem Explanation](#1-problem-explanation-2)
-      + [2. Solution Explanation](#2-solution-explanation-2)
-      + [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-2)
-         - [Time Complexity: O(N)](#time-complexity-on-1)
-         - [Space Complexity: O(h) or O(N)](#space-complexity-oh-or-on)
-      + [4. Solution Code](#4-solution-code-2)
-         - [Python Solution](#python-solution-2)
-         - [JavaScript Solution](#javascript-solution-2)
-      + [Terminology & Concepts](#terminology-concepts)
-      + [Real-World Interview Variations (The "Indirect" Ask)](#real-world-interview-variations-the-indirect-ask)
-- [124. Binary Tree Maximum Path Sum](#124-binary-tree-maximum-path-sum)
-      + [1. Problem Explanation](#1-problem-explanation-3)
-      + [2. Solution Explanation](#2-solution-explanation-3)
-      + [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-3)
-      + [4. Solution Code](#4-solution-code-3)
-      + [New Terms / Techniques](#new-terms-techniques)
-      + [Real World / Interview Variations](#real-world-interview-variations)
-- [102. Binary Tree Level Order Traversal](#102-binary-tree-level-order-traversal)
-      + [1. Problem Explanation](#1-problem-explanation-4)
-      + [2. Solution Explanation](#2-solution-explanation-4)
-      + [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-4)
-      + [4. Solution Code](#4-solution-code-4)
-         - [Python Solution](#python-solution-3)
-         - [JavaScript Solution](#javascript-solution-3)
-      + [Note 1: New Terms / Techniques](#note-1-new-terms-techniques)
-      + [Note 2: Real World & Interview Variations](#note-2-real-world-interview-variations-2)
-- [297. Serialize and Deserialize Binary Tree](#297-serialize-and-deserialize-binary-tree)
-      + [1. Problem Explanation](#1-problem-explanation-5)
-      + [2. Solution Explanation: Preorder Traversal (DFS)](#2-solution-explanation-preorder-traversal-dfs)
-         - [Part A: Serialization (Tree  String)](#part-a-serialization-tree-string)
-         - [Part B: Deserialization (String  Tree)](#part-b-deserialization-string-tree)
-      + [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-5)
-         - [Time Complexity: O(N)](#time-complexity-on-2)
-         - [Space Complexity: O(N)](#space-complexity-on)
-      + [4. Solution Code](#4-solution-code-5)
-         - [Python Solution](#python-solution-4)
-         - [Javascript Solution](#javascript-solution-4)
-      + [Note 1: New Terms / Techniques](#note-1-new-terms-techniques-1)
-      + [Note 2: Real World & Interview Variations](#note-2-real-world-interview-variations-3)
-- [572. Subtree of Another Tree](#572-subtree-of-another-tree)
-      + [1. Problem Explanation](#1-problem-explanation-6)
-         - [Visual Examples](#visual-examples)
-      + [2. Solution Explanation](#2-solution-explanation-5)
-         - [Step-by-Step Walkthrough with Diagrams](#step-by-step-walkthrough-with-diagrams)
-      + [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-6)
-      + [4. Solution Code](#4-solution-code-6)
-         - [Python Solution](#python-solution-5)
-         - [JavaScript Solution](#javascript-solution-5)
-      + [Note 1: Terminology & "L6" Optimization](#note-1-terminology-l6-optimization)
-      + [Note 2: Real World & Indirect Interview Questions](#note-2-real-world-indirect-interview-questions)
-- [105. Construct Binary Tree from Preorder and Inorder Traversal](#105-construct-binary-tree-from-preorder-and-inorder-traversal)
-      + [1. Problem Explanation](#1-problem-explanation-7)
-      + [2. Solution Explanation (The "Divide and Conquer" Strategy)](#2-solution-explanation-the-divide-and-conquer-strategy)
-         - [Detailed ASCII Walkthrough](#detailed-ascii-walkthrough)
-      + [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-7)
-         - [Time Complexity: O(N)](#time-complexity-on-3)
-         - [Space Complexity: O(N)](#space-complexity-on-1)
-      + [4. Solution Code](#4-solution-code-7)
-         - [Python Solution](#python-solution-6)
-         - [JavaScript Solution](#javascript-solution-6)
-      + [Note 1: Terminology & Techniques](#note-1-terminology-techniques)
-      + [Note 2: Indirect & Real-World Interview Variations](#note-2-indirect-real-world-interview-variations)
-- [98. Validate Binary Search Tree](#98-validate-binary-search-tree)
-      + [1. Problem Explanation](#1-problem-explanation-8)
-      + [2. Solution Explanation: The "Valid Range" Approach](#2-solution-explanation-the-valid-range-approach)
-         - [Visual Walkthrough](#visual-walkthrough)
-         - [Logic Flow (ASCII)](#logic-flow-ascii)
-      + [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-8)
-         - [Time Complexity: O(N)](#time-complexity-on-4)
-         - [Space Complexity: O(N) [Worst Case] / O(H) [Average]](#space-complexity-on-worst-case-oh-average)
-      + [4. Solution Code](#4-solution-code-8)
-         - [Python Solution](#python-solution-7)
-         - [JavaScript Solution](#javascript-solution-7)
-      + [Note 1: Terminology](#note-1-terminology)
-      + [Note 2: Real World & Interview Context](#note-2-real-world-interview-context)
-- [230. Kth Smallest Element in a BST](#230-kth-smallest-element-in-a-bst)
-      + [1. Problem Explanation](#1-problem-explanation-9)
-      + [2. Solution Explanation](#2-solution-explanation-6)
-      + [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-9)
-      + [4. Solution Code](#4-solution-code-9)
-         - [Python Solution](#python-solution-8)
-         - [JavaScript Solution](#javascript-solution-8)
-      + [Note 1: Terminology Clarification](#note-1-terminology-clarification)
-      + [Note 2: Real World / Interview Context](#note-2-real-world-interview-context-1)
-- [235. Lowest Common Ancestor of a Binary Search Tree](#235-lowest-common-ancestor-of-a-binary-search-tree)
-      + [1. Problem Explanation](#1-problem-explanation-10)
-         - [Visualizing the Goal](#visualizing-the-goal)
-      + [2. Solution Explanation](#2-solution-explanation-7)
-         - [The Algorithm: "The Split Point"](#the-algorithm-the-split-point)
-         - [ASCII Walkthroughs](#ascii-walkthroughs)
-      + [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-10)
-         - [Time Complexity: O(H)](#time-complexity-oh)
-         - [Space Complexity: O(1) (Iterative Solution)](#space-complexity-o1-iterative-solution)
-      + [4. Solution Code](#4-solution-code-10)
-         - [Python Solution](#python-solution-9)
-         - [JavaScript Solution](#javascript-solution-9)
-      + [Note 1: Terminology & Techniques](#note-1-terminology-techniques-1)
-      + [Note 2: Real World & Interview Variations](#note-2-real-world-interview-variations-4)
-- [208. Implement Trie (Prefix Tree)](#208-implement-trie-prefix-tree)
-      + [1. Problem Explanation](#1-problem-explanation-11)
-      + [2. Solution Explanation (with Visualizations)](#2-solution-explanation-with-visualizations)
-         - [The Node Structure](#the-node-structure)
-         - [Scenario 1: Inserting "apple"](#scenario-1-inserting-apple)
-         - [Scenario 2: Inserting "app"](#scenario-2-inserting-app)
-         - [Scenario 3: Searching for "app" vs "apple" vs "apricot"](#scenario-3-searching-for-app-vs-apple-vs-apricot)
-      + [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-11)
-      + [4. Solution Code](#4-solution-code-11)
-         - [Python Solution](#python-solution-10)
-         - [JavaScript Solution](#javascript-solution-10)
-      + [Note 1: Terminology Clarification](#note-1-terminology-clarification-1)
-      + [Note 2: Real World & Interview Variations](#note-2-real-world-interview-variations-5)
-- [211. Design Add and Search Words Data Structure](#211-design-add-and-search-words-data-structure)
-      + [1. Problem Explanation](#1-problem-explanation-12)
-      + [2. Solution Explanation](#2-solution-explanation-8)
-         - [Visualizing the Data Structure](#visualizing-the-data-structure)
-         - [The Algorithm](#the-algorithm)
-         - [Visualizing the Search with Wildcards](#visualizing-the-search-with-wildcards)
-      + [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-12)
-         - [Time Complexity](#time-complexity)
-         - [Space Complexity](#space-complexity)
-      + [4. Solution Code](#4-solution-code-12)
-         - [Python Implementation](#python-implementation)
-         - [JavaScript Implementation](#javascript-implementation)
-      + [Note 1: Terminology & Techniques](#note-1-terminology-techniques-2)
-      + [Note 2: Real World & Interview Variations](#note-2-real-world-interview-variations-6)
-- [212. Word Search II](#212-word-search-ii)
-      + [1. Problem Explanation](#1-problem-explanation-13)
-      + [2. Solution Explanation](#2-solution-explanation-9)
-         - [The Naive Approach (Why it fails L5/L6 expectations)](#the-naive-approach-why-it-fails-l5l6-expectations)
-         - [The L5/L6 Approach: Inverted Thinking with a Trie](#the-l5l6-approach-inverted-thinking-with-a-trie)
-      + [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-13)
-         - [Time Complexity](#time-complexity-1)
-         - [Space Complexity](#space-complexity-1)
-      + [4. Solution Code](#4-solution-code-13)
-         - [Python Solution](#python-solution-11)
-         - [JavaScript Solution](#javascript-solution-11)
-      + [Note 1: Terminology Breakdown](#note-1-terminology-breakdown-1)
-      + [Note 2: Real World / Interview Context](#note-2-real-world-interview-context-2)
-- [2458. Height of Binary Tree After Subtree Removal Queries](#2458-height-of-binary-tree-after-subtree-removal-queries)
-      + [1. Problem Explanation](#1-problem-explanation-14)
-      + [2. Solution Explanation: The "Linearization" Technique](#2-solution-explanation-the-linearization-technique)
-         - [Step-by-Step Visualization](#step-by-step-visualization)
-      + [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-14)
-      + [4. Solution Code](#4-solution-code-14)
-         - [Javascript Solution](#javascript-solution-12)
-         - [Python Solution](#python-solution-12)
-      + [Note 1: Terminology & Techniques](#note-1-terminology-techniques-3)
-      + [Note 2: Real World & Interview Variations](#note-2-real-world-interview-variations-7)
-- [101. Symmetric Tree](#101-symmetric-tree)
-      + [1. Problem Explanation](#1-problem-explanation-15)
-      + [2. Solution Explanation](#2-solution-explanation-10)
-      + [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-15)
-      + [4. Solution Code](#4-solution-code-15)
-         - [Python Solution](#python-solution-13)
-         - [JavaScript Solution](#javascript-solution-13)
-      + [Note 1: Terms and Techniques](#note-1-terms-and-techniques)
-      + [Note 2: Real World & Interview Context](#note-2-real-world-interview-context-3)
-- [222. Count Complete Tree Nodes](#222-count-complete-tree-nodes)
-      + [1. Problem Explanation](#1-problem-explanation-16)
-      + [2. Solution Explanation: The "Divide and Conquer" Optimization](#2-solution-explanation-the-divide-and-conquer-optimization)
-         - [Step-by-Step Execution with ASCII](#step-by-step-execution-with-ascii)
-      + [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-16)
-      + [4. Solution Code](#4-solution-code-16)
-         - [Python Solution](#python-solution-14)
-         - [Javascript Solution](#javascript-solution-14)
-      + [Note 1: New Terms & Techniques](#note-1-new-terms-techniques-2)
-      + [Note 2: Real World & Interview Context](#note-2-real-world-interview-context-4)
-- [543. Diameter of Binary Tree](#543-diameter-of-binary-tree)
-      + [1. Problem Explanation](#1-problem-explanation-17)
-      + [2. Solution Explanation: The "Bottom-Up" Approach](#2-solution-explanation-the-bottom-up-approach)
-      + [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-17)
-      + [4. Solution Code](#4-solution-code-17)
-         - [Python Solution](#python-solution-15)
-         - [JavaScript Solution](#javascript-solution-15)
-      + [Note 1: Terminology & Techniques](#note-1-terminology-techniques-4)
-      + [Note 2: Real World & Interview Variations](#note-2-real-world-interview-variations-8)
-- [951. Flip Equivalent Binary Trees](#951-flip-equivalent-binary-trees)
-      + [1. Problem Explanation](#1-problem-explanation-18)
-      + [2. Solution Explanation](#2-solution-explanation-11)
-      + [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-18)
-      + [4. Solution Code](#4-solution-code-18)
-         - [Python Solution](#python-solution-16)
-         - [JavaScript Solution](#javascript-solution-16)
-      + [Note 1: The "Canonical Representation" Technique](#note-1-the-canonical-representation-technique)
-      + [Note 2: Real World & Interview Variations](#note-2-real-world-interview-variations-9)
-- [1448. Count Good Nodes in Binary Tree](#1448-count-good-nodes-in-binary-tree)
-      + [1. Problem Explanation](#1-problem-explanation-19)
-      + [2. Solution Explanation](#2-solution-explanation-12)
-      + [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-19)
-      + [4. Solution Code](#4-solution-code-19)
-         - [Python Solution](#python-solution-17)
-         - [JavaScript Solution](#javascript-solution-17)
-      + [New Terms & Techniques](#new-terms-techniques-1)
-      + [Real World / Interview Variations](#real-world-interview-variations-1)
-- [236. Lowest Common Ancestor of a Binary Tree](#236-lowest-common-ancestor-of-a-binary-tree)
-      + [1. Problem Explanation](#1-problem-explanation-20)
-      + [2. Solution Explanation](#2-solution-explanation-13)
-      + [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-20)
-      + [4. Solution Code](#4-solution-code-20)
-         - [Python Solution](#python-solution-18)
-         - [JavaScript Solution](#javascript-solution-18)
-      + [Note 1: Terminology & Technique](#note-1-terminology-technique)
-      + [Note 2: Real World & Interview Variants](#note-2-real-world-interview-variants)
-- [106. Construct Binary Tree from Inorder and Postorder Traversal](#106-construct-binary-tree-from-inorder-and-postorder-traversal)
-      + [1. Problem Explanation](#1-problem-explanation-21)
-      + [2. Solution Explanation (Visualized)](#2-solution-explanation-visualized)
-         - [The Algorithm Step-by-Step](#the-algorithm-step-by-step)
-      + [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-21)
-         - [Time Complexity: O(N)](#time-complexity-on-5)
-         - [Space Complexity: O(N)](#space-complexity-on-2)
-      + [4. Solution Code](#4-solution-code-21)
-         - [Python Solution](#python-solution-19)
-         - [JavaScript Solution](#javascript-solution-19)
-      + [Note 1: Terminology Breakdown](#note-1-terminology-breakdown-2)
-      + [Note 2: Real World & Indirect Interview Variations](#note-2-real-world-indirect-interview-variations)
-- [129. Sum Root to Leaf Numbers](#129-sum-root-to-leaf-numbers)
-      + [1. Problem Explanation](#1-problem-explanation-22)
-      + [2. Solution Explanation (DFS Approach)](#2-solution-explanation-dfs-approach)
-         - [Visual Walkthrough (Step-by-Step)](#visual-walkthrough-step-by-step-1)
-      + [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-22)
-         - [Time Complexity: O(N)](#time-complexity-on-6)
-         - [Space Complexity: O(H)](#space-complexity-oh)
-      + [4. Solution Code](#4-solution-code-22)
-         - [Python Solution](#python-solution-20)
-         - [JavaScript Solution](#javascript-solution-20)
-      + [Note 1: Terminology & Techniques](#note-1-terminology-techniques-5)
-      + [Note 2: Real World & Interview Variations](#note-2-real-world-interview-variations-10)
-- [199. Binary Tree Right Side View](#199-binary-tree-right-side-view)
-      + [1. Problem Explanation](#1-problem-explanation-23)
-         - [Example A: The "Obvious" Case](#example-a-the-obvious-case)
-         - [Example B: The "Tricky" Case (The Left-Heavy Tree)](#example-b-the-tricky-case-the-left-heavy-tree)
-      + [2. Solution Explanation](#2-solution-explanation-14)
-         - [ASCII Visualization of the Algorithm](#ascii-visualization-of-the-algorithm)
-      + [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-23)
-         - [Time Complexity: O(N)](#time-complexity-on-7)
-         - [Space Complexity: O(D)](#space-complexity-od)
-      + [4. Solution Code](#4-solution-code-23)
-         - [Python Implementation](#python-implementation-1)
-         - [Javascript Implementation](#javascript-implementation-1)
-      + [Note 1: Terms & Techniques](#note-1-terms-techniques-1)
-      + [Note 2: Indirect/Real-World Interview Contexts](#note-2-indirectreal-world-interview-contexts)
-- [103. Binary Tree Zigzag Level Order Traversal](#103-binary-tree-zigzag-level-order-traversal)
-      + [1. Problem Explanation](#1-problem-explanation-24)
-      + [2. Solution Explanation (Deep Dive)](#2-solution-explanation-deep-dive)
-         - [Detailed ASCII Walkthrough](#detailed-ascii-walkthrough-1)
-      + [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-24)
-      + [4. Solution Code](#4-solution-code-24)
-         - [Python Solution](#python-solution-21)
-         - [JavaScript Solution](#javascript-solution-21)
-      + [New Terms & Techniques](#new-terms-techniques-2)
-      + [Real World / Interview Variations](#real-world-interview-variations-2)
-- [1110. Delete Nodes And Return Forest](#1110-delete-nodes-and-return-forest)
-   * [1. Problem Explanation](#1-problem-explanation-25)
-      + [The Core Challenges](#the-core-challenges)
-   * [2. Solution Explanation](#2-solution-explanation-15)
-      + [Why Bottom-Up?](#why-bottom-up)
-      + [The Logic (The "L5" Way)](#the-logic-the-l5-way)
-      + [Step-by-Step Visualization](#step-by-step-visualization-1)
-      + [The "Is Root" Logic Diagram](#the-is-root-logic-diagram)
-   * [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-25)
-      + [Time Complexity (TC)](#time-complexity-tc)
-      + [Space Complexity (SC)](#space-complexity-sc)
-   * [4. Solution Code](#4-solution-code-25)
-      + [Python Snippet](#python-snippet)
-      + [JavaScript Snippet](#javascript-snippet)
-   * [Key Terms & Real-World Context](#key-terms-real-world-context)
-      + [Algorithm Technique: Post-Order Traversal](#algorithm-technique-post-order-traversal)
-      + [Real-World / Interview Variations](#real-world-interview-variations-3)
-- [2096. Step-By-Step Directions From a Binary Tree Node to Another](#2096-step-by-step-directions-from-a-binary-tree-node-to-another)
-   * [1. Problem Explanation](#1-problem-explanation-26)
-      + [The Core Challenge](#the-core-challenge)
-   * [2. Solution Explanation](#2-solution-explanation-16)
-      + [The Algorithm Strategy](#the-algorithm-strategy)
-      + [Visualizing the Logic](#visualizing-the-logic)
-      + [Example 2: When LCA is one of the nodes](#example-2-when-lca-is-one-of-the-nodes)
-   * [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-26)
-      + [Time Complexity (TC)](#time-complexity-tc-1)
-      + [Space Complexity (SC)](#space-complexity-sc-1)
-   * [4. Solution Code](#4-solution-code-26)
-      + [Python Snippet](#python-snippet-1)
-      + [Javascript Snippet](#javascript-snippet-1)
-      + [Terminology & Techniques](#terminology-techniques)
-      + [Real-World / Interview Variations](#real-world-interview-variations-4)
-- [987. Vertical Order Traversal of a Binary Tree](#987-vertical-order-traversal-of-a-binary-tree)
-   * [1. Problem Explanation](#1-problem-explanation-27)
-   * [2. Solution Explanation](#2-solution-explanation-17)
-      + [Step-by-Step Logic](#step-by-step-logic)
-      + [Visualization with ASCII](#visualization-with-ascii)
-   * [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-27)
-   * [4. Solution Code](#4-solution-code-27)
-      + [Python Snippet](#python-snippet-2)
-      + [Javascript Snippet](#javascript-snippet-2)
-   * [Terms and Indirect Real-World Problems](#terms-and-indirect-real-world-problems)
-      + [Key Term: **Coordinate Transformation**](#key-term-coordinate-transformation)
-      + [Real-World Interview Variations](#real-world-interview-variations-5)
-- [863. All Nodes Distance K in Binary Tree](#863-all-nodes-distance-k-in-binary-tree)
-   * [1. Problem Explanation](#1-problem-explanation-28)
-   * [2. Solution Explanation](#2-solution-explanation-18)
-      + [Phase A: Adding "Backlinks" (Building the Graph)](#phase-a-adding-backlinks-building-the-graph)
-      + [Phase B: Breadth-First Search (BFS)](#phase-b-breadth-first-search-bfs)
-      + [Step-by-Step Visualization](#step-by-step-visualization-2)
-   * [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-28)
-      + [Time Complexity (TC)](#time-complexity-tc-2)
-      + [Space Complexity (SC)](#space-complexity-sc-2)
-   * [4. Solution Code](#4-solution-code-28)
-      + [Python Implementation](#python-implementation-2)
-      + [JavaScript Implementation](#javascript-implementation-2)
-   * [Technical Terms & Context](#technical-terms-context)
-   * [Real-World / Interview Variations](#real-world-interview-variations-6)
-- [99. Recover Binary Search Tree](#99-recover-binary-search-tree)
-   * [1. Problem Explanation](#1-problem-explanation-29)
-      + [The Twist](#the-twist)
-   * [2. Solution Explanation](#2-solution-explanation-19)
-      + [The Core Logic: Identifying the Swapped Nodes](#the-core-logic-identifying-the-swapped-nodes)
-      + [Visualization: Finding the Violations](#visualization-finding-the-violations)
-      + [The Secret Weapon: Morris Traversal](#the-secret-weapon-morris-traversal)
-   * [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-29)
-      + [Time Complexity (TC)](#time-complexity-tc-3)
-      + [Space Complexity (SC)](#space-complexity-sc-3)
-   * [4. Solution Code](#4-solution-code-29)
-      + [Python Snippet](#python-snippet-3)
-      + [Javascript Snippet](#javascript-snippet-3)
-      + [Note 1: Terms & Techniques](#note-1-terms-techniques-2)
-      + [Note 2: Real-World / Indirect Interview Variants](#note-2-real-world-indirect-interview-variants)
-- [173. Binary Search Tree Iterator](#173-binary-search-tree-iterator)
-   * [1. Problem Explanation](#1-problem-explanation-30)
-   * [2. Solution Explanation](#2-solution-explanation-20)
-      + [The Logic: "Go Left as Far as Possible"](#the-logic-go-left-as-far-as-possible)
-      + [ASCII Visualization](#ascii-visualization)
-   * [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-30)
-   * [4. Solution Code](#4-solution-code-30)
-      + [Python](#python)
-      + [JavaScript](#javascript)
-   * [Terminology & Real-World Context](#terminology-real-world-context)
-      + [New Terms](#new-terms)
-      + [Real-World Interview Variations](#real-world-interview-variations-7)
-- [450. Delete Node in a BST](#450-delete-node-in-a-bst)
-   * [1. Problem Explanation](#1-problem-explanation-31)
-   * [2. Solution Explanation](#2-solution-explanation-21)
-      + [Scenario A: The Leaf Node (No Children)](#scenario-a-the-leaf-node-no-children)
-      + [Scenario B: One Child](#scenario-b-one-child)
-      + [Scenario C: Two Children (The Non-Trivial Part)](#scenario-c-two-children-the-non-trivial-part)
-         - [Visualizing Scenario C (Delete Node 5)](#visualizing-scenario-c-delete-node-5)
-   * [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-31)
-      + [Time Complexity (TC)](#time-complexity-tc-4)
-      + [Space Complexity (SC)](#space-complexity-sc-4)
-   * [4. Solution Code](#4-solution-code-31)
-      + [Python Implementation](#python-implementation-3)
-      + [Javascript Implementation](#javascript-implementation-3)
-   * [Note 1: Terms & Techniques](#note-1-terms-techniques-3)
-   * [Note 2: Real-World Interview Variations](#note-2-real-world-interview-variations-11)
-- [669. Trim a Binary Search Tree](#669-trim-a-binary-search-tree)
-   * [1. Problem Explanation](#1-problem-explanation-32)
-      + [The Rules of Trimming](#the-rules-of-trimming)
-   * [2. Solution Explanation](#2-solution-explanation-22)
-      + [The Core Logic](#the-core-logic)
-      + [Visualization 1: Trimming a "Too Small" Node](#visualization-1-trimming-a-too-small-node)
-      + [Visualization 2: Full Example walkthrough](#visualization-2-full-example-walkthrough)
-   * [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-32)
-      + [Time Complexity (TC)](#time-complexity-tc-5)
-      + [Space Complexity (SC)](#space-complexity-sc-5)
-   * [4. Solution Code](#4-solution-code-32)
-      + [Python Implementation](#python-implementation-4)
-      + [Javascript Implementation](#javascript-implementation-4)
-      + [Note 1: Key Technique - Divide and Conquer (Recursive BST Invariant)](#note-1-key-technique-divide-and-conquer-recursive-bst-invariant)
-      + [Note 2: Real-World Interview Variations](#note-2-real-world-interview-variations-12)
-- [1305. All Elements in Two Binary Search Trees](#1305-all-elements-in-two-binary-search-trees)
-   * [1. Problem Explanation](#1-problem-explanation-33)
-   * [2. Solution Explanation](#2-solution-explanation-23)
-      + [Visualizing Step 1: In-order Traversal](#visualizing-step-1-in-order-traversal)
-      + [Visualizing Step 2: The Two-Pointer Merge](#visualizing-step-2-the-two-pointer-merge)
-   * [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-33)
-      + [Time Complexity (TC)](#time-complexity-tc-6)
-      + [Space Complexity (SC)](#space-complexity-sc-6)
-   * [4. Solution Code](#4-solution-code-33)
-      + [Python Snippet](#python-snippet-4)
-      + [JavaScript Snippet](#javascript-snippet-4)
-   * [Note 1: Terms and Techniques](#note-1-terms-and-techniques-1)
-   * [Note 2: Real-World Interview Variations](#note-2-real-world-interview-variations-13)
-- [307. Range Sum Query - Mutable](#307-range-sum-query-mutable)
-   * [1. Problem Explanation](#1-problem-explanation-34)
-      + [The Conflict](#the-conflict)
-   * [2. Solution Explanation: The Segment Tree](#2-solution-explanation-the-segment-tree)
-      + [Building the Tree (Visualization)](#building-the-tree-visualization)
-      + [How `sumRange(1, 3)` works:](#how-sumrange1-3-works)
-      + [How `update(1, 10)` works:](#how-update1-10-works)
-   * [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-34)
-   * [4. Solution Code](#4-solution-code-34)
-      + [Python Implementation](#python-implementation-5)
-      + [JavaScript Implementation](#javascript-implementation-5)
-   * [Notes on Techniques](#notes-on-techniques)
-      + [Segment Tree](#segment-tree)
-      + [Binary Indexed Tree (Fenwick Tree)](#binary-indexed-tree-fenwick-tree)
-   * [Real-World / Interview Variations](#real-world-interview-variations-8)
-- [652. Find Duplicate Subtrees](#652-find-duplicate-subtrees)
-   * [1. Problem Explanation](#1-problem-explanation-35)
-      + [The Core Challenge](#the-core-challenge-1)
-   * [2. Solution Explanation](#2-solution-explanation-24)
-      + [Step-by-Step Logic](#step-by-step-logic-1)
-      + [Why ASCII Visualizations Matter](#why-ascii-visualizations-matter)
-         - [ASCII Execution Trace:](#ascii-execution-trace)
-   * [3. Complexity Analysis](#3-complexity-analysis)
-      + [Time Complexity (TC)](#time-complexity-tc-7)
-      + [Space Complexity (SC)](#space-complexity-sc-7)
-   * [4. Solution Code](#4-solution-code-35)
-      + [Python (The Optimized ID Approach)](#python-the-optimized-id-approach)
-      + [JavaScript (The Serialization Approach)](#javascript-the-serialization-approach)
-   * [New Terms & Real-World Context](#new-terms-real-world-context)
-      + [Key Terms](#key-terms)
-      + [How Big Tech Asks This (Indirectly)](#how-big-tech-asks-this-indirectly)
-- [Boundary of Binary Tree](#boundary-of-binary-tree)
-   * [1. Problem Explanation](#1-problem-explanation-36)
-      + [A Critical Non-Trivial Detail: The Definition of "Boundary"](#a-critical-non-trivial-detail-the-definition-of-boundary)
-   * [2. Solution Explanation](#2-solution-explanation-25)
-      + [The Mental Model: The Four-Part Harmony](#the-mental-model-the-four-part-harmony)
-      + [Visualizing the Walkthrough](#visualizing-the-walkthrough)
-   * [3. Time and Space Complexity Analysis](#3-time-and-space-complexity-analysis-35)
-   * [4. Solution Code](#4-solution-code-36)
-      + [Python Implementation](#python-implementation-6)
-      + [Javascript Implementation](#javascript-implementation-6)
-   * [Note 1: Terms and Techniques](#note-1-terms-and-techniques-2)
-   * [Note 2: Real-World Interview Variants](#note-2-real-world-interview-variants-1)
-
-<!-- TOC end -->
-
-<!-- TOC --><a name="trees"></a>
 # Trees
 
 <!-- TOC --><a name="104-maximum-depth-of-binary-tree"></a>
@@ -12242,3 +11791,1419 @@ Google, Meta, and Bloomberg rarely ask the "exact" Leetcode problem anymore. Ins
 1. **The "Drone" Problem (Google):** "You have a drone flying around a forest represented as a tree. It needs to circle the perimeter to map the area. What is its path?"
 2. **The "Shadow" Problem (Meta):** "Given a 3D structure (represented as a tree), return the nodes that would be visible if you looked at it from the side (the silhouette)."
 3. **The "UI Rendering" Problem (Bloomberg):** "In a nested UI component tree, identify all 'outer' components that need a specific border-shadow applied."
+
+# Nested List Weight Sum
+
+To a Google L5 or L6 engineer, "Nested List Weight Sum" is not just a math problem; it is a **Tree Traversal** problem. Senior engineers recognize that a nested list is simply a tree where integers are "leaves" and lists are "internal nodes."
+
+The key to a high-level performance is demonstrating that you can navigate recursive structures both **recursively** (DFS) and **iteratively** (BFS) while keeping track of the "depth" state.
+
+---
+
+### 1. Problem Explanation
+
+**The Goal:**
+You are given a nested list of integers. Each element is either an integer or another list. You need to calculate the sum of all integers in the list, but each integer is multiplied by its **depth**.
+
+**The Rules of Depth:**
+* The top-level list has a depth of 1.
+* Each time you go inside a nested list, the depth increases by 1.
+
+**Example:**
+Input: `[[1,1], 2, [1,1]]`
+* The `2` is at depth 1. (Value = 2 * 1 = 2)
+* The pairs `[1,1]` are inside another list, so they are at depth 2. (Value = (1 * 2) + (1 * 2) + (1 * 2) + (1 * 2) = 8)
+* **Total Sum:** 2 + 8 = 10.
+
+---
+
+### 2. Solution Explanation
+
+**The Intuition (The "Why"):**
+Imagine a building with several floors. 
+* Floor 1 (Depth 1) has some items.
+* Some boxes on Floor 1 contain stairs leading to a sub-floor (Floor 2).
+* Inside the boxes on Floor 2, there might be more stairs leading to Floor 3.
+
+To solve this, we must "walk" through every room. When we find a number, we multiply it by our current floor number. When we find a box (a list), we step inside and increment our floor counter.
+
+
+
+**The Algorithm (The "How" - Recursive DFS):**
+1.  Create a helper function that takes two inputs: the `current_list` and the `current_depth`.
+2.  Initialize a `total` sum to 0.
+3.  Loop through every `element` in the `current_list`:
+    * **Case A:** If the element is an **Integer**, multiply it by `current_depth` and add it to `total`.
+    * **Case B:** If the element is a **List**, call the helper function again on this sub-list, but pass `current_depth + 1`. Add that result to `total`.
+4.  Return the `total`.
+
+**Walkthrough with ASCII Visualization:**
+Input: `[1, [4, [6]]]`
+
+```text
+[ INITIAL CALL ]
+Function: DFS(list=[1, [4, [6]]], depth=1)
+
+Step 1: Look at '1'
+- It's an integer.
+- Calculation: 1 (value) * 1 (depth) = 1
+- Running Total: 1
+
+Step 2: Look at '[4, [6]]'
+- It's a list. 
+- Action: Dive deeper! 
+--------------------------------------------------
+    [ NESTED CALL 1 ]
+    Function: DFS(list=[4, [6]], depth=2)
+    
+    Step 1: Look at '4'
+    - It's an integer.
+    - Calculation: 4 (value) * 2 (depth) = 8
+    - running total: 8
+    
+    Step 2: Look at '[6]'
+    - It's a list.
+    - Action: Dive deeper!
+--------------------------------------------------
+        [ NESTED CALL 2 ]
+        Function: DFS(list=[6], depth=3)
+        
+        Step 1: Look at '6'
+        - It's an integer.
+        - Calculation: 6 (value) * 3 (depth) = 18
+        - Running Total: 18
+        
+        Return 18 to Caller...
+--------------------------------------------------
+    Back in [ NESTED CALL 1 ]
+    - Result from sub-list was 18.
+    - Running Total: 8 + 18 = 26
+    
+    Return 26 to Caller...
+--------------------------------------------------
+Back in [ INITIAL CALL ]
+- Result from sub-list was 26.
+- Running Total: 1 (from step 1) + 26 = 27
+
+FINAL RESULT: 27
+```
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+```text
+TIME COMPLEXITY: O(N)
+--------------------------------------------------
+Let N = The total number of nested elements 
+(including integers and the lists themselves).
+
+- We visit every single integer exactly once.
+- We "step into" every list exactly once.
+- Each operation (check type, multiply, add) is 
+  a constant time O(1) operation.
+
+Total Work: N * O(1) = O(N)
+
+[ TC Visual Derivation ]
+Input Structure: [ [ x ], y, [ [ z ] ] ]
+Visits:            ^ ^ ^  ^  ^ ^ ^ ^ ^
+Visits scale perfectly with the number of items.
+--------------------------------------------------
+
+SPACE COMPLEXITY: O(D)
+--------------------------------------------------
+Let D = The maximum depth of the nesting 
+(the "height" of the tree).
+
+- Even though we aren't creating new lists, 
+  each recursive call is placed on the 
+  "System Call Stack".
+- If the list is nested 10 levels deep, there 
+  will be 10 function calls waiting in memory.
+
+Worst Case: O(N) if every element is a list 
+containing exactly one list (a long chain).
+Average Case: O(D)
+
+[ Space Visual ]
+Stack: [ Depth 1 ]
+       [ Depth 2 ]
+       [ Depth 3 ] <-- Max memory depends on height.
+--------------------------------------------------
+```
+
+---
+
+### 4. Solution Code
+
+In an L5/L6 interview, you should acknowledge that the input is usually provided as an interface (e.g., `NestedInteger` class).
+
+#### Python Snippet
+
+```python
+def depthSum(nestedList):
+    """
+    Standard DFS approach. 
+    Focuses on clean recursion and depth tracking.
+    """
+    def dfs(current_list, depth):
+        total = 0
+        for item in current_list:
+            if item.isInteger():
+                # Value * Depth
+                total += item.getInteger() * depth
+            else:
+                # Recurse with incremented depth
+                total += dfs(item.getList(), depth + 1)
+        return total
+
+    return dfs(nestedList, 1)
+
+# Note: BFS approach is also viable and avoids recursion limits
+from collections import deque
+
+def depthSum_BFS(nestedList):
+    """
+    Iterative BFS approach.
+    Useful for very deep nesting to avoid StackOverflow.
+    """
+    queue = deque([(nestedList, 1)]) # (list, depth)
+    total_sum = 0
+    
+    while queue:
+        current_list, depth = queue.popleft()
+        for item in current_list:
+            if item.isInteger():
+                total_sum += item.getInteger() * depth
+            else:
+                # Add sub-list to queue with next depth
+                queue.append((item.getList(), depth + 1))
+                
+    return total_sum
+```
+
+#### JavaScript Snippet
+
+```javascript
+/**
+ * Recursive Depth-First Search (DFS)
+ * Time: O(N), Space: O(D)
+ */
+var depthSum = function(nestedList) {
+    const dfs = (list, depth) => {
+        let total = 0;
+        
+        for (let item of list) {
+            if (item.isInteger()) {
+                // Calculation: Value * current depth
+                total += item.getInteger() * depth;
+            } else {
+                // If it's a list, we go one level deeper
+                total += dfs(item.getList(), depth + 1);
+            }
+        }
+        return total;
+    };
+    
+    return dfs(nestedList, 1);
+};
+```
+
+---
+
+### Note 1: Terminology Addendum
+
+**Recursion / DFS (Depth First Search):**
+* **What it is:** A method where a function calls itself to solve smaller versions of the same problem.
+* **Why it helps:** It is the most natural way to handle "nested" or "hierarchical" data like file systems or nested lists.
+* **Application:** Every time we see a list, we restart the same logic on that sub-list.
+
+**System Call Stack:**
+* **What it is:** The memory the computer uses to keep track of where to return to after a function call finishes.
+* **Why it matters:** If your nesting is too deep (e.g., 100,000 levels), you might run out of stack space, causing a crash.
+
+---
+
+### Note 2: Real-World Interview Variations
+
+**Variation 1: "Nested List Weight Sum II" (Very Common at Google/Meta)**
+* **Prompt:** Instead of depth starting at 1 from the top, it starts at 1 from the bottom. (Integers at the deepest level are multiplied by 1, and the top level is the highest).
+* **The L5 Solve:** You can't know the max depth until you finish. A senior engineer solves this in **one pass** without finding max depth first. You keep a running `sum_of_elements` and a `total_accumulated_sum`. Every time you move to a new depth, you add the current `sum_of_elements` to the `total_accumulated_sum`. This "doubles" the weight of earlier elements naturally.
+
+**Variation 2: "JSON Object Sum" (Bloomberg/Meta)**
+* **Prompt:** Given a massive JSON object with numbers and nested objects/arrays, find the sum of all numbers.
+* **The L5 Solve:** This is the exact same problem. The difference is handling keys in an object vs indices in an array. You use recursion to traverse the keys and check if the value is a Number or another Object/Array.
+
+**Variation 3: "File System Disk Usage" (Real-World System Design)**
+* **Prompt:** Write a function like `du -h` that calculates the total size of a directory, including all sub-directories.
+* **The L5 Solve:** This is exactly Nested List Weight Sum, where "File Size" is the integer and "Folder" is the nested list. You use DFS (recursive) or BFS (iterative) to crawl the directories. You must also handle **Circular Links** (Symbolic links that point back to a parent), which would cause infinite recursion. You solve this by keeping a `Set` of "seen" directory IDs.
+
+# 938. Range Sum of BST
+
+This is a foundational tree problem. A Senior Engineer (L5/L6) at Google views this as a lesson in **Search Space Pruning**. While a junior might visit every node in the tree, a senior engineer uses the mathematical properties of a Binary Search Tree (BST) to ignore entire branches that cannot possibly contain a valid number, saving significant time and energy.
+
+---
+
+### 1. Problem Explanation
+
+**The Premise:**
+You are given the `root` node of a Binary Search Tree (BST) and two integers, `low` and `high`. Your task is to return the sum of values of all nodes that fall within the inclusive range `[low, high]`.
+
+**The "Why" of the BST Property:**
+In a standard Binary Search Tree:
+1. Every node to the **left** of a parent is **smaller** than the parent.
+2. Every node to the **right** of a parent is **larger** than the parent.
+
+
+
+[Image of binary search tree properties]
+
+
+**The Goal:**
+We want to traverse the tree, but we want to be smart. 
+- If a node's value is already smaller than `low`, there is no point in looking at its left children (because they are even smaller). 
+- If a node's value is already larger than `high`, there is no point in looking at its right children (because they are even larger).
+
+---
+
+### 2. Solution Explanation
+
+We will use a **Recursive Depth-First Search (DFS)** with pruning.
+
+#### The Strategy:
+1. **Base Case:** If the current node is `null`, return 0.
+2. **Case 1 (Value is too small):** If `node.val < low`, this node is out of range, and its left side is definitely out of range. We only search the **right** side.
+3. **Case 2 (Value is too large):** If `node.val > high`, this node is out of range, and its right side is definitely out of range. We only search the **left** side.
+4. **Case 3 (Value is in range):** If `low <= node.val <= high`, we add the current node's value to the result and search **both** the left and right sides.
+
+#### Detailed ASCII Walkthrough
+
+Input: `Tree: [10, 5, 15, 3, 7, null, 18]`, `low = 7`, `high = 15`
+
+```text
+Initial BST Structure:
+      10
+     /  \
+    5    15
+   / \     \
+  3   7     18
+
+Range: [7 to 15]
+
+---------------------------------------------------------
+STEP 1: Process Root (10)
+Is 10 in range [7, 15]? YES.
+Action: Sum = 10 + solve(Left) + solve(Right)
+
+---------------------------------------------------------
+STEP 2: Process Left of 10 (Node 5)
+Is 5 in range [7, 15]? NO. 
+Is 5 too small (5 < 7)? YES.
+Action: Ignore 5, Ignore 5's left child (3). 
+        Only check 5's RIGHT side.
+
+      10 (In)
+     /
+   [5] (Too Small -> Go Right)
+     \
+      7
+
+---------------------------------------------------------
+STEP 3: Process Right of 5 (Node 7)
+Is 7 in range [7, 15]? YES.
+Action: Sum = (from step 1: 10) + 7 + solve(Left) + solve(Right)
+(7 has no children, so it returns 7 to the caller).
+
+---------------------------------------------------------
+STEP 4: Process Right of 10 (Node 15)
+Is 15 in range [7, 15]? YES.
+Action: Sum = (previous: 17) + 15 + solve(Left) + solve(Right)
+
+---------------------------------------------------------
+STEP 5: Process Right of 15 (Node 18)
+Is 18 in range [7, 15]? NO.
+Is 18 too large (18 > 15)? YES.
+Action: Ignore 18, Ignore 18's right children. 
+        Check 18's LEFT side (which is null).
+
+---------------------------------------------------------
+FINAL CALCULATION:
+10 (root) + 7 (from left branch) + 15 (from right branch) = 32.
+```
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+**Time Complexity: O(N)**
+Where N is the total number of nodes in the tree.
+
+```text
+Visual Derivation of Time Complexity:
+
+Worst Case: low and high are so far apart that they 
+encompass the entire tree.
+Example: low=0, high=100 for a tree with nodes [10, 20, 30].
+
+[Node] -> visit
+  / \
+[N] [N] -> visit both
+
+In this scenario, we visit every node exactly once.
+Total Work = N visits.
+Complexity = O(N).
+
+Note: In the best case (range is very narrow), we visit 
+far fewer nodes, but Big O always tracks the worst case.
+```
+
+**Space Complexity: O(H)**
+Where H is the height of the tree.
+
+```text
+Visual Derivation of Space Complexity:
+
+We use recursion, which uses the "Call Stack".
+The stack grows as we go deeper into the tree.
+
+      (Root)       <- Stack Level 1
+       /
+    (Child)        <- Stack Level 2
+     /
+  (Leaf)           <- Stack Level 3 (Max Depth)
+
+The maximum amount of memory used at one time is 
+proportional to the height of the tree.
+- Balanced Tree: H = log N
+- Skewed Tree (like a list): H = N
+
+Final SC = O(H).
+```
+
+---
+
+### 4. Solution Code
+
+#### Python Implementation
+
+```python
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+def rangeSumBST(root: TreeNode, low: int, high: int) -> int:
+    # Base Case: Empty node contributes 0 to the sum
+    if not root:
+        return 0
+    
+    # CASE 1: Current node is too small. 
+    # Its left children are even smaller, so we skip them entirely.
+    if root.val < low:
+        return rangeSumBST(root.right, low, high)
+        
+    # CASE 2: Current node is too large.
+    # Its right children are even larger, so we skip them.
+    if root.val > high:
+        return rangeSumBST(root.left, low, high)
+        
+    # CASE 3: Current node is within the range [low, high].
+    # We include its value and search both subtrees.
+    return root.val + rangeSumBST(root.left, low, high) + rangeSumBST(root.right, low, high)
+```
+
+#### JavaScript Implementation
+
+```javascript
+function TreeNode(val, left, right) {
+    this.val = (val===undefined ? 0 : val)
+    this.left = (left===undefined ? null : left)
+    this.right = (right===undefined ? null : right)
+}
+
+var rangeSumBST = function(root, low, high) {
+    // 1. Base case: null node
+    if (!root) return 0;
+
+    // 2. Optimization: Pruning the search space
+    if (root.val < low) {
+        // Too small? Only look right.
+        return rangeSumBST(root.right, low, high);
+    }
+    
+    if (root.val > high) {
+        // Too large? Only look left.
+        return rangeSumBST(root.left, low, high);
+    }
+
+    // 3. Node is in range: include its value and continue searching
+    return root.val + 
+           rangeSumBST(root.left, low, high) + 
+           rangeSumBST(root.right, low, high);
+};
+```
+
+---
+
+### Note 1: Terms and Techniques
+
+* **Search Space Pruning:** The act of cutting off parts of a search tree because you have proof that the answer cannot exist there. This is why Case 1 and Case 2 are so important—they make the code much faster than a standard "visit every node" approach.
+* **Depth-First Search (DFS):** A traversal method where you go as deep as possible down one branch before backing up and trying another.
+* **Balanced vs Skewed Tree:** A balanced tree looks like a pyramid (fast to search). A skewed tree looks like a straight line (slow to search, behaves like a linked list).
+
+---
+
+### Note 2: Real-World Interview Variations
+
+**1. Bloomberg: "Find All Nodes in Range"**
+* **The Twist:** Instead of the sum, return a list of the actual node values in sorted order.
+* **L5 Solution:** Use the same pruning logic, but perform an **In-Order Traversal** (Left, then Node, then Right). Because it's a BST, an in-order traversal naturally visits the nodes in sorted order.
+
+**2. Meta: "Closest Binary Search Tree Value" (LeetCode 270)**
+* **The Twist:** Given a target value (e.g., 7.2), find the node value in the BST closest to that target.
+* **L5 Solution:** This is similar to `rangeSumBST`. You move down the tree: if target < root.val, go left; else go right. At each step, keep track of the "closest seen so far." Pruning works here too—if you are at 10 and the target is 5, you don't need to check nodes > 10.
+
+**3. Google: "File System Disk Usage"**
+* **The Twist:** Your "BST" is a file directory structure. Find the total size of files created between "January" and "March." 
+* **L5 Solution:** This is the same logic, but with "Strings" or "Timestamps" as the keys. You prune any folder branch whose name/metadata falls entirely outside the time range requested.
+
+# 129. Sum Root to Leaf Numbers
+
+To a Google L5 or L6 engineer, this problem is a textbook example of **DFS (Depth First Search)** with **state propagation**. The key is to realize that as you move down the tree, the value of a parent node "shifts" its weight to the left to make room for the child node, much like how numbers work in base 10.
+
+Here is the senior-level breakdown of LeetCode 129.
+
+---
+
+### 1. Problem Explanation
+
+**The Goal:**
+You are given a binary tree where each node contains a single digit (0-9). Each path from the root to a leaf represents a number. You need to return the sum of all these numbers.
+
+**The "Number" Logic:**
+If a path is `1 -> 2 -> 3`, the number is **123**.
+How do we get that mathematically? 
+1. Start with `1`.
+2. Move to `2`: Take the previous value (`1`), multiply by 10, and add the new digit (`1 * 10 + 2 = 12`).
+3. Move to `3`: Take the previous value (`12`), multiply by 10, and add the new digit (`12 * 10 + 3 = 123`).
+
+**Visualizing the Goal:**
+```text
+      1
+     / \
+    2   3
+
+Paths:
+1 -> 2 (Number: 12)
+1 -> 3 (Number: 13)
+
+Total Sum: 12 + 13 = 25
+```
+
+---
+
+### 2. Solution Explanation
+
+**The Strategy: Pre-order Traversal (DFS)**
+A senior engineer uses a recursive function that carries the "running total" down the tree. 
+
+1.  **Base Case:** If the node is `null`, return 0.
+2.  **Calculate:** Update the `current_number` using the formula: `(running_total * 10) + node.val`.
+3.  **Leaf Check:** If the node has no children (left is null AND right is null), it means we've completed a full path. Return the `current_number`.
+4.  **Recurse:** If not a leaf, get the sum of the left subtree and the right subtree.
+
+
+
+#### ASCII Diagram Walkthrough: Detailed Trace
+
+Let's trace this tree:
+```text
+      4
+     / \
+    9   0
+   /
+  5
+```
+
+**Step 1: Start at Root (4)**
+* Incoming sum: 0
+* New sum: (0 * 10) + 4 = **4**
+* This is not a leaf. Call left (9) and right (0).
+
+**Step 2: Move Left to Node (9)**
+* Incoming sum: 4
+* New sum: (4 * 10) + 9 = **49**
+* This is not a leaf. Call left (5) and right (null).
+
+**Step 3: Move Left to Node (5)**
+* Incoming sum: 49
+* New sum: (49 * 10) + 5 = **495**
+* **IS A LEAF!** Return 495.
+
+**Step 4: Return to Node (9)**
+* Right child was null. Total for this branch is 495.
+
+**Step 5: Return to Root (4) and move Right to Node (0)**
+* Incoming sum: 4
+* New sum: (4 * 10) + 0 = **40**
+* **IS A LEAF!** (No children). Return 40.
+
+**Step 6: Final Tally at Root**
+* Sum from left: 495
+* Sum from right: 40
+* Result: 495 + 40 = **535**
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+```text
++-----------------------------------------------------------------------+
+| TIME COMPLEXITY DERIVATION: O(N)                                      |
++-----------------------------------------------------------------------+
+| N = Number of nodes in the tree                                       |
+|                                                                       |
+| 1. Every node is visited exactly once during the DFS traversal.       |
+| 2. At each node, we perform basic arithmetic (multiply, add) which    |
+|    is a constant time O(1) operation.                                 |
+|                                                                       |
+| TOTAL TIME: O(N)                                                      |
++-----------------------------------------------------------------------+
+
++-----------------------------------------------------------------------+
+| SPACE COMPLEXITY DERIVATION: O(H)                                     |
++-----------------------------------------------------------------------+
+| H = Height of the tree                                                |
+|                                                                       |
+| 1. This is the space used by the recursion stack.                    |
+| 2. In the worst case (a skewed tree like a linked list), H = N.       |
+| 3. In the best case (a balanced tree), H = log N.                     |
+|                                                                       |
+| TOTAL AUXILIARY SPACE: O(H)                                           |
++-----------------------------------------------------------------------+
+```
+
+---
+
+### 4. Solution Code
+
+#### Optimized DFS Solution (The L5 Standard)
+
+**Python Snippet**
+```python
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+def sumNumbers(root: TreeNode) -> int:
+    # Helper function to carry the running total down the tree
+    def dfs(node, current_sum):
+        if not node:
+            return 0
+        
+        # Calculate new path value
+        current_sum = current_sum * 10 + node.val
+        
+        # If it's a leaf node, return the completed path value
+        if not node.left and not node.right:
+            return current_sum
+        
+        # Otherwise, sum the results from left and right subtrees
+        return dfs(node.left, current_sum) + dfs(node.right, current_sum)
+    
+    return dfs(root, 0)
+```
+
+**JavaScript Snippet**
+```javascript
+function TreeNode(val, left, right) {
+    this.val = (val===undefined ? 0 : val);
+    this.left = (left===undefined ? null : left);
+    this.right = (right===undefined ? null : right);
+}
+
+var sumNumbers = function(root) {
+    // We define our recursive DFS function inside for access to scope
+    const dfs = (node, currentSum) => {
+        if (!node) return 0;
+
+        // Shift existing number left (multiply by 10) and add current digit
+        currentSum = currentSum * 10 + node.val;
+
+        // Leaf node check: if both children are null, we found a full number
+        if (!node.left && !node.right) {
+            return currentSum;
+        }
+
+        // Return the sum of numbers found in sub-branches
+        return dfs(node.left, currentSum) + dfs(node.right, currentSum);
+    };
+
+    return dfs(root, 0);
+};
+```
+
+---
+
+### Note 1: Terminology and Techniques
+
+* **Pre-order Traversal:** A type of DFS where you process the current node *before* its children. This is necessary here because the "value" of a path depends on the parent coming before the child.
+* **Recursion Stack:** When a function calls itself, the computer "remembers" where it left off by putting that data on a stack. The space complexity O(H) refers to how high this stack gets.
+* **Base 10 Shift:** The logic `total * 10 + next` is the standard way to convert a stream of digits into an integer without using string concatenation (which is slower and uses more memory).
+
+---
+
+### Note 2: Real-World Interview Variations
+
+**1. Google: "Validating Serialized Configs"**
+* **Scenario:** A configuration is stored as a tree of dependency versions (e.g., v1.0.4). You need to find the sum of all unique version strings as integers.
+* **Solution:** Same logic. As you traverse, you treat the version segments like digits. If it's `v1 -> v0 -> v4`, the number is `104`.
+
+**2. Meta: "Path-to-Sum Target"**
+* **Scenario:** Instead of summing all paths, return "True" if any path from root to leaf equals a specific target number `K`.
+* **Solution:** Use DFS. Pass the `current_sum` down. At the leaf, check `if current_sum == K: return True`. Use an `OR` operation to combine results from children.
+
+**3. Bloomberg: "Account Hierarchy Balances"**
+* **Scenario:** A main account has sub-accounts. A "balance path" is defined as the sequence of account ID digits. Calculate the total "Path ID" value of all leaf accounts for auditing.
+* **Solution:** Directly applies LC 129. The DFS approach ensures that you only traverse the hierarchy once, keeping the audit fast and memory-efficient.
+
+# Convert BST to Doubly LL
+
+At an L5/L6 level at Google, this problem—"Convert Binary Search Tree to Sorted Circular Doubly Linked List"—is treated as a masterclass in **In-order Traversal** and **Pointer Manipulation**.
+
+The key insight for a senior engineer is that a BST already has a sorted structure if you read it from left-to-right. We aren't creating new nodes; we are simply re-wiring the existing `left` and `right` pointers to act as `prev` and `next`.
+
+---
+
+### 1. Problem Explanation
+
+**The Goal:** Convert a Binary Search Tree (BST) into a sorted circular doubly linked list (DLL) **in-place**.
+
+**What does that mean?**
+* **Sorted:** The values must be in ascending order.
+* **Doubly Linked:** Each node points to the one before it and the one after it.
+* **Circular:** The last node's `next` points to the first node, and the first node's `prev` points to the last node.
+* **In-place:** You cannot create new nodes. You must reuse the `left` pointer as `prev` and the `right` pointer as `next`.
+
+**Visualizing the Transformation:**
+
+
+
+Input BST:
+```text
+      (4)
+     /   \
+   (2)   (6)
+  /   \
+(1)   (3)
+```
+
+Target Circular DLL:
+```text
++---------------------------------------+
+|                                       |
+v                                       |
+(1) <==> (2) <==> (3) <==> (4) <==> (6)-+
+ ^                                      ^
+ |______________________________________|
+```
+
+---
+
+### 2. Solution Explanation
+
+To get a sorted sequence from a BST, we use **In-order Traversal** (Left -> Root -> Right).
+
+**The Strategy:**
+We maintain two global (or state-shared) pointers:
+1.  **first:** To keep track of the smallest node (the head of our DLL).
+2.  **last:** To keep track of the node we just processed, so we can link it to the current node.
+
+**Step-by-Step Logic:**
+
+1.  **Step Left:** Recursively visit the left child.
+2.  **Process Node:**
+    * If `last` exists, link `last.right` to `current` and `current.left` to `last`.
+    * If `last` does not exist, it means we are at the very first (smallest) node. Set `first = current`.
+    * Update `last = current`.
+3.  **Step Right:** Recursively visit the right child.
+4.  **Close the Circle:** After the entire traversal, link `first` and `last`.
+
+**ASCII Walkthrough for BST [4, 2, 6, 1, 3]:**
+
+```text
+TRAVERSAL ORDER: 1 -> 2 -> 3 -> 4 -> 6
+
+Step A: Node (1)
+- No 'last' exists.
+- first = (1)
+- last = (1)
+Current State: (1)
+
+Step B: Node (2)
+- last is (1).
+- Link (1).right = (2)
+- Link (2).left = (1)
+- last = (2)
+Current State: (1) <=> (2)
+
+Step C: Node (3)
+- last is (2).
+- Link (2).right = (3)
+- Link (3).left = (2)
+- last = (3)
+Current State: (1) <=> (2) <=> (3)
+
+... Repeat for 4 and 6 ...
+
+Final Step: Close the Circle
+- Link (6).right = (1)
+- Link (1).left = (6)
+```
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+Let N be the number of nodes in the BST.
+
+```text
+========================================================================
+TIME COMPLEXITY: O(N)
+========================================================================
+Derivation Diagram:
+
+[ Root ]
+  /  \
+[L]  [R]
+      |
+      V
+Each node in the tree is visited exactly once during the 
+In-order traversal.
+
+Operations per node:
+- Checking if 'last' is null (O(1))
+- Updating 2-4 pointers (O(1))
+- Updating 'last' reference (O(1))
+
+Total Time = N * O(1) = O(N)
+
+========================================================================
+SPACE COMPLEXITY: O(H) or O(N)
+========================================================================
+Derivation Diagram:
+
+This solution uses Recursion.
+The memory used is the "Call Stack."
+
+[ Tree Height H ]
+      |
+      V
+In a balanced BST: H = log N
+In a skewed BST (a line): H = N
+
+Worst case (skewed tree): O(N)
+Average case (balanced tree): O(log N)
+
+No extra data structures are created (since it's in-place).
+========================================================================
+```
+
+---
+
+### 4. Solution Code
+
+#### Python
+
+```python
+class Node:
+    def __init__(self, val, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+def treeToDoublyList(root):
+    if not root:
+        return None
+    
+    # We use these to keep track of the boundaries of our list
+    first = None
+    last = None
+
+    def inorder(node):
+        nonlocal first, last
+        if node:
+            # 1. Traverse Left
+            inorder(node.left)
+            
+            # 2. Process Current Node
+            if last:
+                # Link the previous node (last) with the current node
+                last.right = node
+                node.left = last
+            else:
+                # If no last, this is the smallest node (the head)
+                first = node
+            
+            # Move the 'last' pointer to the current node
+            last = node
+            
+            # 3. Traverse Right
+            inorder(node.right)
+
+    # Start the recursive process
+    inorder(root)
+    
+    # 4. Close the circular links
+    last.right = first
+    first.left = last
+    
+    return first
+```
+
+#### JavaScript
+
+```javascript
+/**
+ * L5/L6 Approach: Recursive In-order Traversal
+ * Uses closure to maintain state of 'first' and 'last' pointers.
+ */
+function treeToDoublyList(root) {
+    if (!root) return null;
+
+    let first = null;
+    let last = null;
+
+    // Helper function to perform in-order link adjustments
+    const traverse = (node) => {
+        if (!node) return;
+
+        // Process Left subtree
+        traverse(node.left);
+
+        // Process Current Node
+        if (last) {
+            // Re-wire pointers: right is 'next', left is 'prev'
+            last.right = node;
+            node.left = last;
+        } else {
+            // Mark the smallest node as the head of the list
+            first = node;
+        }
+        last = node;
+
+        // Process Right subtree
+        traverse(node.right);
+    };
+
+    traverse(root);
+
+    // Finalize circularity
+    last.right = first;
+    first.left = last;
+
+    return first;
+}
+```
+
+---
+
+### Note 1: Terms and Techniques
+
+* **In-order Traversal:** A way of visiting all nodes in a BST such that they are processed in non-decreasing order.
+* **In-place Algorithm:** An algorithm that transforms input using no auxiliary data structure, though a small amount of extra storage is allowed for auxiliary variables. The input is usually overwritten by the output.
+* **Circular Doubly Linked List:** A list where nodes have two links (previous and next) and the head and tail are connected, forming a loop. This is useful for buffers and applications where you need to cycle through data infinitely.
+
+---
+
+### Note 2: Real Interview / Real World Variations
+
+**1. Meta: "Convert Binary Tree to Doubly Linked List" (Not a BST)**
+* **The Variation:** The tree is a regular binary tree, not a sorted BST.
+* **The Solution:** You still use In-order traversal! Even if the tree isn't sorted, an in-order traversal provides a predictable "flattening" of the tree. The pointer logic remains identical.
+
+**2. Google: "Flatten Binary Tree to Linked List" (LeetCode 114)**
+* **The Variation:** Convert to a singly linked list (only `right` pointers) in "Pre-order" (Root -> Left -> Right).
+* **The Solution:** This is trickier because as you move the left child to the right, you lose the original right child. An L5 engineer would solve this by processing the tree in **Reverse Pre-order** (Right -> Left -> Root) and keeping a `tail` pointer to attach the nodes backwards.
+
+**3. Bloomberg: "Serialize and Deserialize a BST"**
+* **The Variation:** Save a BST to a file/string and rebuild it.
+* **The Solution:** While seemingly different, the core is still traversal. To reconstruct a BST efficiently from a sorted list (like our DLL), you use a "Divide and Conquer" approach: find the middle of the list to be the root, and recursively build the left and right subtrees.
+
+# 987. Vertical Order Traversal of a Binary Tree
+
+An L5/L6 engineer at Google views this problem as a **Multi-Dimensional Sorting** task disguised as a Tree problem. While a junior might struggle with the "sorting" requirements of nodes that occupy the same space, a senior engineer will immediately move toward establishing a **Global Coordinate System** for the tree.
+
+---
+
+### 1. Problem Explanation
+
+**The Goal:**
+Imagine a binary tree projected onto a 2D grid. You need to group nodes that fall into the same vertical column.
+
+**The Coordinate System:**
+We assign every node a coordinate `(column, row)`:
+* The Root is `(0, 0)`.
+* A Left Child of `(col, row)` is at `(col - 1, row + 1)`.
+* A Right Child of `(col, row)` is at `(col + 1, row + 1)`.
+
+**The Sorting Strictness (The "Hard" Part):**
+1.  Nodes must be ordered from the **top-most row** to the **bottom-most row**.
+2.  If two nodes have the exact same `column` AND the exact same `row`, they must be sorted by their **numerical value** in ascending order.
+
+**Visualizing the Coordinates:**
+```text
+            (0,0)
+             [1]
+           /     \
+    (-1,1) [2]     [3] (1,1)
+          /   \   /   \
+  (-2,2) [4]   [5] [6]  [7] (2,2)
+             (0,2) (0,2) 
+```
+*Notice:* Node `[5]` and Node `[6]` both land at `(0, 2)`. In our result for column 0, we must ensure the smaller value comes first.
+
+---
+
+### 2. Solution Explanation
+
+To solve this optimally, we follow a three-step pipeline: **Traverse -> Store -> Sort.**
+
+#### Step 1: Traversal (BFS or DFS)
+We visit every node and record its `(col, row, value)`. A Breadth-First Search (BFS) is often preferred in interviews because it naturally processes rows from top to bottom, though we still need a final sort for the "same coordinate" edge case.
+
+#### Step 2: Storage
+We use a Hash Map where the **Key** is the `column` index, and the **Value** is a list of pairs: `(row, value)`.
+
+#### Step 3: Global Sort
+1.  Sort the columns from smallest to largest (left to right).
+2.  For each column, sort the nodes by `row` (top to bottom).
+3.  If `rows` are equal, sort by `value`.
+
+
+
+#### Step-by-Step Visualization
+Input: `[3, 9, 20, null, null, 15, 7]`
+
+```text
+========================================================================
+ INITIAL STATE
+========================================================================
+Tree Structure:
+      3
+     / \
+    9   20
+       /  \
+      15   7
+
+Queue (for BFS): [(node:3, col:0, row:0)]
+Data Map: {}
+
+========================================================================
+ STEP 1: Process Root (3)
+========================================================================
+- Node: 3, Col: 0, Row: 0
+- Map: { 0: [(0, 3)] }
+- Queue adds children: [(9, -1, 1), (20, 1, 1)]
+
+========================================================================
+ STEP 2: Process Left (9)
+========================================================================
+- Node: 9, Col: -1, Row: 1
+- Map: { 0: [(0, 3)], -1: [(1, 9)] }
+- Queue: [(20, 1, 1)]
+
+========================================================================
+ STEP 3: Process Right (20)
+========================================================================
+- Node: 20, Col: 1, Row: 1
+- Map: { 0: [(0, 3)], -1: [(1, 9)], 1: [(1, 20)] }
+- Queue adds children: [(15, 0, 2), (7, 2, 2)]
+
+========================================================================
+ STEP 4: Process (15)
+========================================================================
+- Node: 15, Col: 0, Row: 2
+- Map: { 0: [(0, 3), (2, 15)], -1: [(1, 9)], 1: [(1, 20)], 2: [(2, 7)] }
+
+========================================================================
+ FINAL SORTING PHASE
+========================================================================
+1. Sort Columns: -1, 0, 1, 2
+2. Sort within Column 0:
+   Nodes: [(0, 3), (2, 15)] -> Already sorted by row.
+   Result: [3, 15]
+
+Final Result: [[9], [3, 15], [20], [7]]
+```
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+Let N be the number of nodes in the tree.
+
+```text
+TIME COMPLEXITY DERIVATION: O(N log N)
+--------------------------------------------------------------
+1. Traversal (BFS/DFS): 
+   Visits each node once.              ---> O(N)
+
+2. Storage into Map:
+   Inserting N items.                  ---> O(N)
+
+3. Sorting:
+   In the worst case (a very wide tree), 
+   we are sorting N total elements 
+   by (col, row, value).               ---> O(N log N)
+
+Total Time = O(N) + O(N log N)
+Simplified = O(N log N)
+
+
+SPACE COMPLEXITY DERIVATION: O(N)
+--------------------------------------------------------------
+What are we storing?
+1. The Map: Stores N nodes total.      ---> O(N)
+2. The Queue: Stores max width of 
+   tree in BFS.                        ---> O(N)
+3. Result List: Stores N values.       ---> O(N)
+
+Total Space = O(N)
+```
+
+---
+
+### 4. Solution Code
+
+#### Python Implementation
+
+```python
+import collections
+
+def verticalTraversal(root):
+    # node_list will store tuples of (column, row, value)
+    node_list = []
+    
+    # BFS traversal to assign coordinates
+    # Queue stores (node, column, row)
+    queue = collections.deque([(root, 0, 0)])
+    
+    while queue:
+        node, col, row = queue.popleft()
+        if node:
+            node_list.append((col, row, node.val))
+            # Left child: col-1, row+1
+            queue.append((node.left, col - 1, row + 1))
+            # Right child: col+1, row+1
+            queue.append((node.right, col + 1, row + 1))
+            
+    # L5/L6 optimization: Sort globally by col, then row, then value
+    # This handles all tie-breaking rules in one line
+    node_list.sort()
+    
+    # Group nodes by column
+    result_map = collections.defaultdict(list)
+    for col, row, val in node_list:
+        result_map[col].append(val)
+        
+    # Return values sorted by column key
+    return [result_map[c] for c in sorted(result_map.keys())]
+```
+
+#### JavaScript Implementation
+
+```javascript
+/**
+ * @param {TreeNode} root
+ * @return {number[][]}
+ */
+var verticalTraversal = function(root) {
+    const nodes = []; // Store [col, row, val]
+    
+    // BFS Traversal
+    const queue = [[root, 0, 0]];
+    
+    while (queue.length > 0) {
+        const [node, col, row] = queue.shift();
+        
+        if (node) {
+            nodes.push([col, row, node.val]);
+            queue.push([node.left, col - 1, row + 1]);
+            queue.push([node.right, col + 1, row + 1]);
+        }
+    }
+    
+    // Sort logic: 
+    // 1. Primary: Column (left to right)
+    // 2. Secondary: Row (top to bottom)
+    // 3. Tertiary: Value (ascending)
+    nodes.sort((a, b) => {
+        if (a[0] !== b[0]) return a[0] - b[0];
+        if (a[1] !== b[1]) return a[1] - b[1];
+        return a[2] - b[2];
+    });
+    
+    const result = [];
+    let currentColumnNodes = [];
+    let prevCol = nodes.length > 0 ? nodes[0][0] : null;
+    
+    for (const [col, row, val] of nodes) {
+        if (col !== prevCol) {
+            result.push(currentColumnNodes);
+            currentColumnNodes = [];
+            prevCol = col;
+        }
+        currentColumnNodes.push(val);
+    }
+    
+    if (currentColumnNodes.length > 0) {
+        result.push(currentColumnNodes);
+    }
+    
+    return result;
+};
+```
+
+---
+
+### Note 1: Terminology & Techniques
+
+* **Coordinate Mapping:** Treating a non-linear data structure (a tree) as a set of points on a Cartesian plane. This simplifies complex structural problems into sorting problems.
+* **BFS (Breadth-First Search):** Traverses the tree level by level. In this problem, it helps keep the "Row" index naturally increasing.
+* **Multi-level Sorting:** Sorting by multiple criteria (Col -> Row -> Val). In Python, sorting a list of tuples handles this automatically.
+
+---
+
+### Note 2: Real-World Interview Variations
+
+**1. Variation: Binary Tree Vertical Order Traversal (The "Easier" version - Meta)**
+* **The Difference:** If two nodes are at the same `(col, row)`, you only care about their order in the original BFS, not their numerical value.
+* **Solution:** Use a `TreeMap` (or sort keys at the end) and a standard BFS. You don't need the global sort; just appending to a list per column during BFS works.
+
+**2. Variation: Top View of a Binary Tree (Bloomberg)**
+* **The Problem:** Only return the nodes that are visible if you look at the tree from the top.
+* **Solution:** Follow the vertical traversal logic, but for every `column`, only keep the very first node you encounter (the one with the minimum `row`).
+
+**3. Variation: Boundary Traversal of Binary Tree (Google)**
+* **The Problem:** Return the "outline" of the tree (Left boundary, leaves, then right boundary).
+* **Solution:** This involves three separate DFS calls: one to hug the left edge, one to collect all leaves, and one to hug the right edge. It tests "edge-case" handling rather than coordinate sorting.
+
+# Lowest Common Ancestor III
+
+This problem is a favorite at companies like Meta and Google because it tests your ability to think beyond standard tree traversals. An L5/L6 engineer will immediately spot that since each node has a **parent pointer**, this isn't a "tree problem"—it’s actually a **Linked List intersection problem** in disguise.
+
+---
+
+### 1. Problem Explanation
+
+**The Goal:**
+You are given two nodes, `p` and `q`, in a binary tree. Each node has a pointer to its `parent`. You need to find their **Lowest Common Ancestor (LCA)**. The LCA is the lowest node in the tree that has both `p` and `q` as descendants (where a node can be a descendant of itself).
+
+**The Advantage:**
+Usually, in LCA problems, you start at the `root` and go down. Here, you start at `p` and `q` and go **up**.
+
+**The Visualization:**
+Think of the path from a node to the root as a linked list.
+If you start at `p` and follow parent pointers, you get a path: `p -> parent -> grandparent -> ... -> root`.
+If you start at `q`, you get: `q -> parent -> grandparent -> ... -> root`.
+
+The LCA is the first node where these two paths "collide" or merge.
+
+---
+
+### 2. Solution Explanation
+
+A senior engineer will offer two ways to solve this. The first is intuitive (using extra space), and the second is "the trick" (constant space).
+
+#### Approach A: The Set (Path Tracking)
+1. Start at node `p`. Move up to the root, adding every node you visit into a `Set`.
+2. Start at node `q`. Move up to the root. The **first** node you encounter that is already in the `Set` is the LCA.
+
+#### Approach B: The "Two Runner" Trick (Optimal)
+This is the same logic used to find the intersection of two linked lists. 
+If the paths from `p` to root and `q` to root are different lengths, they won't "hit" the LCA at the same time. 
+* **The Trick:** Two pointers, `a` and `b`. 
+* Pointer `a` starts at `p`. Pointer `b` starts at `q`.
+* They move up one step at a time.
+* When pointer `a` hits the root (becomes null), it "restarts" at node **`q`**.
+* When pointer `b` hits the root, it "restarts" at node **`p`**.
+* By switching paths, both pointers travel the exact same total distance: `(Path P to LCA) + (Common Path) + (Path Q to LCA)`. They will eventually meet exactly at the LCA.
+
+
+
+**Step-by-Step ASCII Visualization (Approach B):**
+
+```text
+TREE STRUCTURE:
+      3 (Root)
+     / \
+    5   1
+   / \
+  6   2
+     / \
+    7   4
+
+Target Nodes: p = 7, q = 1
+
+PATH P to Root: 7 -> 2 -> 5 -> 3 (Length 4)
+PATH Q to Root: 1 -> 3           (Length 2)
+
+========================================================================
+POINTER TRACKING
+========================================================================
+
+STEP 1:
+Pointer A: 7
+Pointer B: 1
+
+STEP 2:
+Pointer A: 2
+Pointer B: 3
+
+STEP 3:
+Pointer A: 5
+Pointer B: null (Reached end, restart at P's start: 7)
+
+STEP 4:
+Pointer A: 3
+Pointer B: 7
+
+STEP 5:
+Pointer A: null (Reached end, restart at Q's start: 1)
+Pointer B: 2
+
+STEP 6:
+Pointer A: 1
+Pointer B: 5
+
+STEP 7:
+Pointer A: 3 (MEET!)
+Pointer B: 3 (MEET!)
+
+LCA is 3.
+```
+
+---
+
+### 3. Time and Space Complexity Analysis
+
+Let H be the height of the tree. In the worst case, the path to the root is the height of the tree.
+
+```text
+TIME COMPLEXITY: O(H)
+--------------------------------------------------------------
+The two runners approach:
+In the worst case, each pointer travels the distance from p to 
+root PLUS the distance from q to root.
+This is roughly 2 * H operations.
+
+Total Time = O(H)
+
+
+SPACE COMPLEXITY: O(1) or O(H)
+--------------------------------------------------------------
+Approach A (Set):
+Requires storing the path of node p. In a skewed tree, 
+the path can be H nodes long.
+Space = O(H)
+
+Approach B (Two Pointers):
+Only two variables (Pointer A and Pointer B) are stored.
+No extra data structures are used regardless of tree size.
+
+Total Space = O(1) (Constant)
+```
+
+---
+
+### 4. Solution Code
+
+#### Optimized Solution: Two-Pointer Trick
+
+```python
+# Definition for a Node.
+class Node:
+    def __init__(self, val):
+        self.val = val
+        self.left = None
+        self.right = None
+        self.parent = None
+
+def lowestCommonAncestor(p, q):
+    # This is effectively finding the intersection of two linked lists.
+    # We use two runners, a and b.
+    a, b = p, q
+    
+    # Keep moving until they meet.
+    # They are guaranteed to meet because they both eventually 
+    # travel the same total distance (Path P + Path Q).
+    while a != b:
+        # If runner 'a' reaches the top, switch to the start of 'q'
+        a = a.parent if a.parent else q
+        # If runner 'b' reaches the top, switch to the start of 'p'
+        b = b.parent if b.parent else p
+        
+    return a
+```
+
+```javascript
+/**
+ * // Definition for a Node.
+ * function Node(val) {
+ * this.val = val;
+ * this.left = null;
+ * this.right = null;
+ * this.parent = null;
+ * };
+ */
+
+/**
+ * @param {Node} p
+ * @param {Node} q
+ * @return {Node}
+ */
+var lowestCommonAncestor = function(p, q) {
+    let a = p;
+    let b = q;
+    
+    // The loop continues until the references are the same
+    while (a !== b) {
+        // Standard linked list intersection logic:
+        // When a pointer hits the root (null parent), wrap it to the OTHER node
+        a = (a.parent === null) ? q : a.parent;
+        b = (b.parent === null) ? p : b.parent;
+    }
+    
+    return a;
+};
+```
+
+---
+
+### Note 1: Terminology and Techniques
+
+* **Parent Pointer:** A link in a node that points "up" to its container. This turns a tree structure into a directed graph where every node has exactly one outgoing edge (except the root).
+* **Linked List Intersection:** A technique to find where two lists merge by having two pointers traverse both paths (`Path1 + Path2` and `Path2 + Path1`). This "equalizes" the distance traveled, forcing the pointers to align at the merge point.
+
+---
+
+### Note 2: Real-World / Interview Variations
+
+**1. LCA of N Nodes (Google)**
+* **The Problem:** Find the LCA of an array of 10 nodes instead of just 2.
+* **The L5 Solution:** You can't use the two-pointer trick easily here. Instead, you would use the **Set** approach. Record the path of the first node in a Set. Then, for every subsequent node, "trim" the Set by removing any nodes that aren't in the current node's path to the root. The highest remaining node in the set is your answer.
+
+**2. Finding the "Distance" between two nodes (Meta)**
+* **The Problem:** Instead of the LCA, return how many edges are between `p` and `q`.
+* **The L5 Solution:** 1. Find the LCA using the method above.
+    2. Distance = `(Depth of p) + (Depth of q) - 2 * (Depth of LCA)`.
+    3. Depth can be found by counting steps to the root.
+
+**3. Closest Shared Manager in a Company Hierarchy (Bloomberg)**
+* **The Context:** This is the most common real-world version. "Find the lowest person in the company who both Alice and Bob report to."
+* **The L5 Solution:** This is exactly LCA III. The "Parent Pointer" is the "Manager" field in a database. If the database is massive, you wouldn't pull the whole tree; you would query the managers of Alice and managers of Bob and find the intersection of those two lists.
